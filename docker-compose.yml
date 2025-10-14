@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: opensilicio-db
+    environment:
+      POSTGRES_DB: opensilicio
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d opensilicio"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: opensilicio-backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/uploads:/app/uploads
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/opensilicio
+      JWT_SECRET: dev-secret-key-change-in-production
+      PORT: 3001
+      API_URL: http://localhost:3001
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npm install && npm run dev"
+
+  frontend:
+    build: 
+      context: ./openSilicioWebsite
+      dockerfile: Dockerfile
+    container_name: opensilicio-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./openSilicioWebsite/src:/app/src
+      - ./openSilicioWebsite/public:/app/public
+    environment:
+      VITE_API_URL: http://backend:3001
+    command: sh -c "npm install && npm run dev -- --host"
+
+volumes:
+  postgres_data:
+
