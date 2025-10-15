@@ -14,6 +14,7 @@ import educationRoutes from './routes/education';
 import wikiRoutes from './routes/wiki';
 import uploadRoutes from './routes/upload';
 import { apiLimiter } from './middleware/rateLimit';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -71,6 +72,10 @@ app.use('/api/upload', uploadRoutes);
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'OpenSilício API está funcionando' });
 });
+
+// Error handling middlewares (MUST be after all routes)
+app.use(notFoundHandler); // 404 handler
+app.use(errorHandler); // Centralized error handler
 
 // Iniciar servidor
 app.listen(PORT, () => {
