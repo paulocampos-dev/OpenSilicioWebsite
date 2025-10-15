@@ -31,8 +31,9 @@ export default function BlogList() {
 
   const loadPosts = async () => {
     try {
-      const data = await blogApi.getAll();
-      setPosts(data);
+      // Load all posts (published and unpublished) for admin with high limit
+      const response = await blogApi.getAll(undefined, 1, 100);
+      setPosts(response.data);
     } catch (error) {
       console.error('Erro ao carregar posts:', error);
     } finally {

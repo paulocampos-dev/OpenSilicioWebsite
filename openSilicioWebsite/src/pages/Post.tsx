@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
+import WikiLinkRenderer from '../components/WikiLinkRenderer'
 
 export default function Post() {
   const { slug } = useParams<{ slug: string }>()
@@ -78,7 +79,14 @@ export default function Post() {
 
       <Stack spacing={2} sx={{ maxWidth: '100%' }}>
         {post.content_type === 'markdown' ? (
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a: WikiLinkRenderer,
+            }}
+          >
+            {post.content}
+          </ReactMarkdown>
         ) : (
           <div dangerouslySetInnerHTML={{ __html: post.content }} />
         )}

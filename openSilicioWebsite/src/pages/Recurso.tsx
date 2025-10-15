@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { educationApi } from '../services/api'
 import type { EducationResource } from '../types'
+import WikiLinkRenderer from '../components/WikiLinkRenderer'
 
 export default function Recurso() {
   const { id } = useParams<{ id: string }>()
@@ -66,7 +67,14 @@ export default function Recurso() {
 
       <Stack spacing={3}>
         {resource.content_type === 'markdown' ? (
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{resource.content}</ReactMarkdown>
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a: WikiLinkRenderer,
+            }}
+          >
+            {resource.content}
+          </ReactMarkdown>
         ) : (
           <div dangerouslySetInnerHTML={{ __html: resource.content }} />
         )}

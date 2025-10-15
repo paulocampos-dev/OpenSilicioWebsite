@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, BlogPost, EducationResource, WikiEntry, WikiLink } from '../types';
+import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -31,9 +31,13 @@ export const authApi = {
 
 // Blog
 export const blogApi = {
-  getAll: async (published?: boolean) => {
-    const response = await api.get<BlogPost[]>('/blog', {
-      params: published !== undefined ? { published } : {},
+  getAll: async (published?: boolean, page = 1, limit = 10) => {
+    const response = await api.get<PaginatedResponse<BlogPost>>('/blog', {
+      params: {
+        ...(published !== undefined ? { published } : {}),
+        page,
+        limit,
+      },
     });
     return response.data;
   },
@@ -56,9 +60,13 @@ export const blogApi = {
 
 // Education
 export const educationApi = {
-  getAll: async (published?: boolean) => {
-    const response = await api.get<EducationResource[]>('/education', {
-      params: published !== undefined ? { published } : {},
+  getAll: async (published?: boolean, page = 1, limit = 10) => {
+    const response = await api.get<PaginatedResponse<EducationResource>>('/education', {
+      params: {
+        ...(published !== undefined ? { published } : {}),
+        page,
+        limit,
+      },
     });
     return response.data;
   },
@@ -81,9 +89,13 @@ export const educationApi = {
 
 // Wiki
 export const wikiApi = {
-  getAll: async (published?: boolean) => {
-    const response = await api.get<WikiEntry[]>('/wiki', {
-      params: published !== undefined ? { published } : {},
+  getAll: async (published?: boolean, page = 1, limit = 20) => {
+    const response = await api.get<PaginatedResponse<WikiEntry>>('/wiki', {
+      params: {
+        ...(published !== undefined ? { published } : {}),
+        page,
+        limit,
+      },
     });
     return response.data;
   },

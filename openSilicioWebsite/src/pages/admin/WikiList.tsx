@@ -31,8 +31,9 @@ export default function WikiList() {
 
   const loadEntries = async () => {
     try {
-      const data = await wikiApi.getAll();
-      setEntries(data);
+      // Load all entries (published and unpublished) for admin with high limit
+      const response = await wikiApi.getAll(undefined, 1, 100);
+      setEntries(response.data);
     } catch (error) {
       console.error('Erro ao carregar entradas:', error);
     } finally {

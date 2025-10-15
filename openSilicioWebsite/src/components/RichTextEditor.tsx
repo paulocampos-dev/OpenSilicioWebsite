@@ -21,7 +21,9 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import ImageIcon from '@mui/icons-material/Image';
 import CodeIcon from '@mui/icons-material/Code';
+import LinkIcon from '@mui/icons-material/Link';
 import { uploadApi } from '../services/api';
+import WikiLinkInserter from './WikiLinkInserter';
 
 interface RichTextEditorProps {
   content: string;
@@ -37,6 +39,7 @@ export default function RichTextEditor({
   onContentTypeChange,
 }: RichTextEditorProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [wikiLinkDialogOpen, setWikiLinkDialogOpen] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -84,6 +87,30 @@ export default function RichTextEditor({
     input.click();
   };
 
+  const handleWikiLinkInsert = (term: string, slug: string) => {
+    if (contentType === 'wysiwyg' && editor) {
+      const { from, to } = editor.state.selection;
+      const selectedText = editor.state.doc.textBetween(from, to);
+      const linkText = selectedText || term;
+      
+      editor.chain().focus().setLink({ 
+        href: `/wiki/${slug}`,
+        target: '_blank'
+      }).run();
+    } else {
+      const wikiLink = `[${term}](/wiki/${slug})`;
+      onContentChange(content + wikiLink);
+    }
+  };
+
+  const getSelectedText = () => {
+    if (contentType === 'wysiwyg' && editor) {
+      const { from, to } = editor.state.selection;
+      return editor.state.doc.textBetween(from, to);
+    }
+    return '';
+  };
+
   if (contentType === 'markdown') {
     return (
       <Stack spacing={2}>
@@ -104,6 +131,13 @@ export default function RichTextEditor({
             size="small"
           >
             {isUploading ? 'Enviando...' : 'Adicionar Imagem'}
+          </Button>
+          <Button
+            startIcon={<LinkIcon />}
+            onClick={() => setWikiLinkDialogOpen(true)}
+            size="small"
+          >
+            Link da Wiki
           </Button>
         </Box>
         <TextField
@@ -184,6 +218,11 @@ export default function RichTextEditor({
               <ImageIcon />
             </IconButton>
           </Tooltip>
+          <Tooltip title="Adicionar Link da Wiki">
+            <IconButton onClick={() => setWikiLinkDialogOpen(true)}>
+              <LinkIcon />
+            </IconButton>
+          </Tooltip>
         </ButtonGroup>
 
         <Box
@@ -209,6 +248,13 @@ export default function RichTextEditor({
           <EditorContent editor={editor} />
         </Box>
       </Paper>
+
+      <WikiLinkInserter
+        open={wikiLinkDialogOpen}
+        onClose={() => setWikiLinkDialogOpen(false)}
+        onInsert={handleWikiLinkInsert}
+        selectedText={getSelectedText()}
+      />
     </Stack>
   );
 }

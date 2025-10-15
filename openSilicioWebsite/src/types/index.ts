@@ -52,3 +52,19 @@ export interface WikiLink {
   slug?: string;
   created_at: string;
 }
+
+// Pagination metadata
+export interface PaginationMetadata {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+// Paginated response wrapper
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMetadata;
+}

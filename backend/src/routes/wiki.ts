@@ -10,6 +10,8 @@ import {
   deleteWikiLink,
 } from '../controllers/wikiController';
 import { authMiddleware } from '../middleware/auth';
+import { createLimiter } from '../middleware/rateLimit';
+import { validate, wikiEntrySchema, wikiLinkSchema } from '../middleware/validation';
 
 const router = Router();
 
@@ -18,11 +20,11 @@ router.get('/', getAllEntries);
 router.get('/:slug', getEntryBySlug);
 router.get('/links/:contentType/:contentId', getWikiLinksForContent);
 
-// Rotas protegidas
-router.post('/', authMiddleware, createEntry);
-router.put('/:id', authMiddleware, updateEntry);
+// Rotas protegidas (com autenticação, validação e rate limiting)
+router.post('/', authMiddleware, createLimiter, validate(wikiEntrySchema), createEntry);
+router.put('/:id', authMiddleware, validate(wikiEntrySchema), updateEntry);
 router.delete('/:id', authMiddleware, deleteEntry);
-router.post('/links', authMiddleware, createWikiLink);
+router.post('/links', authMiddleware, validate(wikiLinkSchema), createWikiLink);
 router.delete('/links/:id', authMiddleware, deleteWikiLink);
 
 export default router;

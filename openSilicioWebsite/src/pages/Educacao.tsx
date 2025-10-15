@@ -23,8 +23,9 @@ export default function Educacao() {
 
   const loadResources = async () => {
     try {
-      const data = await educationApi.getAll(true) // Only published resources
-      setResources(data)
+      // Load all published resources with high limit for client-side filtering
+      const response = await educationApi.getAll(true, 1, 100)
+      setResources(response.data)
     } catch (error) {
       console.error('Erro ao carregar recursos:', error)
     } finally {

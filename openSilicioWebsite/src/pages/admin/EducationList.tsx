@@ -31,8 +31,9 @@ export default function EducationList() {
 
   const loadResources = async () => {
     try {
-      const data = await educationApi.getAll();
-      setResources(data);
+      // Load all resources (published and unpublished) for admin with high limit
+      const response = await educationApi.getAll(undefined, 1, 100);
+      setResources(response.data);
     } catch (error) {
       console.error('Erro ao carregar recursos:', error);
     } finally {

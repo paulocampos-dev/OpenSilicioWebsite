@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { uploadFile } from '../controllers/uploadController';
 import { authMiddleware } from '../middleware/auth';
+import { uploadLimiter } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -35,7 +36,8 @@ const upload = multer({
   fileFilter,
 });
 
-router.post('/', authMiddleware, upload.single('file'), uploadFile);
+// Apply rate limiting to prevent abuse of upload functionality
+router.post('/', uploadLimiter, authMiddleware, upload.single('file'), uploadFile);
 
 export default router;
 

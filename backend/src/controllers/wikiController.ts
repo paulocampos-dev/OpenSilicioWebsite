@@ -5,19 +5,52 @@ import { AuthRequest } from '../middleware/auth';
 
 export const getAllEntries = async (req: AuthRequest, res: Response) => {
   try {
-    const { published } = req.query;
-    let query = 'SELECT * FROM wiki_entries';
-    const params: any[] = [];
+    const { published, page = '1', limit = '20' } = req.query;
+
+    // Parse and validate pagination parameters
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20)); // Max 100 items per page
+    const offset = (pageNum - 1) * limitNum;
+
+    // Build count query
+    let countQuery = 'SELECT COUNT(*) FROM wiki_entries';
+    const countParams: any[] = [];
+
+    // Build data query
+    let dataQuery = 'SELECT * FROM wiki_entries';
+    const dataParams: any[] = [];
 
     if (published !== undefined) {
-      query += ' WHERE published = $1';
-      params.push(published === 'true');
+      const publishedValue = published === 'true';
+      countQuery += ' WHERE published = $1';
+      countParams.push(publishedValue);
+      dataQuery += ' WHERE published = $1';
+      dataParams.push(publishedValue);
     }
 
-    query += ' ORDER BY term ASC';
+    dataQuery += ' ORDER BY term ASC LIMIT $' + (dataParams.length + 1) + ' OFFSET $' + (dataParams.length + 2);
+    dataParams.push(limitNum, offset);
 
-    const result = await pool.query(query, params);
-    res.json(result.rows);
+    // Execute both queries
+    const [countResult, dataResult] = await Promise.all([
+      pool.query(countQuery, countParams),
+      pool.query(dataQuery, dataParams),
+    ]);
+
+    const total = parseInt(countResult.rows[0].count, 10);
+    const totalPages = Math.ceil(total / limitNum);
+
+    res.json({
+      data: dataResult.rows,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1,
+      },
+    });
   } catch (error) {
     console.error('Erro ao buscar entradas da wiki:', error);
     res.status(500).json({ error: 'Erro ao buscar entradas da wiki' });

@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Grid, Paper, Stack, Typography, Divider } from '@mui/material'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined'
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined'
@@ -7,58 +7,60 @@ import { Link as RouterLink } from 'react-router-dom'
 export default function Landing() {
   return (
     <Stack spacing={8}>
-      {/* Hero */}
+      {/* Hero Parallax */}
       <Box
         sx={{
           position: 'relative',
-          minHeight: { xs: 360, sm: 420, md: 520 },
-          p: { xs: 2, sm: 4, md: 6 },
+          minHeight: { xs: 420, sm: 520, md: 640 },
           borderRadius: { xs: 2, sm: 3 },
           overflow: 'hidden',
           backgroundImage:
-            'linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.45)), url("https://lh3.googleusercontent.com/aida-public/AB6AXuCbX9MI-J43khapg-f3lfg7WvbHUESmzQ_mMhqqB2vL5Shz5tBatBTLJfKWcN8ok_IXCLUcIuPLBbIyXI8M583-Eje3ghlpYtpsDEkSZuD8THUKNpWXuJOOyHI6m75IPNEbOVH7b8GyQhBeg4_pKdBqDpCARdKeUL47E-x74YOPko2BZG5Ec8J6aFL50QsWWg6eWtK9uqPYPz2SX6-axs8rB43y_z45iMOS5XI_Hnyj65uBDZb9-Yt0nnVhGhbmDPYN9dB-H71LLw")',
+            'linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)), url("https://images.unsplash.com/photo-1585060544812-6b45742d7621?q=80&w=1974&auto=format&fit=crop")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          backgroundAttachment: 'fixed', // Parallax simples (desktop)
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          gap: 2,
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: { xs: 2, sm: 4, md: 6 },
         }}
       >
-        <Box sx={{ maxWidth: 960 }}>
-          <Typography
-            sx={{ typography: { xs: 'h4', sm: 'h3', md: 'h2' } }}
-            fontWeight={900}
-            color="common.white"
-          >
-            Capacitando a próxima geração de projetistas de chips
+        <Stack spacing={2} alignItems="center" textAlign="center" sx={{ color: 'common.white' }}>
+          <Typography variant="overline" sx={{ letterSpacing: 2 }}>Bem-vindo ao</Typography>
+          <Typography sx={{ typography: { xs: 'h3', sm: 'h2', md: 'h1' } }} fontWeight={900}>
+            OpenSilício
           </Typography>
-          <Typography color="common.white" sx={{ maxWidth: 900, mt: 1 }}>
-            OpenSilício é um grupo universitário dedicado a oferecer educação acessível em eletrônica e projeto de
-            circuitos integrados. Junte-se à nossa comunidade para aprender, colaborar e inovar no empolgante campo da
-            microeletrônica.
+          <Typography sx={{ maxWidth: 860, opacity: 0.95 }}>
+            Democratizando a inovação em microeletrônica com educação, pesquisa e projetos abertos.
           </Typography>
-        </Box>
-        <Button
-          component={RouterLink}
-          to="/educacao"
-          variant="contained"
-          size="large"
-          sx={{ width: { xs: 'auto', sm: 'auto' } }}
-        >
-          Conheça nossos programas
-        </Button>
+          <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+            <Button component={RouterLink} to="/educacao" variant="contained" size="large">Começar a aprender</Button>
+            <Button component={RouterLink} to="/wiki" variant="outlined" color="inherit" size="large">Explorar Wiki</Button>
+          </Stack>
+        </Stack>
       </Box>
 
-      {/* What We Offer */}
-      <Stack spacing={4}>
+      {/* Sobre nós */}
+      <Stack id="sobre" spacing={3} alignItems="center" textAlign="center" sx={{ px: { xs: 2, md: 4 } }}>
+        <Typography sx={{ typography: { xs: 'h5', sm: 'h4' } }} fontWeight={800}>Sobre nós</Typography>
+        <Typography color="text.secondary" sx={{ maxWidth: 900 }}>
+          Somos o Open‑Silício, um grupo de pesquisa e extensão da Escola Politécnica da USP. Nossa missão é tornar o
+          desenvolvimento de microeletrônica mais acessível e colaborativo. Unimos ensino, projetos e comunidade para
+          formar a próxima geração de projetistas de chips.
+        </Typography>
+        <Button component={RouterLink} to="/blog" variant="contained" sx={{ mt: 1 }}>Saiba mais</Button>
+      </Stack>
+      <Divider />
+
+      {/* O que fazemos */}
+      <Stack id="oque-fazemos" spacing={4}>
         <Stack spacing={1.5}>
           <Typography sx={{ typography: { xs: 'h5', sm: 'h4' } }} fontWeight={800}>
-            O que oferecemos
+            O que fazemos
           </Typography>
           <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
-            O OpenSilício oferece diversos recursos e atividades para apoiar sua jornada de aprendizado em eletrônica e
-            projeto de circuitos integrados.
+            Oferecemos trilhas práticas, guias de ferramentas e conteúdo técnico para apoiar sua jornada em eletrônica
+            e projeto de circuitos integrados.
           </Typography>
         </Stack>
         <Button component={RouterLink} to="/blog" variant="contained" size="large" sx={{ width: 'fit-content' }}>
@@ -103,19 +105,18 @@ export default function Landing() {
         </Grid>
       </Stack>
 
-      {/* Our Focus Areas */}
-      <Stack spacing={4}>
+      {/* Projetos – Acesso rápido */}
+      <Stack id="projetos" spacing={4}>
         <Stack spacing={1.5}>
           <Typography sx={{ typography: { xs: 'h5', sm: 'h4' } }} fontWeight={800}>
-            Nossas áreas de foco
+            Aprenda com os nossos projetos!
           </Typography>
           <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
-            Cobrimos uma ampla variedade de tópicos em eletrônica e projeto de circuitos integrados, garantindo uma
-            experiência educacional completa.
+            Uma seleção rápida de projetos e tópicos para você explorar agora mesmo.
           </Typography>
         </Stack>
         <Button component={RouterLink} to="/blog" variant="contained" size="large" sx={{ width: 'fit-content' }}>
-          Ver nossos projetos
+          Ver todos os posts do Blog
         </Button>
         <Grid container spacing={3}>
           {[

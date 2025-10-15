@@ -23,8 +23,9 @@ export default function Blog() {
 
   const loadPosts = async () => {
     try {
-      const data = await blogApi.getAll(true) // Only published posts
-      setPosts(data)
+      // Load all published posts with high limit for client-side filtering
+      const response = await blogApi.getAll(true, 1, 100)
+      setPosts(response.data)
     } catch (error) {
       console.error('Erro ao carregar posts:', error)
     } finally {
