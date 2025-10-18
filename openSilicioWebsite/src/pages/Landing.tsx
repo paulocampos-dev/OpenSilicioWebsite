@@ -563,14 +563,23 @@ export default function Landing() {
                       textDecoration: 'none',
                       background: (theme) => theme.palette.background.paper,
                       backdropFilter: 'blur(20px)',
-                      border: (theme) => `1px solid ${theme.palette.divider}`,
+                      border: 'none', // Remove border entirely (prevents vertical line from stacking Card borders)
                       borderRadius: 4,
-                      boxShadow: (theme) => theme.palette.mode === 'dark' 
-                        ? '0 8px 32px rgba(0,0,0,0.3)' 
+                      boxShadow: (theme) => theme.palette.mode === 'dark'
+                        ? '0 8px 32px rgba(0,0,0,0.3)'
                         : '0 8px 32px rgba(0,0,0,0.08)',
                       transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                       position: 'relative',
                       overflow: 'hidden',
+                      outline: 'none',
+                      '&:focus': {
+                        outline: 'none',
+                      },
+                      '&:focus-visible': {
+                        outline: '2px solid',
+                        outlineColor: 'primary.main',
+                        outlineOffset: '2px',
+                      },
                       '&::before': {
                         content: '""',
                         position: 'absolute',
@@ -582,18 +591,20 @@ export default function Landing() {
                         opacity: 0,
                         transition: 'opacity 0.3s ease',
                       },
-                      '&:hover': {
-                        transform: 'translateY(-12px) scale(1.02)',
-                        boxShadow: (theme) => theme.palette.mode === 'dark'
-                          ? '0 20px 60px rgba(0,0,0,0.4)'
-                          : '0 20px 60px rgba(0,0,0,0.15)',
-                        '&::before': {
-                          opacity: 1,
-                        },
-                      },
+                      boxSizing: 'border-box',
+                      // Add a subtle separator only between cards (except on last row): a margin, not a border
                     }}
                   >
-                    <CardContent sx={{ p: 5 }}>
+                    <CardContent sx={{
+                      p: 5,
+                      border: (theme) => theme.palette.mode === 'dark'
+                        ? '1px solid rgba(255,255,255,0.07)'
+                        : '1px solid #ececec',
+                      borderRadius: 4,
+                      boxSizing: 'border-box',
+                      height: '100%',
+                      background: 'transparent',
+                    }}>
                       <Stack spacing={3}>
                         <Avatar
                           sx={{
