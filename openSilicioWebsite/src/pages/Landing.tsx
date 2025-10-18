@@ -165,14 +165,14 @@ export default function Landing() {
       </Box>
 
       {/* --- Spacer before Quick Start Section --- */}
-      <Box sx={{ py: { xs: 5, md: 8 } }} />
+      <Box sx={{ py: { xs: 2, md: 3 } }} />
 
       {/* Quick Start Section */}
       <Box
         sx={{
           mt: { xs: 0, md: 0 }, // Remove negative margin for more natural flow
           mb: { xs: 0, md: 0 }, // Remove tight bottom margin
-          py: { xs: 6, md: 10 },
+          py: { xs: 4, md: 6 },
           background: (theme) => theme.palette.background.default,
         }}
       >
@@ -241,7 +241,7 @@ export default function Landing() {
                 gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
               },
             ].map((action, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
                 <Card
                   component={RouterLink}
                   to={action.link}
@@ -327,13 +327,10 @@ export default function Landing() {
         </Container>
       </Box>
 
-      {/* --- Spacer after Quick Start Section --- */}
-      <Box sx={{ py: { xs: 5, md: 8 } }} />
-
       {/* About Section */}
-      <Container maxWidth="lg" sx={{ py: { xs: 10, md: 16 } }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Grid container spacing={8} alignItems="center">
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }} >
             <Box
               sx={{
                 width: '100%',
@@ -363,9 +360,18 @@ export default function Landing() {
                 },
               }}
             >
+              <Box component="img"
+              src="/boardPCB_stocl.jpg"
+              alt="Circuit board design"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+              />
             </Box>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Stack spacing={4}>
               <Box>
                 <Typography
@@ -458,7 +464,6 @@ export default function Landing() {
       {/* Features Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
           py: { xs: 10, md: 16 },
           position: 'relative',
           '&::before': {
@@ -565,7 +570,7 @@ export default function Landing() {
                   link: '/educacao',
                 },
               ].map((feature, index) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                   <Card
                     component={RouterLink}
                     to={feature.link}
@@ -672,7 +677,7 @@ export default function Landing() {
             </Typography>
             <Grid container spacing={6} alignItems="center" justifyContent="center">
               {[ '/open-silicio-logo.jpg', '/open-silicio-logo.jpg', '/open-silicio-logo.jpg', '/open-silicio-logo.jpg' ].map((src, i) => (
-                <Grid item key={i}>
+                <Grid key={i}>
                   <Box
                     component="img"
                     src={src}
@@ -768,7 +773,7 @@ export default function Landing() {
                 gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
               },
             ].map((topic, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Card
                     sx={{
                       width: 260,
