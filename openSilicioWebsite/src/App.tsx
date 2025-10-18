@@ -16,6 +16,7 @@ import Educacao from './pages/Educacao'
 import Recurso from './pages/Recurso'
 import WikiPage from './pages/WikiPage'
 import Wiki from './pages/Wiki'
+import About from './pages/About'
 import Login from './pages/Login'
 
 // Admin Pages
@@ -48,6 +49,7 @@ function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void 
         <Button component={RouterLink} to="/educacao" color="primary">Educação</Button>
         <Button component={RouterLink} to="/blog" color="primary">Blog</Button>
         <Button component={RouterLink} to="/wiki" color="primary">Wiki</Button>
+        <Button component={RouterLink} to="/sobre" color="primary">Sobre</Button>
         <Button component={RouterLink} to="/login" color="primary">Entrar</Button>
         <IconButton onClick={toggleMode} color="inherit" aria-label="Alternar tema" size="large">
           {mode === 'dark' ? <Brightness7Icon fontSize="large" /> : <Brightness4Icon fontSize="large" />}
@@ -85,6 +87,7 @@ function AppContent() {
               <Route path="/educacao/:id" element={<Container sx={{ py: 4 }}><Recurso /></Container>} />
               <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiPage /></Container>} />
               <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><Wiki /></Container>} />
+              <Route path="/sobre" element={<Container sx={{ py: 4 }}><About /></Container>} />
               <Route path="/login" element={<Container sx={{ py: 4 }}><Login /></Container>} />
             </Routes>
           )}

@@ -14,10 +14,18 @@ import {
   MenuItem,
   Chip,
   OutlinedInput,
+  IconButton,
+  Divider,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
-import { settingsApi, educationApi, blogApi } from '../../services/api';
-import type { SiteSettings, EducationResource, BlogPost } from '../../types';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import UploadIcon from '@mui/icons-material/Upload';
+import { settingsApi, educationApi, blogApi, uploadApi } from '../../services/api';
+import type { SiteSettings, EducationResource, BlogPost, TeamMember } from '../../types';
+import RichTextEditor from '../../components/RichTextEditor';
 
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings>({
@@ -33,6 +41,9 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [aboutTab, setAboutTab] = useState<'main' | 'mission' | 'vision' | 'history' | 'team'>('main');
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   useEffect(() => {
     fetchData();
@@ -70,6 +81,33 @@ export default function Settings() {
       setMessage({ type: 'error', text: error.response?.data?.error || 'Erro ao salvar configurações' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleImageUpload = async (index: number, file: File) => {
+    setUploadingIndex(index);
+    setUploadProgress(0);
+    setMessage(null);
+
+    try {
+      const result = await uploadApi.uploadTeamMemberImage(file, (progress) => {
+        setUploadProgress(progress);
+      });
+
+      // Update the team member's photo URL
+      const newMembers = [...(settings.about_team_members || [])];
+      newMembers[index].photo_url = result.url;
+      setSettings({ ...settings, about_team_members: newMembers });
+
+      setMessage({
+        type: 'success',
+        text: `Imagem enviada! Tamanho original: ${(result.originalSize / 1024).toFixed(1)}KB, Comprimido: ${(result.size / 1024).toFixed(1)}KB (${result.compressionRatio} redução)`
+      });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.response?.data?.error || 'Erro ao enviar imagem' });
+    } finally {
+      setUploadingIndex(null);
+      setUploadProgress(0);
     }
   };
 
@@ -276,6 +314,244 @@ export default function Settings() {
                 ))}
               </Stack>
             </Box>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* About Page Content */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+            Página "Sobre"
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Gerencie o conteúdo da página Sobre o OpenSilício
+          </Typography>
+
+          <Tabs value={aboutTab} onChange={(_, v) => setAboutTab(v)} sx={{ mb: 3 }}>
+            <Tab value="main" label="Principal" />
+            <Tab value="mission" label="Missão" />
+            <Tab value="vision" label="Visão" />
+            <Tab value="history" label="História" />
+            <Tab value="team" label="Equipe" />
+          </Tabs>
+
+          <Divider sx={{ mb: 3 }} />
+
+          {aboutTab === 'main' && (
+            <Stack spacing={3}>
+              <TextField
+                label="Título da Página"
+                value={settings.about_title || ''}
+                onChange={(e) => setSettings({ ...settings, about_title: e.target.value })}
+                fullWidth
+              />
+              <Box>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                  Conteúdo Principal
+                </Typography>
+                <RichTextEditor
+                  content={settings.about_content || ''}
+                  contentType={settings.about_content_type || 'wysiwyg'}
+                  onContentChange={(content) => setSettings({ ...settings, about_content: content })}
+                  onContentTypeChange={(content_type) => setSettings({ ...settings, about_content_type: content_type })}
+                />
+              </Box>
+            </Stack>
+          )}
+
+          {aboutTab === 'mission' && (
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                Missão
+              </Typography>
+              <RichTextEditor
+                content={settings.about_mission || ''}
+                contentType={settings.about_mission_type || 'wysiwyg'}
+                onContentChange={(content) => setSettings({ ...settings, about_mission: content })}
+                onContentTypeChange={(content_type) => setSettings({ ...settings, about_mission_type: content_type })}
+              />
+            </Box>
+          )}
+
+          {aboutTab === 'vision' && (
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                Visão
+              </Typography>
+              <RichTextEditor
+                content={settings.about_vision || ''}
+                contentType={settings.about_vision_type || 'wysiwyg'}
+                onContentChange={(content) => setSettings({ ...settings, about_vision: content })}
+                onContentTypeChange={(content_type) => setSettings({ ...settings, about_vision_type: content_type })}
+              />
+            </Box>
+          )}
+
+          {aboutTab === 'history' && (
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                História
+              </Typography>
+              <RichTextEditor
+                content={settings.about_history || ''}
+                contentType={settings.about_history_type || 'wysiwyg'}
+                onContentChange={(content) => setSettings({ ...settings, about_history: content })}
+                onContentTypeChange={(content_type) => setSettings({ ...settings, about_history_type: content_type })}
+              />
+            </Box>
+          )}
+
+          {aboutTab === 'team' && (
+            <Stack spacing={3}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle2" fontWeight={600}>
+                  Membros da Equipe
+                </Typography>
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={() => {
+                    const newMember: TeamMember = { name: '', role: '', photo_url: '' };
+                    setSettings({
+                      ...settings,
+                      about_team_members: [...(settings.about_team_members || []), newMember],
+                    });
+                  }}
+                >
+                  Adicionar Membro
+                </Button>
+              </Box>
+
+              {(settings.about_team_members || []).map((member, index) => (
+                <Card key={index} variant="outlined">
+                  <CardContent>
+                    <Stack spacing={2}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="subtitle2">Membro {index + 1}</Typography>
+                        <IconButton
+                          color="error"
+                          onClick={() => {
+                            const newMembers = [...(settings.about_team_members || [])];
+                            newMembers.splice(index, 1);
+                            setSettings({ ...settings, about_team_members: newMembers });
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                      <TextField
+                        label="Nome"
+                        value={member.name}
+                        onChange={(e) => {
+                          const newMembers = [...(settings.about_team_members || [])];
+                          newMembers[index].name = e.target.value;
+                          setSettings({ ...settings, about_team_members: newMembers });
+                        }}
+                        fullWidth
+                      />
+                      <TextField
+                        label="Cargo/Função"
+                        value={member.role}
+                        onChange={(e) => {
+                          const newMembers = [...(settings.about_team_members || [])];
+                          newMembers[index].role = e.target.value;
+                          setSettings({ ...settings, about_team_members: newMembers });
+                        }}
+                        fullWidth
+                      />
+
+                      <Box>
+                        <Typography variant="body2" fontWeight={600} gutterBottom>
+                          Foto do Membro
+                        </Typography>
+
+                        {member.photo_url && (
+                          <Box sx={{ mb: 2, textAlign: 'center' }}>
+                            <Box
+                              component="img"
+                              src={member.photo_url}
+                              alt={member.name}
+                              sx={{
+                                width: 120,
+                                height: 120,
+                                borderRadius: '50%',
+                                objectFit: 'cover',
+                                border: '3px solid',
+                                borderColor: 'primary.main',
+                              }}
+                            />
+                          </Box>
+                        )}
+
+                        <Button
+                          variant="outlined"
+                          component="label"
+                          fullWidth
+                          startIcon={<UploadIcon />}
+                          disabled={uploadingIndex === index}
+                        >
+                          {uploadingIndex === index
+                            ? `Enviando... ${uploadProgress}%`
+                            : member.photo_url
+                            ? 'Trocar Foto'
+                            : 'Enviar Foto'}
+                          <input
+                            type="file"
+                            hidden
+                            accept="image/jpeg,image/jpg,image/png,image/webp"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleImageUpload(index, file);
+                              }
+                            }}
+                          />
+                        </Button>
+
+                        {uploadingIndex === index && (
+                          <Box sx={{ width: '100%', mt: 1 }}>
+                            <Box
+                              sx={{
+                                width: `${uploadProgress}%`,
+                                height: 4,
+                                bgcolor: 'primary.main',
+                                borderRadius: 2,
+                                transition: 'width 0.3s',
+                              }}
+                            />
+                          </Box>
+                        )}
+
+                        {member.photo_url && (
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={() => {
+                              const newMembers = [...(settings.about_team_members || [])];
+                              newMembers[index].photo_url = '';
+                              setSettings({ ...settings, about_team_members: newMembers });
+                            }}
+                            sx={{ mt: 1 }}
+                          >
+                            Remover Foto
+                          </Button>
+                        )}
+
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                          Formatos aceitos: JPEG, PNG, WebP. Máximo 5MB. A imagem será redimensionada e comprimida automaticamente.
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {(!settings.about_team_members || settings.about_team_members.length === 0) && (
+                <Typography color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+                  Nenhum membro adicionado. Clique em "Adicionar Membro" para começar.
+                </Typography>
+              )}
+            </Stack>
           )}
         </CardContent>
       </Card>

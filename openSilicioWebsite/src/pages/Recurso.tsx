@@ -110,11 +110,6 @@ export default function Recurso() {
           )}
         </Stack>
       )}
-
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-        <Button variant="contained" fullWidth>Marcar como concluído</Button>
-        <Button variant="outlined" fullWidth>Baixar recursos</Button>
-      </Stack>
     </Stack>
   )
 }

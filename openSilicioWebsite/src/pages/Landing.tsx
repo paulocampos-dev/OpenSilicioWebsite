@@ -99,7 +99,9 @@ export default function Landing() {
                 color: 'common.white',
                 fontWeight: 800,
                 maxWidth: 1000,
-                lineHeight: 1.1,
+                lineHeight: 1.2,
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
                 textShadow: '0 4px 24px rgba(0,0,0,0.3)',
                 background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 50%, #e8ecff 100%)',
                 backgroundClip: 'text',
@@ -449,7 +451,7 @@ export default function Landing() {
               <Box sx={{ pt: 2 }}>
                 <Button
                   component={RouterLink}
-                  to="/blog"
+                  to="/sobre"
                   variant="contained"
                   size="large"
                   sx={{

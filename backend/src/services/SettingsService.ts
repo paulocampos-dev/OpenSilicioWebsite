@@ -37,6 +37,12 @@ export interface BlogPost {
   updated_at: string;
 }
 
+export interface TeamMember {
+  name: string;
+  role: string;
+  photo_url?: string;
+}
+
 export interface SiteSettings {
   contact_email: string;
   instagram_url: string;
@@ -46,6 +52,16 @@ export interface SiteSettings {
   featured_blog_ids: string[];
   featured_education_resources?: EducationResource[];
   featured_blog_posts?: BlogPost[];
+  about_title?: string;
+  about_content?: string;
+  about_content_type?: 'wysiwyg' | 'markdown';
+  about_mission?: string;
+  about_mission_type?: 'wysiwyg' | 'markdown';
+  about_vision?: string;
+  about_vision_type?: 'wysiwyg' | 'markdown';
+  about_history?: string;
+  about_history_type?: 'wysiwyg' | 'markdown';
+  about_team_members?: TeamMember[];
 }
 
 class SettingsService {
@@ -78,7 +94,7 @@ class SettingsService {
       const settings: any = {};
       result.rows.forEach((row) => {
         // Parse JSON fields
-        if (row.key === 'featured_education_ids' || row.key === 'featured_blog_ids') {
+        if (row.key === 'featured_education_ids' || row.key === 'featured_blog_ids' || row.key === 'about_team_members') {
           try {
             settings[row.key] = row.value ? JSON.parse(row.value) : [];
           } catch {
@@ -137,8 +153,8 @@ class SettingsService {
    */
   async updateSetting(key: string, value: any): Promise<SiteSetting> {
     try {
-      // Convert array/object to JSON string for ID arrays
-      const stringValue = (key === 'featured_education_ids' || key === 'featured_blog_ids')
+      // Convert array/object to JSON string for ID arrays and team members
+      const stringValue = (key === 'featured_education_ids' || key === 'featured_blog_ids' || key === 'about_team_members')
         ? JSON.stringify(value)
         : value;
 

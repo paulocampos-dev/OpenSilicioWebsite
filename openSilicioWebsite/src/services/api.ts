@@ -214,6 +214,28 @@ export const uploadApi = {
     });
     return response.data;
   },
+  uploadTeamMemberImage: async (file: File, onUploadProgress?: (progress: number) => void) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await api.post<{
+      filename: string;
+      url: string;
+      size: number;
+      originalSize: number;
+      compressionRatio: string;
+    }>('/upload/team-member', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onUploadProgress: (progressEvent) => {
+        if (onUploadProgress && progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onUploadProgress(percentCompleted);
+        }
+      },
+    });
+    return response.data;
+  },
 };
 
 // Settings

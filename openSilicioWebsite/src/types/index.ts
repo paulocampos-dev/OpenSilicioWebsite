@@ -72,6 +72,12 @@ export interface PaginatedResponse<T> {
 }
 
 // Settings
+export interface TeamMember {
+  name: string;
+  role: string;
+  photo_url?: string;
+}
+
 export interface SiteSettings {
   contact_email: string;
   instagram_url: string;
@@ -81,4 +87,14 @@ export interface SiteSettings {
   featured_blog_ids: string[];
   featured_education_resources?: EducationResource[];
   featured_blog_posts?: BlogPost[];
+  about_title?: string;
+  about_content?: string;
+  about_content_type?: 'wysiwyg' | 'markdown';
+  about_mission?: string;
+  about_mission_type?: 'wysiwyg' | 'markdown';
+  about_vision?: string;
+  about_vision_type?: 'wysiwyg' | 'markdown';
+  about_history?: string;
+  about_history_type?: 'wysiwyg' | 'markdown';
+  about_team_members?: TeamMember[];
 }
