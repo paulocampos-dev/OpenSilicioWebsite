@@ -10,10 +10,9 @@ import {
   Avatar,
   Divider,
 } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { settingsApi } from '../services/api';
 import type { SiteSettings } from '../types';
+import BlockNoteContent from '../components/BlockNoteContent';
 
 export default function About() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -50,13 +49,9 @@ export default function About() {
     );
   }
 
-  const renderContent = (content?: string, contentType?: 'wysiwyg' | 'markdown') => {
+  const renderContent = (content?: string) => {
     if (!content) return null;
-
-    if (contentType === 'markdown') {
-      return <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>;
-    }
-    return <div dangerouslySetInnerHTML={{ __html: content }} />;
+    return <BlockNoteContent content={content} />;
   };
 
   return (
@@ -71,7 +66,7 @@ export default function About() {
       {/* Main Content */}
       {settings.about_content && (
         <Box>
-          {renderContent(settings.about_content, settings.about_content_type)}
+          {renderContent(settings.about_content)}
         </Box>
       )}
 
@@ -87,7 +82,7 @@ export default function About() {
                   <Typography variant="h5" fontWeight={700} gutterBottom color="primary.main">
                     Nossa Missão
                   </Typography>
-                  {renderContent(settings.about_mission, settings.about_mission_type)}
+                  {renderContent(settings.about_mission)}
                 </CardContent>
               </Card>
             </Grid>
@@ -100,7 +95,7 @@ export default function About() {
                   <Typography variant="h5" fontWeight={700} gutterBottom color="secondary.main">
                     Nossa Visão
                   </Typography>
-                  {renderContent(settings.about_vision, settings.about_vision_type)}
+                  {renderContent(settings.about_vision)}
                 </CardContent>
               </Card>
             </Grid>
@@ -115,7 +110,7 @@ export default function About() {
             Nossa História
           </Typography>
           <Divider sx={{ mb: 3 }} />
-          {renderContent(settings.about_history, settings.about_history_type)}
+          {renderContent(settings.about_history)}
         </Box>
       )}
 

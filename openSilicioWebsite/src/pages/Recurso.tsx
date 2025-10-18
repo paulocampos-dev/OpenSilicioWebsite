@@ -1,11 +1,9 @@
 import { Box, Breadcrumbs, Button, Link as MUILink, Stack, Tab, Tabs, Typography } from '@mui/material'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { educationApi } from '../services/api'
 import type { EducationResource } from '../types'
-import WikiLinkRenderer from '../components/WikiLinkRenderer'
+import BlockNoteContent from '../components/BlockNoteContent'
 
 export default function Recurso() {
   const { id } = useParams<{ id: string }>()
@@ -74,18 +72,7 @@ export default function Recurso() {
               </Typography>
             )}
             {tab === 'Conteúdo' && (
-              resource.content_type === 'markdown' ? (
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: WikiLinkRenderer,
-                  }}
-                >
-                  {resource.content}
-                </ReactMarkdown>
-              ) : (
-                <div dangerouslySetInnerHTML={{ __html: resource.content }} />
-              )
+              <BlockNoteContent content={resource.content} />
             )}
             {tab === 'Recursos' && (
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -96,18 +83,7 @@ export default function Recurso() {
         </>
       ) : (
         <Stack spacing={3}>
-          {resource.content_type === 'markdown' ? (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                a: WikiLinkRenderer,
-              }}
-            >
-              {resource.content}
-            </ReactMarkdown>
-          ) : (
-            <div dangerouslySetInnerHTML={{ __html: resource.content }} />
-          )}
+          <BlockNoteContent content={resource.content} />
         </Stack>
       )}
     </Stack>

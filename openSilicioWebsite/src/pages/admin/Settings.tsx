@@ -25,7 +25,7 @@ import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import { settingsApi, educationApi, blogApi, uploadApi } from '../../services/api';
 import type { SiteSettings, EducationResource, BlogPost, TeamMember } from '../../types';
-import RichTextEditor from '../../components/RichTextEditor';
+import BlockNoteEditor from '../../components/BlockNoteEditor';
 
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings>({
@@ -350,11 +350,9 @@ export default function Settings() {
                 <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                   Conteúdo Principal
                 </Typography>
-                <RichTextEditor
+                <BlockNoteEditor
                   content={settings.about_content || ''}
-                  contentType={settings.about_content_type || 'wysiwyg'}
                   onContentChange={(content) => setSettings({ ...settings, about_content: content })}
-                  onContentTypeChange={(content_type) => setSettings({ ...settings, about_content_type: content_type })}
                 />
               </Box>
             </Stack>
@@ -365,11 +363,9 @@ export default function Settings() {
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Missão
               </Typography>
-              <RichTextEditor
+              <BlockNoteEditor
                 content={settings.about_mission || ''}
-                contentType={settings.about_mission_type || 'wysiwyg'}
                 onContentChange={(content) => setSettings({ ...settings, about_mission: content })}
-                onContentTypeChange={(content_type) => setSettings({ ...settings, about_mission_type: content_type })}
               />
             </Box>
           )}
@@ -379,11 +375,9 @@ export default function Settings() {
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Visão
               </Typography>
-              <RichTextEditor
+              <BlockNoteEditor
                 content={settings.about_vision || ''}
-                contentType={settings.about_vision_type || 'wysiwyg'}
                 onContentChange={(content) => setSettings({ ...settings, about_vision: content })}
-                onContentTypeChange={(content_type) => setSettings({ ...settings, about_vision_type: content_type })}
               />
             </Box>
           )}
@@ -393,11 +387,9 @@ export default function Settings() {
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 História
               </Typography>
-              <RichTextEditor
+              <BlockNoteEditor
                 content={settings.about_history || ''}
-                contentType={settings.about_history_type || 'wysiwyg'}
                 onContentChange={(content) => setSettings({ ...settings, about_history: content })}
-                onContentTypeChange={(content_type) => setSettings({ ...settings, about_history_type: content_type })}
               />
             </Box>
           )}

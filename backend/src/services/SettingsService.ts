@@ -15,7 +15,6 @@ export interface EducationResource {
   title: string;
   description: string;
   content: string;
-  content_type: 'wysiwyg' | 'markdown';
   category: string;
   published: boolean;
   created_at: string;
@@ -28,7 +27,6 @@ export interface BlogPost {
   title: string;
   excerpt: string;
   content: string;
-  content_type: 'wysiwyg' | 'markdown';
   author: string;
   image_url?: string;
   category: string;
@@ -54,13 +52,9 @@ export interface SiteSettings {
   featured_blog_posts?: BlogPost[];
   about_title?: string;
   about_content?: string;
-  about_content_type?: 'wysiwyg' | 'markdown';
   about_mission?: string;
-  about_mission_type?: 'wysiwyg' | 'markdown';
   about_vision?: string;
-  about_vision_type?: 'wysiwyg' | 'markdown';
   about_history?: string;
-  about_history_type?: 'wysiwyg' | 'markdown';
   about_team_members?: TeamMember[];
 }
 

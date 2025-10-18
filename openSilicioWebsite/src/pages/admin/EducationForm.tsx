@@ -19,10 +19,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { educationApi } from '../../services/api'
 import type { EducationResource } from '../../types';
-import RichTextEditor from '../../components/RichTextEditor';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import WikiLinkRenderer from '../../components/WikiLinkRenderer';
+import BlockNoteEditor from '../../components/BlockNoteEditor';
+import BlockNoteContent from '../../components/BlockNoteContent';
 
 export default function EducationForm() {
   const { id } = useParams<{ id: string }>();
@@ -34,7 +32,6 @@ export default function EducationForm() {
     title: '',
     description: '',
     content: '',
-    content_type: 'wysiwyg',
     category: '',
     published: false,
   });
@@ -162,13 +159,9 @@ export default function EducationForm() {
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Conteúdo
                 </Typography>
-                <RichTextEditor
+                <BlockNoteEditor
                   content={resource.content || ''}
-                  contentType={resource.content_type || 'wysiwyg'}
                   onContentChange={(content) => setResource({ ...resource, content })}
-                  onContentTypeChange={(content_type) =>
-                    setResource({ ...resource, content_type })
-                  }
                 />
               </Box>
 
@@ -213,18 +206,7 @@ export default function EducationForm() {
                       </Typography>
                     )}
                     {previewTab === 'Conteúdo' && (
-                      resource.content_type === 'markdown' ? (
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            a: WikiLinkRenderer,
-                          }}
-                        >
-                          {resource.content || ''}
-                        </ReactMarkdown>
-                      ) : (
-                        <div dangerouslySetInnerHTML={{ __html: resource.content || '<p>Nenhum conteúdo disponível.</p>' }} />
-                      )
+                      <BlockNoteContent content={resource.content || ''} />
                     )}
                     {previewTab === 'Recursos' && (
                       <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -235,18 +217,7 @@ export default function EducationForm() {
                 </>
               ) : (
                 <Stack spacing={3}>
-                  {resource.content_type === 'markdown' ? (
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: WikiLinkRenderer,
-                      }}
-                    >
-                      {resource.content || ''}
-                    </ReactMarkdown>
-                  ) : (
-                    <div dangerouslySetInnerHTML={{ __html: resource.content || '<p>Nenhum conteúdo disponível.</p>' }} />
-                  )}
+                  <BlockNoteContent content={resource.content || ''} />
                 </Stack>
               )}
             </Stack>

@@ -7,7 +7,6 @@ export interface EducationResource {
   title: string;
   description: string;
   content: string;
-  content_type: 'wysiwyg' | 'markdown';
   category?: string;
   overview?: string;
   resources?: string;
@@ -48,7 +47,6 @@ export class EducationService extends BaseService<EducationResource> {
     const resourceData = {
       id: uuidv4(),
       ...data,
-      content_type: data.content_type || 'wysiwyg',
       published: data.published || false,
     };
 
@@ -57,7 +55,6 @@ export class EducationService extends BaseService<EducationResource> {
       'title',
       'description',
       'content',
-      'content_type',
       'category',
       'overview',
       'resources',

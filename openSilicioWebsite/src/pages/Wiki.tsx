@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import { Box, Breadcrumbs, Link as MUILink, Paper, Stack, Typography, Divider } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { wikiApi } from '../services/api'
 import type { WikiEntry } from '../types';
+import BlockNoteContent from '../components/BlockNoteContent';
 
 export default function Wiki() {
   const { slug } = useParams<{ slug: string }>();
@@ -30,7 +29,6 @@ export default function Wiki() {
           definitionLength: data.definition?.length || 0,
           hasContent: !!data.content?.trim(),
           contentLength: data.content?.length || 0,
-          contentType: data.content_type,
         });
 
         if (!data.definition || !data.definition.trim()) {
@@ -84,11 +82,7 @@ export default function Wiki() {
 
       {entry.content && (
         <Paper sx={{ p: 4 }}>
-          {entry.content_type === 'markdown' ? (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.content}</ReactMarkdown>
-          ) : (
-            <div dangerouslySetInnerHTML={{ __html: entry.content }} />
-          )}
+          <BlockNoteContent content={entry.content} />
         </Paper>
       )}
     </Stack>

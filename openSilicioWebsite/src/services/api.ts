@@ -110,6 +110,10 @@ export const blogApi = {
     const response = await api.get<BlogPost>(`/blog/${slug}`);
     return response.data;
   },
+  getCategories: async () => {
+    const response = await api.get<string[]>('/blog/categories/list');
+    return response.data;
+  },
   create: async (data: Partial<BlogPost>) => {
     const response = await api.post<BlogPost>('/blog', data);
     return response.data;

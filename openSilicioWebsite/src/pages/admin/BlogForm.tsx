@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  Autocomplete,
   Box,
   Breadcrumbs,
   Button,
@@ -15,24 +16,25 @@ import {
 import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
-import { blogApi } from '../../services/api'
+import UploadIcon from '@mui/icons-material/Upload';
+import { blogApi, uploadApi } from '../../services/api'
 import type { BlogPost } from '../../types';
-import RichTextEditor from '../../components/RichTextEditor';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import WikiLinkRenderer from '../../components/WikiLinkRenderer';
+import BlockNoteEditor from '../../components/BlockNoteEditor';
+import BlockNoteContent from '../../components/BlockNoteContent';
 
 export default function BlogForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [post, setPost] = useState<Partial<BlogPost>>({
     slug: '',
     title: '',
     excerpt: '',
     content: '',
-    content_type: 'wysiwyg',
     author: '',
     image_url: '',
     category: '',
@@ -40,10 +42,20 @@ export default function BlogForm() {
   });
 
   useEffect(() => {
+    loadCategories();
     if (id) {
       loadPost();
     }
   }, [id]);
+
+  const loadCategories = async () => {
+    try {
+      const data = await blogApi.getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+    }
+  };
 
   const loadPost = async () => {
     try {
@@ -71,6 +83,24 @@ export default function BlogForm() {
       alert(error.response?.data?.error || 'Erro ao salvar post');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCoverImageUpload = async (file: File) => {
+    setUploadingImage(true);
+    setUploadProgress(0);
+
+    try {
+      const result = await uploadApi.uploadTeamMemberImage(file, (progress) => {
+        setUploadProgress(progress);
+      });
+      setPost({ ...post, image_url: result.url });
+      alert(`Imagem enviada com sucesso! ${(result.size / 1024).toFixed(1)}KB`);
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Erro ao enviar imagem');
+    } finally {
+      setUploadingImage(false);
+      setUploadProgress(0);
     }
   };
 
@@ -138,30 +168,107 @@ export default function BlogForm() {
                 fullWidth
               />
 
-              <TextField
-                label="Categoria"
-                value={post.category}
-                onChange={(e) => setPost({ ...post, category: e.target.value })}
-                required
-                fullWidth
+              <Autocomplete
+                freeSolo
+                options={categories}
+                value={post.category || ''}
+                onChange={(_, newValue) => setPost({ ...post, category: newValue || '' })}
+                onInputChange={(_, newInputValue) => setPost({ ...post, category: newInputValue })}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Categoria"
+                    required
+                    helperText="Selecione uma categoria existente ou digite uma nova"
+                  />
+                )}
               />
 
-              <TextField
-                label="URL da Imagem de Capa"
-                value={post.image_url}
-                onChange={(e) => setPost({ ...post, image_url: e.target.value })}
-                fullWidth
-              />
+              <Box>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                  Imagem de Capa
+                </Typography>
+
+                {post.image_url && (
+                  <Box sx={{ mb: 2 }}>
+                    <Box
+                      component="img"
+                      src={post.image_url}
+                      alt="Cover"
+                      sx={{
+                        width: '100%',
+                        maxHeight: 300,
+                        objectFit: 'cover',
+                        borderRadius: 2,
+                        border: '2px solid',
+                        borderColor: 'divider',
+                      }}
+                    />
+                  </Box>
+                )}
+
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  startIcon={<UploadIcon />}
+                  disabled={uploadingImage}
+                >
+                  {uploadingImage
+                    ? `Enviando... ${uploadProgress}%`
+                    : post.image_url
+                    ? 'Trocar Imagem'
+                    : 'Enviar Imagem'}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleCoverImageUpload(file);
+                      }
+                    }}
+                  />
+                </Button>
+
+                {uploadingImage && (
+                  <Box sx={{ width: '100%', mt: 1 }}>
+                    <Box
+                      sx={{
+                        width: `${uploadProgress}%`,
+                        height: 4,
+                        bgcolor: 'primary.main',
+                        borderRadius: 2,
+                        transition: 'width 0.3s',
+                      }}
+                    />
+                  </Box>
+                )}
+
+                {post.image_url && (
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={() => setPost({ ...post, image_url: '' })}
+                    sx={{ mt: 1 }}
+                  >
+                    Remover Imagem
+                  </Button>
+                )}
+
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                  Formatos aceitos: JPEG, PNG, WebP. Máximo 5MB. Será redimensionada e comprimida automaticamente.
+                </Typography>
+              </Box>
 
               <Box>
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Conteúdo
                 </Typography>
-                <RichTextEditor
+                <BlockNoteEditor
                   content={post.content || ''}
-                  contentType={post.content_type || 'wysiwyg'}
                   onContentChange={(content) => setPost({ ...post, content })}
-                  onContentTypeChange={(content_type) => setPost({ ...post, content_type })}
                 />
               </Box>
 
@@ -207,18 +314,7 @@ export default function BlogForm() {
             )}
 
             <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-              {post.content_type === 'markdown' ? (
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: WikiLinkRenderer,
-                  }}
-                >
-                  {post.content || ''}
-                </ReactMarkdown>
-              ) : (
-                <div dangerouslySetInnerHTML={{ __html: post.content || '<p>Nenhum conteúdo disponível.</p>' }} />
-              )}
+              <BlockNoteContent content={post.content || ''} />
             </Stack>
           </Stack>
         )}

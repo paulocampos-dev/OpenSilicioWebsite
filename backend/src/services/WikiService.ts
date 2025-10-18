@@ -8,7 +8,6 @@ export interface WikiEntry {
   slug: string;
   definition: string;
   content?: string;
-  content_type: 'wysiwyg' | 'markdown';
   published: boolean;
   created_at: Date;
   updated_at: Date;
@@ -53,7 +52,6 @@ export class WikiService extends BaseService<WikiEntry> {
       id: uuidv4(),
       ...data,
       content: data.content || '',
-      content_type: data.content_type || 'wysiwyg',
       published: data.published || false,
     };
 
@@ -63,7 +61,6 @@ export class WikiService extends BaseService<WikiEntry> {
       'slug',
       'definition',
       'content',
-      'content_type',
       'published',
     ];
 

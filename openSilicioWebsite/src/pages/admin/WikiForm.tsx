@@ -18,9 +18,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { wikiApi } from '../../services/api'
 import type { WikiEntry } from '../../types';
-import RichTextEditor from '../../components/RichTextEditor';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import BlockNoteEditor from '../../components/BlockNoteEditor';
+import BlockNoteContent from '../../components/BlockNoteContent';
 
 export default function WikiForm() {
   const { id } = useParams<{ id: string }>();
@@ -32,7 +31,6 @@ export default function WikiForm() {
     slug: '',
     definition: '',
     content: '',
-    content_type: 'wysiwyg',
     published: false,
   });
 
@@ -133,11 +131,9 @@ export default function WikiForm() {
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Conteúdo Detalhado (Opcional)
                 </Typography>
-                <RichTextEditor
+                <BlockNoteEditor
                   content={entry.content || ''}
-                  contentType={entry.content_type || 'wysiwyg'}
                   onContentChange={(content) => setEntry({ ...entry, content })}
-                  onContentTypeChange={(content_type) => setEntry({ ...entry, content_type })}
                 />
               </Box>
 
@@ -174,11 +170,7 @@ export default function WikiForm() {
 
             {entry.content && (
               <Paper sx={{ p: 4 }}>
-                {entry.content_type === 'markdown' ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{entry.content}</ReactMarkdown>
-                ) : (
-                  <div dangerouslySetInnerHTML={{ __html: entry.content }} />
-                )}
+                <BlockNoteContent content={entry.content} />
               </Paper>
             )}
           </Stack>

@@ -4,11 +4,9 @@ import { useEffect, useState } from 'react'
 import TwitterIcon from '@mui/icons-material/Twitter'
 import LinkedInIcon from '@mui/icons-material/LinkedIn'
 import FacebookIcon from '@mui/icons-material/Facebook'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
-import WikiLinkRenderer from '../components/WikiLinkRenderer'
+import BlockNoteContent from '../components/BlockNoteContent'
 
 export default function Post() {
   const { slug } = useParams<{ slug: string }>()
@@ -78,18 +76,7 @@ export default function Post() {
       )}
 
       <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-        {post.content_type === 'markdown' ? (
-          <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
-            components={{
-              a: WikiLinkRenderer,
-            }}
-          >
-            {post.content}
-          </ReactMarkdown>
-        ) : (
-          <div dangerouslySetInnerHTML={{ __html: post.content }} />
-        )}
+        <BlockNoteContent content={post.content} />
       </Stack>
 
       <Stack spacing={2} alignItems="center" textAlign="center">

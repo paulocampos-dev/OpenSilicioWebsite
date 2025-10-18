@@ -8,7 +8,6 @@ export interface BlogPost {
   title: string;
   excerpt: string;
   content: string;
-  content_type: 'wysiwyg' | 'markdown';
   author?: string;
   image_url?: string;
   category?: string;
@@ -55,7 +54,6 @@ export class BlogService extends BaseService<BlogPost> {
     const postData = {
       id: uuidv4(),
       ...data,
-      content_type: data.content_type || 'wysiwyg',
       published: data.published || false,
     };
 
@@ -65,7 +63,6 @@ export class BlogService extends BaseService<BlogPost> {
       'title',
       'excerpt',
       'content',
-      'content_type',
       'author',
       'image_url',
       'category',
@@ -88,6 +85,20 @@ export class BlogService extends BaseService<BlogPost> {
    */
   async deletePost(id: string): Promise<void> {
     return this.delete(id);
+  }
+
+  /**
+   * Get all unique categories from blog posts
+   */
+  async getCategories(): Promise<string[]> {
+    const result = await pool.query(
+      `SELECT DISTINCT category
+       FROM blog_posts
+       WHERE category IS NOT NULL
+         AND category != ''
+       ORDER BY category ASC`
+    );
+    return result.rows.map(row => row.category);
   }
 }
 

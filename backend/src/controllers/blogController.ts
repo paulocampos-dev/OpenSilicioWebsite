@@ -84,3 +84,8 @@ export const deletePost = asyncHandler(async (req: AuthRequest, res: Response) =
   res.json({ message: 'Post deletado com sucesso' });
 });
 
+export const getCategories = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const categories = await blogService.getCategories();
+  res.json(categories);
+});
+
