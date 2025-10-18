@@ -6,10 +6,11 @@ import MenuBookIcon from '@mui/icons-material/MenuBook'
 import CodeIcon from '@mui/icons-material/Code'
 import GroupsIcon from '@mui/icons-material/Groups'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
+import Footer from '../components/Footer'
 
 export default function Landing() {
   return (
-    <Stack spacing={0}>
+    <Stack sx={{ m: 0, p: 0 }}>
       {/* Hero Section */}
       <Box
         sx={{
@@ -901,124 +902,7 @@ export default function Landing() {
         </Stack>
       </Container>
 
-      {/* CTA Section */}
-      <Box
-        sx={{
-          position: 'relative',
-          py: { xs: 12, md: 18 },
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: 'url(/closeup_electronic_stock.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: 0.1,
-            zIndex: 1,
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'radial-gradient(circle at 30% 70%, rgba(102, 126, 234, 0.2) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(240, 147, 251, 0.15) 0%, transparent 50%)',
-            zIndex: 2,
-          },
-        }}
-      >
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 3 }}>
-          <Stack spacing={6} alignItems="center" textAlign="center">
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: 800,
-                color: 'common.white',
-                fontSize: { xs: '2rem', md: '2.5rem' },
-                lineHeight: 1.2,
-                textShadow: '0 4px 24px rgba(0,0,0,0.5)',
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 50%, #e8ecff 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Pronto para Começar sua Jornada?
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'rgba(255,255,255,0.9)',
-                fontWeight: 400,
-                maxWidth: 650,
-                lineHeight: 1.8,
-                fontSize: { xs: '1.1rem', md: '1.25rem' },
-              }}
-            >
-              Junte-se ao OpenSilício e faça parte de uma comunidade vibrante de estudantes e
-              profissionais apaixonados por microeletrônica. Acesse recursos exclusivos,
-              participe de projetos e molde o futuro da tecnologia.
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
-              <Button
-                component={RouterLink}
-                to="/educacao"
-                variant="contained"
-                size="large"
-                sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.125rem',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
-                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                  },
-                }}
-              >
-                Começar Agora
-              </Button>
-              <Button
-                component={RouterLink}
-                to="/blog"
-                variant="outlined"
-                size="large"
-                sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.125rem',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  color: 'white',
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  backdropFilter: 'blur(10px)',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    borderColor: 'white',
-                    backgroundColor: 'rgba(255,255,255,0.15)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 32px rgba(255,255,255,0.1)',
-                  },
-                }}
-              >
-                Saiba Mais
-              </Button>
-            </Stack>
-          </Stack>
-        </Container>
-      </Box>
+      <Footer />
     </Stack>
   )
 }

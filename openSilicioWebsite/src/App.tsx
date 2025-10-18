@@ -66,95 +66,103 @@ function AppContent() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Header mode={mode} toggleMode={toggleMode} />
-      {!isAdminRoute && (
-        <Container sx={{ py: 4 }}>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<Post />} />
-            <Route path="/educacao" element={<Educacao />} />
-            <Route path="/educacao/:id" element={<Recurso />} />
-            <Route path="/wiki" element={<WikiPage />} />
-            <Route path="/wiki/:slug" element={<Wiki />} />
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </Container>
-      )}
-      {isAdminRoute && (
-        <Routes>
-          <Route path="/admin" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <Dashboard />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/blog" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <BlogList />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/blog/new" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <BlogForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/blog/edit/:id" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <BlogForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/educacao" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <EducationList />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/educacao/new" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <EducationForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/educacao/edit/:id" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <EducationForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/wiki" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <WikiList />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/wiki/new" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <WikiForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/wiki/edit/:id" element={
-            <ProtectedRoute>
-              <AdminLayout>
-                <WikiForm />
-              </AdminLayout>
-            </ProtectedRoute>
-          } />
-        </Routes>
-      )}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
+        <Header mode={mode} toggleMode={toggleMode} />
+        <Box sx={{ flex: 1 }}>
+          {!isAdminRoute && (
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/blog" element={<Container sx={{ py: 4 }}><Blog /></Container>} />
+              <Route path="/blog/:slug" element={<Container sx={{ py: 4 }}><Post /></Container>} />
+              <Route path="/educacao" element={<Container sx={{ py: 4 }}><Educacao /></Container>} />
+              <Route path="/educacao/:id" element={<Container sx={{ py: 4 }}><Recurso /></Container>} />
+              <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiPage /></Container>} />
+              <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><Wiki /></Container>} />
+              <Route path="/login" element={<Container sx={{ py: 4 }}><Login /></Container>} />
+            </Routes>
+          )}
+          {isAdminRoute && (
+            <Routes>
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Dashboard />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/blog" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <BlogList />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/blog/new" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <BlogForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/blog/edit/:id" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <BlogForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/educacao" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <EducationList />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/educacao/new" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <EducationForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/educacao/edit/:id" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <EducationForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/wiki" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <WikiList />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/wiki/new" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <WikiForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/wiki/edit/:id" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <WikiForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+            </Routes>
+          )}
+        </Box>
+      </Box>
     </ThemeProvider>
   )
 }
