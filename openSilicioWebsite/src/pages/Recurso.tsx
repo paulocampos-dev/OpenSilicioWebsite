@@ -11,7 +11,7 @@ export default function Recurso() {
   const { id } = useParams<{ id: string }>()
   const [resource, setResource] = useState<EducationResource | null>(null)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'Visão geral' | 'Conteúdo' | 'Recursos'>('Conteúdo')
+  const [tab, setTab] = useState<'Visão geral' | 'Conteúdo' | 'Recursos'>('Visão geral')
 
   useEffect(() => {
     if (id) {
@@ -59,26 +59,57 @@ export default function Recurso() {
         <Typography color="text.secondary" sx={{ maxWidth: 900 }}>{resource.description}</Typography>
       </Stack>
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="Conteúdo do recurso" variant="scrollable" allowScrollButtonsMobile>
-        {(['Visão geral','Conteúdo','Recursos'] as const).map((t) => (
-          <Tab key={t} value={t} label={t} />
-        ))}
-      </Tabs>
+      {resource.category === 'Projetos' ? (
+        <>
+          <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="Conteúdo do recurso" variant="scrollable" allowScrollButtonsMobile>
+            {(['Visão geral','Conteúdo','Recursos'] as const).map((t) => (
+              <Tab key={t} value={t} label={t} />
+            ))}
+          </Tabs>
 
-      <Stack spacing={3}>
-        {resource.content_type === 'markdown' ? (
-          <ReactMarkdown 
-            remarkPlugins={[remarkGfm]}
-            components={{
-              a: WikiLinkRenderer,
-            }}
-          >
-            {resource.content}
-          </ReactMarkdown>
-        ) : (
-          <div dangerouslySetInnerHTML={{ __html: resource.content }} />
-        )}
-      </Stack>
+          <Stack spacing={3}>
+            {tab === 'Visão geral' && (
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                {resource.overview || 'Nenhuma visão geral disponível.'}
+              </Typography>
+            )}
+            {tab === 'Conteúdo' && (
+              resource.content_type === 'markdown' ? (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a: WikiLinkRenderer,
+                  }}
+                >
+                  {resource.content}
+                </ReactMarkdown>
+              ) : (
+                <div dangerouslySetInnerHTML={{ __html: resource.content }} />
+              )
+            )}
+            {tab === 'Recursos' && (
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                {resource.resources || 'Nenhum recurso disponível.'}
+              </Typography>
+            )}
+          </Stack>
+        </>
+      ) : (
+        <Stack spacing={3}>
+          {resource.content_type === 'markdown' ? (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a: WikiLinkRenderer,
+              }}
+            >
+              {resource.content}
+            </ReactMarkdown>
+          ) : (
+            <div dangerouslySetInnerHTML={{ __html: resource.content }} />
+          )}
+        </Stack>
+      )}
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Button variant="contained" fullWidth>Marcar como concluído</Button>

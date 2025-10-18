@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   FormControlLabel,
+  MenuItem,
   Paper,
   Stack,
   Switch,
@@ -106,7 +107,36 @@ export default function EducationForm() {
               onChange={(e) => setResource({ ...resource, category: e.target.value })}
               required
               fullWidth
-            />
+              select
+            >
+              <MenuItem value="Projetos">Projetos</MenuItem>
+              <MenuItem value="Guias">Guias</MenuItem>
+              <MenuItem value="Tutoriais">Tutoriais</MenuItem>
+            </TextField>
+
+            {resource.category === 'Projetos' && (
+              <>
+                <TextField
+                  label="Visão Geral"
+                  value={resource.overview || ''}
+                  onChange={(e) => setResource({ ...resource, overview: e.target.value })}
+                  fullWidth
+                  multiline
+                  rows={4}
+                  helperText="Descrição geral do projeto (aparece na aba 'Visão Geral')"
+                />
+
+                <TextField
+                  label="Recursos"
+                  value={resource.resources || ''}
+                  onChange={(e) => setResource({ ...resource, resources: e.target.value })}
+                  fullWidth
+                  multiline
+                  rows={4}
+                  helperText="Lista de recursos necessários (aparece na aba 'Recursos')"
+                />
+              </>
+            )}
 
             <Box>
               <Typography variant="subtitle1" fontWeight={600} gutterBottom>

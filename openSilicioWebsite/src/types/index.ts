@@ -25,6 +25,8 @@ export interface EducationResource {
   content: string;
   content_type: 'wysiwyg' | 'markdown';
   category: string;
+  overview?: string;
+  resources?: string;
   published: boolean;
   created_at: string;
   updated_at: string;

@@ -25,7 +25,7 @@ export const getResourceById = asyncHandler(async (req: AuthRequest, res: Respon
 });
 
 export const createResource = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { title, description, content, content_type, category, published } = req.body;
+  const { title, description, content, content_type, category, overview, resources, published } = req.body;
 
   if (!title || !description || !content) {
     throw new BadRequestError('Campos obrigatórios faltando');
@@ -37,6 +37,8 @@ export const createResource = asyncHandler(async (req: AuthRequest, res: Respons
     content,
     content_type,
     category,
+    overview,
+    resources,
     published,
   });
 
@@ -48,7 +50,7 @@ export const createResource = asyncHandler(async (req: AuthRequest, res: Respons
 
 export const updateResource = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { title, description, content, content_type, category, published } = req.body;
+  const { title, description, content, content_type, category, overview, resources, published } = req.body;
 
   const resource = await educationService.updateResource(id, {
     title,
@@ -56,6 +58,8 @@ export const updateResource = asyncHandler(async (req: AuthRequest, res: Respons
     content,
     content_type,
     category,
+    overview,
+    resources,
     published,
   });
 

@@ -9,6 +9,8 @@ export interface EducationResource {
   content: string;
   content_type: 'wysiwyg' | 'markdown';
   category?: string;
+  overview?: string;
+  resources?: string;
   published: boolean;
   created_at: Date;
   updated_at: Date;
@@ -57,6 +59,8 @@ export class EducationService extends BaseService<EducationResource> {
       'content',
       'content_type',
       'category',
+      'overview',
+      'resources',
       'published',
     ];
 
