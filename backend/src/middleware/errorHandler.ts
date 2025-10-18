@@ -13,10 +13,15 @@ export const errorHandler = (
   let message = 'Erro interno do servidor';
   let errors: Array<{ field: string; message: string }> | undefined;
 
+  // Get request ID for better debugging
+  const requestId = req.requestId || 'unknown';
+
   // Log error for debugging
-  console.error('❌ Error:', {
+  console.error(`❌ Error [${requestId}]:`, {
     name: err.name,
     message: err.message,
+    path: req.path,
+    method: req.method,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
 
@@ -80,6 +85,7 @@ export const errorHandler = (
   // Send error response
   const response: any = {
     error: message,
+    requestId, // Include request ID for debugging
   };
 
   // Add validation errors if present

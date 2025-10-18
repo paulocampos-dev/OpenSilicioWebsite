@@ -7,6 +7,9 @@ import dotenv from 'dotenv';
 // Carregar variáveis de ambiente
 dotenv.config();
 
+// Importar configurações
+import pool from './config/database';
+
 // Importar rotas
 import authRoutes from './routes/auth';
 import blogRoutes from './routes/blog';
@@ -16,28 +19,33 @@ import uploadRoutes from './routes/upload';
 import settingsRoutes from './routes/settings';
 import { apiLimiter } from './middleware/rateLimit';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { requestIdMiddleware } from './middleware/requestId';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Request ID middleware - must be first to be available in all subsequent middleware
+app.use(requestIdMiddleware);
 
 // Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const timestamp = new Date().toISOString();
-  
+  const requestId = req.requestId || 'unknown';
+
   // Log request
-  console.log(`[${timestamp}] ${req.method} ${req.path}`);
-  
+  console.log(`[${timestamp}] [${requestId}] ${req.method} ${req.path}`);
+
   // Log response when finished
   res.on('finish', () => {
     const duration = Date.now() - start;
     const statusColor = res.statusCode >= 400 ? '\x1b[31m' : '\x1b[32m';
     const resetColor = '\x1b[0m';
     console.log(
-      `[${timestamp}] ${req.method} ${req.path} ${statusColor}${res.statusCode}${resetColor} - ${duration}ms`
+      `[${timestamp}] [${requestId}] ${req.method} ${req.path} ${statusColor}${res.statusCode}${resetColor} - ${duration}ms`
     );
   });
-  
+
   next();
 });
 
@@ -92,8 +100,26 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
 
 // Rota de health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'OpenSilício API está funcionando' });
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    await pool.query('SELECT 1');
+
+    res.json({
+      status: 'OK',
+      message: 'OpenSilício API está funcionando',
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'ERROR',
+      message: 'Serviço indisponível',
+      database: 'disconnected',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Error handling middlewares (MUST be after all routes)

@@ -680,7 +680,7 @@ export default function Landing() {
               Apoiadores e Parceiros
             </Typography>
             <Grid container spacing={6} alignItems="center" justifyContent="center">
-              {[ '/amigos-da-poli-logo-removebg-preview.png'  ].map((src, i) => (
+              {[ '/amigos-da-poli-logo-sem-bg.png'  ].map((src, i) => (
                 <Grid key={i}>
                   <Box
                     component="img"
