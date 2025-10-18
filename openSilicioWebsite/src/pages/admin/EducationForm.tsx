@@ -3,23 +3,33 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
   Button,
+  Divider,
   FormControlLabel,
   MenuItem,
   Paper,
   Stack,
   Switch,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
 import { educationApi } from '../../services/api'
 import type { EducationResource } from '../../types';
 import RichTextEditor from '../../components/RichTextEditor';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import WikiLinkRenderer from '../../components/WikiLinkRenderer';
 
 export default function EducationForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewTab, setPreviewTab] = useState<'Visão geral' | 'Conteúdo' | 'Recursos'>('Visão geral');
   const [resource, setResource] = useState<Partial<EducationResource>>({
     title: '',
     description: '',
@@ -71,98 +81,177 @@ export default function EducationForm() {
           <Typography variant="h4" fontWeight={700}>
             {id ? 'Editar Recurso' : 'Novo Recurso'}
           </Typography>
-          <Button
-            type="submit"
-            variant="contained"
-            startIcon={<SaveIcon />}
-            disabled={loading}
-          >
-            {loading ? 'Salvando...' : 'Salvar'}
-          </Button>
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant={showPreview ? 'outlined' : 'contained'}
+              startIcon={showPreview ? <EditIcon /> : <VisibilityIcon />}
+              onClick={() => setShowPreview(!showPreview)}
+            >
+              {showPreview ? 'Editar' : 'Visualizar'}
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<SaveIcon />}
+              disabled={loading}
+            >
+              {loading ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </Stack>
         </Box>
 
-        <Paper sx={{ p: 3 }}>
-          <Stack spacing={3}>
-            <TextField
-              label="Título"
-              value={resource.title}
-              onChange={(e) => setResource({ ...resource, title: e.target.value })}
-              required
-              fullWidth
-            />
-
-            <TextField
-              label="Descrição"
-              value={resource.description}
-              onChange={(e) => setResource({ ...resource, description: e.target.value })}
-              required
-              fullWidth
-              multiline
-              rows={3}
-            />
-
-            <TextField
-              label="Categoria"
-              value={resource.category}
-              onChange={(e) => setResource({ ...resource, category: e.target.value })}
-              required
-              fullWidth
-              select
-            >
-              <MenuItem value="Projetos">Projetos</MenuItem>
-              <MenuItem value="Guias">Guias</MenuItem>
-              <MenuItem value="Tutoriais">Tutoriais</MenuItem>
-            </TextField>
-
-            {resource.category === 'Projetos' && (
-              <>
-                <TextField
-                  label="Visão Geral"
-                  value={resource.overview || ''}
-                  onChange={(e) => setResource({ ...resource, overview: e.target.value })}
-                  fullWidth
-                  multiline
-                  rows={4}
-                  helperText="Descrição geral do projeto (aparece na aba 'Visão Geral')"
-                />
-
-                <TextField
-                  label="Recursos"
-                  value={resource.resources || ''}
-                  onChange={(e) => setResource({ ...resource, resources: e.target.value })}
-                  fullWidth
-                  multiline
-                  rows={4}
-                  helperText="Lista de recursos necessários (aparece na aba 'Recursos')"
-                />
-              </>
-            )}
-
-            <Box>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                Conteúdo
-              </Typography>
-              <RichTextEditor
-                content={resource.content || ''}
-                contentType={resource.content_type || 'wysiwyg'}
-                onContentChange={(content) => setResource({ ...resource, content })}
-                onContentTypeChange={(content_type) =>
-                  setResource({ ...resource, content_type })
-                }
+        {!showPreview ? (
+          <Paper sx={{ p: 3 }}>
+            <Stack spacing={3}>
+              <TextField
+                label="Título"
+                value={resource.title}
+                onChange={(e) => setResource({ ...resource, title: e.target.value })}
+                required
+                fullWidth
               />
-            </Box>
 
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={resource.published}
-                  onChange={(e) => setResource({ ...resource, published: e.target.checked })}
+              <TextField
+                label="Descrição"
+                value={resource.description}
+                onChange={(e) => setResource({ ...resource, description: e.target.value })}
+                required
+                fullWidth
+                multiline
+                rows={3}
+              />
+
+              <TextField
+                label="Categoria"
+                value={resource.category}
+                onChange={(e) => setResource({ ...resource, category: e.target.value })}
+                required
+                fullWidth
+                select
+              >
+                <MenuItem value="Projetos">Projetos</MenuItem>
+                <MenuItem value="Guias">Guias</MenuItem>
+                <MenuItem value="Tutoriais">Tutoriais</MenuItem>
+              </TextField>
+
+              {resource.category === 'Projetos' && (
+                <>
+                  <TextField
+                    label="Visão Geral"
+                    value={resource.overview || ''}
+                    onChange={(e) => setResource({ ...resource, overview: e.target.value })}
+                    fullWidth
+                    multiline
+                    rows={4}
+                    helperText="Descrição geral do projeto (aparece na aba 'Visão Geral')"
+                  />
+
+                  <TextField
+                    label="Recursos"
+                    value={resource.resources || ''}
+                    onChange={(e) => setResource({ ...resource, resources: e.target.value })}
+                    fullWidth
+                    multiline
+                    rows={4}
+                    helperText="Lista de recursos necessários (aparece na aba 'Recursos')"
+                  />
+                </>
+              )}
+
+              <Box>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  Conteúdo
+                </Typography>
+                <RichTextEditor
+                  content={resource.content || ''}
+                  contentType={resource.content_type || 'wysiwyg'}
+                  onContentChange={(content) => setResource({ ...resource, content })}
+                  onContentTypeChange={(content_type) =>
+                    setResource({ ...resource, content_type })
+                  }
                 />
-              }
-              label="Publicar"
-            />
-          </Stack>
-        </Paper>
+              </Box>
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={resource.published}
+                    onChange={(e) => setResource({ ...resource, published: e.target.checked })}
+                  />
+                }
+                label="Publicar"
+              />
+            </Stack>
+          </Paper>
+        ) : (
+          <Paper sx={{ p: 3 }}>
+            <Stack spacing={4}>
+              <Stack spacing={1}>
+                <Typography sx={{ typography: { xs: 'h4', md: 'h3' } }} fontWeight={900}>
+                  {resource.title || 'Título do Recurso'}
+                </Typography>
+                <Typography color="text.secondary" sx={{ maxWidth: 900 }}>
+                  {resource.description || 'Descrição do recurso aparecerá aqui.'}
+                </Typography>
+              </Stack>
+
+              {resource.category === 'Projetos' ? (
+                <>
+                  <Box>
+                    <Tabs value={previewTab} onChange={(_, v) => setPreviewTab(v)} variant="scrollable" allowScrollButtonsMobile>
+                      {(['Visão geral','Conteúdo','Recursos'] as const).map((t) => (
+                        <Tab key={t} value={t} label={t} />
+                      ))}
+                    </Tabs>
+                    <Divider />
+                  </Box>
+
+                  <Stack spacing={3}>
+                    {previewTab === 'Visão geral' && (
+                      <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {resource.overview || 'Nenhuma visão geral disponível.'}
+                      </Typography>
+                    )}
+                    {previewTab === 'Conteúdo' && (
+                      resource.content_type === 'markdown' ? (
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            a: WikiLinkRenderer,
+                          }}
+                        >
+                          {resource.content || ''}
+                        </ReactMarkdown>
+                      ) : (
+                        <div dangerouslySetInnerHTML={{ __html: resource.content || '<p>Nenhum conteúdo disponível.</p>' }} />
+                      )
+                    )}
+                    {previewTab === 'Recursos' && (
+                      <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {resource.resources || 'Nenhum recurso disponível.'}
+                      </Typography>
+                    )}
+                  </Stack>
+                </>
+              ) : (
+                <Stack spacing={3}>
+                  {resource.content_type === 'markdown' ? (
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: WikiLinkRenderer,
+                      }}
+                    >
+                      {resource.content || ''}
+                    </ReactMarkdown>
+                  ) : (
+                    <div dangerouslySetInnerHTML={{ __html: resource.content || '<p>Nenhum conteúdo disponível.</p>' }} />
+                  )}
+                </Stack>
+              )}
+            </Stack>
+          </Paper>
+        )}
       </Stack>
     </form>
   );
