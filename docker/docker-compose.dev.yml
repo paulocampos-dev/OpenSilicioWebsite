@@ -1,0 +1,114 @@
+version: '3.8'
+
+name: opensilicio-dev
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16
+    container_name: opensilicio-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: opensilicio
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ../backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d opensilicio"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - opensilicio-dev-network
+
+  # Backend API (Node.js + Express) - Development Mode
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../docker/Dockerfile.backend.dev
+    container_name: opensilicio-backend-dev
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      # Mount source code for hot-reload (READ ONLY for better performance)
+      - ../backend/src:/app/src:delegated
+      - ../backend/uploads:/app/uploads:delegated
+      - ../backend/tsconfig.json:/app/tsconfig.json:ro
+      # Use named volume for node_modules (prevents host/container conflicts)
+      - backend_node_modules_dev:/app/node_modules
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@postgres:5432/opensilicio
+      JWT_SECRET: 8f3c4e2d9a7b6e1f5c8d9e0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3
+      PORT: 3001
+      API_URL: http://localhost:3001
+      NODE_ENV: development
+      CORS_ORIGINS: http://localhost:5173,http://frontend:5173
+      # Performance optimizations for nodemon/ts-node-dev
+      TS_NODE_TRANSPILE_ONLY: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - opensilicio-dev-network
+
+  # Frontend (React + Vite) - Development Mode
+  frontend:
+    build:
+      context: ../openSilicioWebsite
+      dockerfile: ../docker/Dockerfile.frontend.dev
+    container_name: opensilicio-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount source code for hot-reload (delegated for better performance on macOS/Windows)
+      - ../openSilicioWebsite/src:/app/src:delegated
+      - ../openSilicioWebsite/public:/app/public:delegated
+      - ../openSilicioWebsite/index.html:/app/index.html:ro
+      - ../openSilicioWebsite/vite.config.js:/app/vite.config.js:ro
+      - ../openSilicioWebsite/tsconfig.json:/app/tsconfig.json:ro
+      # Use named volume for node_modules (prevents host/container conflicts)
+      - frontend_node_modules_dev:/app/node_modules
+    environment:
+      VITE_API_URL: http://backend:3001
+      NODE_ENV: development
+      # Enable Vite HMR
+      CHOKIDAR_USEPOLLING: "false"
+      WATCHPACK_POLLING: "false"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5173 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - opensilicio-dev-network
+
+# Named volumes for persistence
+volumes:
+  postgres_data_dev:
+    driver: local
+  backend_node_modules_dev:
+    driver: local
+  frontend_node_modules_dev:
+    driver: local
+
+# Custom network for service communication
+networks:
+  opensilicio-dev-network:
+    driver: bridge
+

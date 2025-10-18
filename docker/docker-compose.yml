@@ -1,5 +1,7 @@
 version: '3.8'
 
+name: opensilicio
+
 services:
   # PostgreSQL Database
   postgres:
@@ -14,26 +16,29 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d opensilicio"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
     networks:
       - opensilicio-network
 
   # Backend API (Node.js + Express)
   backend:
-    build: ./backend
+    build:
+      context: ../backend
+      dockerfile: ../docker/Dockerfile.backend
     container_name: opensilicio-backend
     restart: unless-stopped
     ports:
       - "3001:3001"
     volumes:
       # Mount source code for hot-reload
-      - ./backend/src:/app/src
-      - ./backend/uploads:/app/uploads
+      - ../backend/src:/app/src
+      - ../backend/uploads:/app/uploads
       # Cache node_modules to avoid reinstalling on every restart
       - backend_node_modules:/app/node_modules
     environment:
@@ -59,16 +64,16 @@ services:
   # Frontend (React + Vite)
   frontend:
     build:
-      context: ./openSilicioWebsite
-      dockerfile: Dockerfile
+      context: ../openSilicioWebsite
+      dockerfile: ../docker/Dockerfile.frontend
     container_name: opensilicio-frontend
     restart: unless-stopped
     ports:
       - "5173:5173"
     volumes:
       # Mount source code for hot-reload
-      - ./openSilicioWebsite/src:/app/src
-      - ./openSilicioWebsite/public:/app/public
+      - ../openSilicioWebsite/src:/app/src
+      - ../openSilicioWebsite/public:/app/public
       # Cache node_modules to avoid reinstalling on every restart
       - frontend_node_modules:/app/node_modules
     environment:

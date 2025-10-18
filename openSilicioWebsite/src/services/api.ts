@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse } from '../types';
+import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -147,6 +147,18 @@ export const uploadApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data;
+  },
+};
+
+// Settings
+export const settingsApi = {
+  getAll: async () => {
+    const response = await api.get<SiteSettings>('/settings');
+    return response.data;
+  },
+  update: async (data: Partial<SiteSettings>) => {
+    const response = await api.put<SiteSettings>('/settings', data);
     return response.data;
   },
 };

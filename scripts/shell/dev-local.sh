@@ -41,7 +41,7 @@ if [ $RESTART_MODE -eq 1 ]; then
     pkill -f "vite" 2>/dev/null || true
     
     # Stop database container
-    docker-compose -f docker-compose.dev.yml down > /dev/null 2>&1
+    docker-compose -f ../../docker/docker-compose.dev.yml down > /dev/null 2>&1
     
     sleep 2
     echo -e "${GREEN}Processes stopped${NC}"
@@ -50,8 +50,8 @@ fi
 
 # Start or restart database
 echo -e "${BLUE}Starting PostgreSQL database...${NC}"
-docker-compose -f docker-compose.dev.yml down > /dev/null 2>&1
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose -f ../../docker/docker-compose.dev.yml down > /dev/null 2>&1
+docker-compose -f ../../docker/docker-compose.dev.yml up -d
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}ERROR: Failed to start database${NC}"
@@ -63,7 +63,7 @@ echo -e "${YELLOW}Waiting for database to be ready...${NC}"
 sleep 8
 
 # Check database health
-docker-compose -f docker-compose.dev.yml exec -T postgres pg_isready -U admin -d opensilicio > /dev/null 2>&1
+docker-compose -f ../../docker/docker-compose.dev.yml exec -T postgres pg_isready -U admin -d opensilicio > /dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo -e "${YELLOW}WARNING: Database may not be ready yet. Continuing anyway...${NC}"
 else
@@ -168,7 +168,7 @@ echo ""
 echo -e "${YELLOW}Commands:${NC}"
 echo "  - Restart all:     ./dev-local.sh restart"
 echo "  - Stop all:        ./stop-dev.sh"
-echo "  - Stop database:   docker-compose -f docker-compose.dev.yml down"
+echo "  - Stop database:   docker-compose -f ../../docker/docker-compose.dev.yml down"
 echo "  - View backend:    tail -f logs/backend.log"
 echo "  - View frontend:   tail -f logs/frontend.log"
 echo ""

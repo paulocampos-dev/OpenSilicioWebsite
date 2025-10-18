@@ -13,6 +13,7 @@ import blogRoutes from './routes/blog';
 import educationRoutes from './routes/education';
 import wikiRoutes from './routes/wiki';
 import uploadRoutes from './routes/upload';
+import settingsRoutes from './routes/settings';
 import { apiLimiter } from './middleware/rateLimit';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
@@ -88,6 +89,7 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/education', educationRoutes);
 app.use('/api/wiki', wikiRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Rota de health check
 app.get('/health', (req, res) => {

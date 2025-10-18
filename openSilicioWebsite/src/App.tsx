@@ -26,6 +26,7 @@ import EducationList from './pages/admin/EducationList'
 import EducationForm from './pages/admin/EducationForm'
 import WikiList from './pages/admin/WikiList'
 import WikiForm from './pages/admin/WikiForm'
+import Settings from './pages/admin/Settings'
 
 function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void }) {
   const location = useLocation()
@@ -156,6 +157,13 @@ function AppContent() {
                 <ProtectedRoute>
                   <AdminLayout>
                     <WikiForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/configuracoes" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <Settings />
                   </AdminLayout>
                 </ProtectedRoute>
               } />

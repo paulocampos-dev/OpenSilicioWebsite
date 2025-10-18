@@ -14,7 +14,7 @@ const pool = new Pool({
   // Connection pool configuration
   max: 20, // Maximum number of clients in pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection could not be established
+  connectionTimeoutMillis: 5000, // Increased to 5 seconds for Docker
 });
 
 // Handle unexpected pool errors - log but don't crash
@@ -23,14 +23,30 @@ pool.on('error', (err) => {
   // Don't exit process - let the application handle reconnection
 });
 
-// Test database connection on startup
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('❌ Database connection failed:', err);
-    process.exit(1);
-  } else {
-    console.log('✅ Database connected successfully');
+// Test database connection with retry logic
+const testConnection = async (retries = 10, delay = 2000): Promise<void> => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await pool.query('SELECT NOW()');
+      console.log('✅ Database connected successfully');
+      return;
+    } catch (err) {
+      const attemptsLeft = retries - i - 1;
+      if (attemptsLeft > 0) {
+        console.log(`⏳ Database not ready yet. Retrying in ${delay/1000}s... (${attemptsLeft} attempts left)`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        console.error('❌ Database connection failed after all retries:', err);
+        process.exit(1);
+      }
+    }
   }
+};
+
+// Start connection test (non-blocking)
+testConnection().catch((err) => {
+  console.error('❌ Fatal database error:', err);
+  process.exit(1);
 });
 
 export default pool;

@@ -68,3 +68,20 @@ export interface PaginatedResponse<T> {
   data: T[];
   pagination: PaginationMetadata;
 }
+
+// Settings
+export interface FeaturedProject {
+  image: string;
+  title: string;
+  description: string;
+  badge: string;
+  gradient: string;
+}
+
+export interface SiteSettings {
+  contact_email: string;
+  instagram_url: string;
+  linkedin_url: string;
+  address: string;
+  featured_projects: FeaturedProject[];
+}

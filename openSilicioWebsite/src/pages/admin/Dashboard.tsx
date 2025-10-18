@@ -11,6 +11,7 @@ import {
 import ArticleIcon from '@mui/icons-material/Article';
 import SchoolIcon from '@mui/icons-material/School';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Dashboard() {
@@ -37,6 +38,13 @@ export default function Dashboard() {
       icon: <MenuBookIcon sx={{ fontSize: 48 }} />,
       path: '/admin/wiki',
       createPath: '/admin/wiki/new',
+    },
+    {
+      title: 'Configurações',
+      description: 'Gerenciar configurações do site',
+      icon: <SettingsIcon sx={{ fontSize: 48 }} />,
+      path: '/admin/configuracoes',
+      createPath: null,
     },
   ];
 
@@ -67,22 +75,36 @@ export default function Dashboard() {
                     </Typography>
                   </Box>
                   <Stack direction="row" spacing={1}>
-                    <Button
-                      component={RouterLink}
-                      to={section.path}
-                      variant="outlined"
-                      size="small"
-                    >
-                      Ver Todos
-                    </Button>
-                    <Button
-                      component={RouterLink}
-                      to={section.createPath}
-                      variant="contained"
-                      size="small"
-                    >
-                      Criar Novo
-                    </Button>
+                    {section.createPath ? (
+                      <>
+                        <Button
+                          component={RouterLink}
+                          to={section.path}
+                          variant="outlined"
+                          size="small"
+                        >
+                          Ver Todos
+                        </Button>
+                        <Button
+                          component={RouterLink}
+                          to={section.createPath}
+                          variant="contained"
+                          size="small"
+                        >
+                          Criar Novo
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        component={RouterLink}
+                        to={section.path}
+                        variant="contained"
+                        size="small"
+                        fullWidth
+                      >
+                        Acessar
+                      </Button>
+                    )}
                   </Stack>
                 </Stack>
               </CardContent>

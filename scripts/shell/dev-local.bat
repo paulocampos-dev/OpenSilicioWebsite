@@ -45,7 +45,7 @@ if %RESTART_MODE%==1 (
     )
     
     REM Stop database container
-    docker-compose -f docker-compose.dev.yml down >nul 2>&1
+    docker-compose -f ../../docker/docker-compose.dev.yml down >nul 2>&1
     
     timeout /t 2 /nobreak >nul
     echo %GREEN%Processes stopped%RESET%
@@ -54,8 +54,8 @@ if %RESTART_MODE%==1 (
 
 REM Start or restart database
 echo %BLUE%Starting PostgreSQL database...%RESET%
-docker-compose -f docker-compose.dev.yml down >nul 2>&1
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose -f ../../docker/docker-compose.dev.yml down >nul 2>&1
+docker-compose -f ../../docker/docker-compose.dev.yml up -d
 
 if errorlevel 1 (
     echo %RED%ERROR: Failed to start database%RESET%
@@ -68,7 +68,7 @@ echo %YELLOW%Waiting for database to be ready...%RESET%
 timeout /t 8 /nobreak >nul
 
 REM Check database health
-docker-compose -f docker-compose.dev.yml exec -T postgres pg_isready -U admin -d opensilicio >nul 2>&1
+docker-compose -f ../../docker/docker-compose.dev.yml exec -T postgres pg_isready -U admin -d opensilicio >nul 2>&1
 if errorlevel 1 (
     echo %YELLOW%WARNING: Database may not be ready yet. Continuing anyway...%RESET%
 ) else (
@@ -161,7 +161,7 @@ echo   - Password: Test123
 echo.
 echo %YELLOW%Commands:%RESET%
 echo   - Restart all:     dev-local.bat restart
-echo   - Stop database:   docker-compose -f docker-compose.dev.yml down
+echo   - Stop database:   docker-compose -f ../../docker/docker-compose.dev.yml down
 echo   - View logs:       type logs\backend.log
 echo   - Stop services:   Close the terminal windows or Ctrl+C
 echo.
