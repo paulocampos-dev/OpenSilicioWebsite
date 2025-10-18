@@ -397,10 +397,7 @@ export default function Landing() {
                   fontWeight: 800,
                   fontSize: { xs: '2rem', md: '2.5rem' },
                   lineHeight: 1.2,
-                  background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  color: 'text.primary',
                 }}
               >
                 Tornando a Microeletrônica Acessível
@@ -491,10 +488,7 @@ export default function Landing() {
                   maxWidth: 700,
                   fontSize: { xs: '2rem', md: '2.5rem' },
                   lineHeight: 1.2,
-                  background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  color: 'text.primary',
                 }}
               >
                 Recursos Completos para Sua Jornada
@@ -567,11 +561,13 @@ export default function Landing() {
                     sx={{
                       height: '100%',
                       textDecoration: 'none',
-                      background: 'rgba(255,255,255,0.9)',
+                      background: (theme) => theme.palette.background.paper,
                       backdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(255,255,255,0.2)',
+                      border: (theme) => `1px solid ${theme.palette.divider}`,
                       borderRadius: 4,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                      boxShadow: (theme) => theme.palette.mode === 'dark' 
+                        ? '0 8px 32px rgba(0,0,0,0.3)' 
+                        : '0 8px 32px rgba(0,0,0,0.08)',
                       transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                       position: 'relative',
                       overflow: 'hidden',
@@ -588,7 +584,9 @@ export default function Landing() {
                       },
                       '&:hover': {
                         transform: 'translateY(-12px) scale(1.02)',
-                        boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                        boxShadow: (theme) => theme.palette.mode === 'dark'
+                          ? '0 20px 60px rgba(0,0,0,0.4)'
+                          : '0 20px 60px rgba(0,0,0,0.15)',
                         '&::before': {
                           opacity: 1,
                         },
@@ -679,12 +677,14 @@ export default function Landing() {
                     alt="OpenSilício"
                     sx={{
                       height: 100,
-                      opacity: 0.6,
-                      filter: 'grayscale(100%)',
+                      opacity: (theme) => theme.palette.mode === 'dark' ? 0.8 : 0.6,
+                      filter: (theme) => theme.palette.mode === 'dark' 
+                        ? 'grayscale(50%) brightness(1.2)' 
+                        : 'grayscale(100%)',
                       transition: 'all 0.3s ease',
                       '&:hover': {
-                        opacity: 0.9,
-                        filter: 'grayscale(0%)',
+                        opacity: 1,
+                        filter: 'grayscale(0%) brightness(1)',
                         transform: 'scale(1.05)',
                       },
                     }}
@@ -722,10 +722,7 @@ export default function Landing() {
                 maxWidth: 700,
                 fontSize: { xs: '2rem', md: '2.5rem' },
                 lineHeight: 1.2,
-                background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: 'text.primary',
               }}
             >
               Aprenda com Nossos Projetos

@@ -36,10 +36,10 @@ export default function Footer() {
       }}
     >
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        <Grid container spacing={6}>
+        <Grid container spacing={4} alignItems="flex-start">
           {/* Logo and Description */}
           <Grid size={{ xs: 12, md: 3 }}>
-            <Stack spacing={2}>
+            <Stack spacing={2.5}>
               <Typography
                 variant="h5"
                 sx={{
@@ -189,12 +189,13 @@ export default function Footer() {
 
           {/* Contact Information */}
           <Grid size={{ xs: 12, md: 5 }}>
-            <Stack spacing={3}>
+            <Stack spacing={2.5}>
               <Typography
                 variant="subtitle1"
                 sx={{
                   fontWeight: 700,
                   fontSize: '1rem',
+                  mb: 1,
                 }}
               >
                 Contato
@@ -254,7 +255,7 @@ export default function Footer() {
               </Stack>
 
               {/* Location */}
-              <Stack spacing={1.5}>
+              <Stack spacing={1}>
                 <Stack direction="row" spacing={1.5} alignItems="flex-start">
                   <LocationOnIcon sx={{ fontSize: 20, color: 'rgba(255,255,255,0.7)', mt: 0.3 }} />
                   <Box>
@@ -279,10 +280,9 @@ export default function Footer() {
                 <Box
                   sx={{
                     width: '100%',
-                    height: 150,
+                    height: 100,
                     borderRadius: 2,
                     overflow: 'hidden',
-                    mt: 2,
                     border: '1px solid rgba(255,255,255,0.1)',
                   }}
                 >
