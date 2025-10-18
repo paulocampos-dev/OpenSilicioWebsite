@@ -463,19 +463,7 @@ export default function Landing() {
 
       {/* Features Section */}
       <Box
-        sx={{
-          py: { xs: 10, md: 16 },
-          position: 'relative',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'radial-gradient(circle at 30% 20%, rgba(102, 126, 234, 0.05) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(240, 147, 251, 0.05) 0%, transparent 50%)',
-          },
-        }}
+        sx={{ py: { xs: 10, md: 16 } }}
       >
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Stack spacing={8}>
@@ -652,13 +640,19 @@ export default function Landing() {
           </Stack>
         </Container>
       </Box>
+      <Box
+        sx={{
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          my: { xs: 6, md: 10 },
+          width: '100%',
+        }}
+      />
 
       {/* Partners / Social Proof */}
       <Box
         sx={{
           py: { xs: 8, md: 12 },
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderTop: '1px solid rgba(0,0,0,0.08)',
         }}
       >
         <Container maxWidth="lg">
@@ -676,14 +670,14 @@ export default function Landing() {
               Apoiadores e Parceiros
             </Typography>
             <Grid container spacing={6} alignItems="center" justifyContent="center">
-              {[ '/open-silicio-logo.jpg', '/open-silicio-logo.jpg', '/open-silicio-logo.jpg', '/open-silicio-logo.jpg' ].map((src, i) => (
+              {[ '/amigos-da-poli-logo-removebg-preview.png'  ].map((src, i) => (
                 <Grid key={i}>
                   <Box
                     component="img"
                     src={src}
                     alt="OpenSilício"
                     sx={{
-                      height: 40,
+                      height: 100,
                       opacity: 0.6,
                       filter: 'grayscale(100%)',
                       transition: 'all 0.3s ease',
