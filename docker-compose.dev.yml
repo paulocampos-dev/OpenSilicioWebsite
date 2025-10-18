@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Only (for development)
+  postgres:
+    image: postgres:16
+    container_name: opensilicio-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: opensilicio
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d opensilicio"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - opensilicio-dev-network
+
+# Named volumes for persistence
+volumes:
+  postgres_data_dev:
+    driver: local
+
+# Custom network for service communication
+networks:
+  opensilicio-dev-network:
+    driver: bridge
+

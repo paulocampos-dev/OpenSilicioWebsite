@@ -49,6 +49,40 @@ cd site_react
 
 ### 2. Execute o script de desenvolvimento
 
+#### Modo Local (Recomendado para Desenvolvimento)
+Roda apenas o banco de dados no Docker, backend e frontend localmente com hot-reload.
+
+**Pré-requisitos:** Node.js 18+ instalado
+
+**No Windows:**
+```bash
+dev-local.bat
+```
+
+**No Linux/Mac:**
+```bash
+chmod +x dev-local.sh
+./dev-local.sh
+```
+
+**Vantagens:**
+- ✅ Hot-reload automático (backend e frontend)
+- ✅ Desenvolvimento mais rápido
+- ✅ Logs em arquivos separados (`logs/backend.log`)
+- ✅ Reiniciar facilmente com `dev-local.bat restart`
+
+**Para parar:**
+```bash
+# Windows
+stop-dev.bat
+
+# Linux/Mac
+./stop-dev.sh
+```
+
+#### Modo Docker Completo (Ambiente Completo)
+Roda tudo em containers Docker (útil para testar deploy).
+
 **No Windows:**
 ```bash
 dev-start.bat
@@ -60,11 +94,17 @@ chmod +x dev-start.sh
 ./dev-start.sh
 ```
 
+**Vantagens:**
+- ✅ Ambiente isolado e idêntico à produção
+- ✅ Sem necessidade de Node.js instalado localmente
+
 ### 3. Acesse a aplicação
 
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:3001
 - **PostgreSQL**: localhost:5432
+
+> 📖 **Guia Completo**: Veja [DEV_SETUP.md](DEV_SETUP.md) para instruções detalhadas, troubleshooting e dicas de desenvolvimento.
 
 ## 👤 Credenciais de Acesso
 
@@ -105,7 +145,25 @@ site_react/
 
 ## 🔧 Comandos Úteis
 
-### Desenvolvimento
+### Desenvolvimento Local (Recomendado)
+```bash
+# Iniciar ambiente de desenvolvimento
+./dev-local.sh  # ou dev-local.bat no Windows
+
+# Reiniciar todos os serviços
+./dev-local.sh restart  # ou dev-local.bat restart no Windows
+
+# Parar todos os serviços
+./stop-dev.sh  # ou stop-dev.bat no Windows
+
+# Ver logs do backend
+tail -f logs/backend.log  # ou type logs\backend.log no Windows
+
+# Ver logs do frontend (Linux/Mac)
+tail -f logs/frontend.log
+```
+
+### Desenvolvimento Docker (Ambiente Completo)
 ```bash
 # Iniciar ambiente de desenvolvimento
 ./dev-start.sh  # ou dev-start.bat no Windows

@@ -19,6 +19,27 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  const timestamp = new Date().toISOString();
+  
+  // Log request
+  console.log(`[${timestamp}] ${req.method} ${req.path}`);
+  
+  // Log response when finished
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const statusColor = res.statusCode >= 400 ? '\x1b[31m' : '\x1b[32m';
+    const resetColor = '\x1b[0m';
+    console.log(
+      `[${timestamp}] ${req.method} ${req.path} ${statusColor}${res.statusCode}${resetColor} - ${duration}ms`
+    );
+  });
+  
+  next();
+});
+
 // Security headers with Helmet
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow images from /uploads
@@ -79,8 +100,15 @@ app.use(errorHandler); // Centralized error handler
 
 // Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log('\n========================================');
+  console.log('🚀 OpenSilício Backend Server');
+  console.log('========================================');
   console.log(`📡 API disponível em http://localhost:${PORT}`);
+  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
+  console.log(`🔒 CORS Origins: ${allowedOrigins.join(', ')}`);
+  console.log('========================================\n');
+  console.log('⏳ Aguardando requisições...\n');
 });
 
 export default app;

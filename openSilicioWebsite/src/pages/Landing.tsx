@@ -1,184 +1,1025 @@
-import { Box, Button, Grid, Paper, Stack, Typography, Divider } from '@mui/material'
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
-import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined'
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined'
+import { Box, Button, Container, Grid, Paper, Stack, Typography, Card, CardContent, Avatar } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
+import SchoolIcon from '@mui/icons-material/School'
+import ArticleIcon from '@mui/icons-material/Article'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
+import CodeIcon from '@mui/icons-material/Code'
+import GroupsIcon from '@mui/icons-material/Groups'
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 
 export default function Landing() {
   return (
-    <Stack spacing={8}>
-      {/* Hero Parallax */}
+    <Stack spacing={0}>
+      {/* Hero Section */}
       <Box
         sx={{
           position: 'relative',
-          minHeight: { xs: 420, sm: 520, md: 640 },
-          borderRadius: { xs: 2, sm: 3 },
-          overflow: 'hidden',
-          backgroundImage:
-            'linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)), url("https://images.unsplash.com/photo-1585060544812-6b45742d7621?q=80&w=1974&auto=format&fit=crop")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed', // Parallax simples (desktop)
+          minHeight: { xs: '85vh', md: '90vh' },
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          p: { xs: 2, sm: 4, md: 6 },
+          overflow: 'visible',
+          width: '100vw',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100%',
+            backgroundImage: 'url(/chip_closeup_stock.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.15,
+            zIndex: 1,
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100%',
+            background: 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%)',
+            zIndex: 2,
+          },
         }}
       >
-        <Stack spacing={2} alignItems="center" textAlign="center" sx={{ color: 'common.white' }}>
-          <Typography variant="overline" sx={{ letterSpacing: 2 }}>Bem-vindo ao</Typography>
-          <Typography sx={{ typography: { xs: 'h3', sm: 'h2', md: 'h1' } }} fontWeight={900}>
-            OpenSilício
-          </Typography>
-          <Typography sx={{ maxWidth: 860, opacity: 0.95 }}>
-            Democratizando a inovação em microeletrônica com educação, pesquisa e projetos abertos.
-          </Typography>
-          <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-            <Button component={RouterLink} to="/educacao" variant="contained" size="large">Começar a aprender</Button>
-            <Button component={RouterLink} to="/wiki" variant="outlined" color="inherit" size="large">Explorar Wiki</Button>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 3 }}>
+          <Stack spacing={6} alignItems="center" textAlign="center" sx={{ py: { xs: 4, md: 8 } }}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: 4,
+                px: 3,
+                py: 1,
+                border: '1px solid rgba(255,255,255,0.2)',
+              }}
+            >
+              <Typography
+                variant="overline"
+                sx={{
+                  color: 'white',
+                  letterSpacing: 2,
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Grupo de Pesquisa e Extensão - Poli USP
+              </Typography>
+            </Box>
+
+            <Typography
+              sx={{
+                typography: { xs: 'h3', sm: 'h2', md: 'h1' },
+                color: 'common.white',
+                fontWeight: 800,
+                maxWidth: 1000,
+                lineHeight: 1.1,
+                textShadow: '0 4px 24px rgba(0,0,0,0.3)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 50%, #e8ecff 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Democratizando o Design de Chips
+            </Typography>
+
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'rgba(255,255,255,0.9)',
+                maxWidth: 700,
+                fontWeight: 400,
+                lineHeight: 1.7,
+                fontSize: { xs: '1.1rem', md: '1.25rem' },
+              }}
+            >
+              Formamos a próxima geração de projetistas de circuitos integrados através de educação aberta, projetos práticos e colaboração.
+            </Typography>
+
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ mt: 4 }}>
+              <Button
+                component={RouterLink}
+                to="/educacao"
+                variant="contained"
+                size="large"
+                startIcon={<RocketLaunchIcon />}
+                sx={{
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.125rem',
+                  fontWeight: 600,
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
+                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                  },
+                }}
+                aria-label="Ir para Educação"
+              >
+                Começar a Aprender
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/wiki"
+                variant="outlined"
+                size="large"
+                startIcon={<MenuBookIcon />}
+                sx={{
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.125rem',
+                  fontWeight: 600,
+                  borderRadius: 3,
+                  color: 'white',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  backdropFilter: 'blur(10px)',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 32px rgba(255,255,255,0.1)',
+                  },
+                }}
+                aria-label="Explorar Wiki"
+              >
+                Explorar Wiki
+              </Button>
+            </Stack>
           </Stack>
-        </Stack>
+        </Container>
       </Box>
 
-      {/* Sobre nós */}
-      <Stack id="sobre" spacing={3} alignItems="center" textAlign="center" sx={{ px: { xs: 2, md: 4 } }}>
-        <Typography sx={{ typography: { xs: 'h5', sm: 'h4' } }} fontWeight={800}>Sobre nós</Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 900 }}>
-          Somos o Open‑Silício, um grupo de pesquisa e extensão da Escola Politécnica da USP. Nossa missão é tornar o
-          desenvolvimento de microeletrônica mais acessível e colaborativo. Unimos ensino, projetos e comunidade para
-          formar a próxima geração de projetistas de chips.
-        </Typography>
-        <Button component={RouterLink} to="/blog" variant="contained" sx={{ mt: 1 }}>Saiba mais</Button>
-      </Stack>
-      <Divider />
+      {/* --- Spacer before Quick Start Section --- */}
+      <Box sx={{ py: { xs: 5, md: 8 } }} />
 
-      {/* O que fazemos */}
-      <Stack id="oque-fazemos" spacing={4}>
-        <Stack spacing={1.5}>
-          <Typography sx={{ typography: { xs: 'h5', sm: 'h4' } }} fontWeight={800}>
-            O que fazemos
-          </Typography>
-          <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
-            Oferecemos trilhas práticas, guias de ferramentas e conteúdo técnico para apoiar sua jornada em eletrônica
-            e projeto de circuitos integrados.
-          </Typography>
-        </Stack>
-        <Button component={RouterLink} to="/blog" variant="contained" size="large" sx={{ width: 'fit-content' }}>
-          Saiba mais
-        </Button>
-        <Grid container spacing={3}>
-          {[
-            {
-              icon: <DescriptionOutlinedIcon />,
-              title: 'Blog abrangente',
-              desc:
-                'Fique por dentro das últimas tendências, tutoriais e insights na área de microeletrônica por meio do nosso blog, atualizado regularmente.',
-            },
-            {
-              icon: <SchoolOutlinedIcon />,
-              title: 'Programas educacionais',
-              desc:
-                'Acesse cursos e workshops estruturados, pensados para fornecer o conhecimento e as habilidades necessárias para uma carreira bem-sucedida em projeto de chips.',
-            },
-            {
-              icon: <GroupOutlinedIcon />,
-              title: 'Engajamento da comunidade',
-              desc:
-                'Conecte-se com estudantes, profissionais da indústria e mentores por meio de nossos fóruns e eventos ativos da comunidade.',
-            },
-          ].map((item) => (
-            <Grid key={item.title} size={{ xs: 12, md: 4 }}>
-              <Paper
-                variant="outlined"
-                sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}
-              >
-                <Box color="text.primary">{item.icon}</Box>
-                <Box>
-                  <Typography variant="h6" fontWeight={700} gutterBottom>
-                    {item.title}
-                  </Typography>
-                  <Typography color="text.secondary">{item.desc}</Typography>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      </Stack>
-
-      {/* Projetos – Acesso rápido */}
-      <Stack id="projetos" spacing={4}>
-        <Stack spacing={1.5}>
-          <Typography sx={{ typography: { xs: 'h5', sm: 'h4' } }} fontWeight={800}>
-            Aprenda com os nossos projetos!
-          </Typography>
-          <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
-            Uma seleção rápida de projetos e tópicos para você explorar agora mesmo.
-          </Typography>
-        </Stack>
-        <Button component={RouterLink} to="/blog" variant="contained" size="large" sx={{ width: 'fit-content' }}>
-          Ver todos os posts do Blog
-        </Button>
-        <Grid container spacing={3}>
-          {[
-            {
-              img:
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuA0ccYKOKWWVddDm8lJtQfdmNMQ-Rj8O6gT6aYwiO8gOrR6SU6a7EotupllTBJvQLz_fryPrGZXK2-iBAa8n5pyMA-eLjYF5IPvzc67ViWVL3Xqarl1J7pxodaNOr2v38RIEJIsmV32OOpF0bVzTNVHPcVKI-VExHcRFeo2-OJPYc4T30RySU2CrswBOcmiM6fp3RrQ92KlMtGxxztpDx9h72PtU-hBfrnJRkqKtmeFbZ6MI6BrIecvARDWZ8SOgcnF9UhmHpjBOw',
-              title: 'Projeto de Circuitos Analógicos',
-              desc:
-                'Explore os princípios e técnicas por trás do projeto de circuitos analógicos, essenciais para diversas aplicações como gerenciamento de energia e processamento de sinal.',
-            },
-            {
-              img:
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuAKD_WQSghn1r09Icn8HLKmd3Li1LuAf3oUX2Og-1b7m-8oaTCX3HdKgKrTLWzmAPp_PgyOZrN-zx08GqqwAyOJVj1B1vpgNH9ed6aAVsGg2uBPr0AcSyGo46pMx1I9Oh99j7g8laHiNsfL03yv9shUHJeqNEwwQa4HxhAD91cxuGEM1bfeljvA6NqZwbtoSqbd-AHJVLSJvTSPWplu6suuMp-YfPDbgOyGa-usWbnPpsBr2QGXAQHB74jlVvdro31iQwaec5clFg',
-              title: 'Projeto de Circuitos Digitais',
-              desc:
-                'Mergulhe no mundo dos circuitos digitais, aprendendo sobre portas lógicas, microprocessadores e outros blocos fundamentais da eletrônica moderna.',
-            },
-            {
-              img:
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuCIGyUW4RArbuBITk213Se0tYZ1wZ9YvCtTOBH6RqH3PEpQlnLDw32fHQzhJqtT6MMtpDtd3Pre9BaD7LqyFchd-HWm0TidxCwmeYi6Lew93OPtLjQWzZQsBhdRHrwgkmgN3VeaUkSfM9l9MF-5WrnuidWnaa7aFCs0CN1-unZEWgUm1Ti0jYnf7mM2h7mB5dIVJ7edzdsw9tv9I1tzBxAKvOGTatkLRz_x-XXzvtvS3jv-eedhHhSqOqRW-Ns0oBvoS-wzVos-Sw',
-              title: 'Física de Semicondutores',
-              desc:
-                'Aprofunde-se nos fundamentos físicos dos semicondutores, os materiais que alimentam nossos dispositivos eletrônicos.',
-            },
-          ].map((item) => (
-            <Grid key={item.title} size={{ xs: 12, md: 4 }}>
-              <Stack spacing={1.5}>
-                <Box
+      {/* Quick Start Section */}
+      <Box
+        sx={{
+          mt: { xs: 0, md: 0 }, // Remove negative margin for more natural flow
+          mb: { xs: 0, md: 0 }, // Remove tight bottom margin
+          py: { xs: 6, md: 10 },
+          background: (theme) => theme.palette.background.default,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Stack spacing={4} alignItems="center" textAlign="center" sx={{ mb: 5 }}>
+            <Typography
+              variant="overline"
+              sx={{
+                color: 'primary.main',
+                fontWeight: 700,
+                letterSpacing: 2,
+                fontSize: '0.9rem',
+                textTransform: 'uppercase',
+              }}
+            >
+              Acesso Rápido
+            </Typography>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 800,
+                maxWidth: 650,
+                fontSize: { xs: '1.6rem', md: '2.1rem' },
+                lineHeight: 1.2,
+              }}
+            >
+              Comece sua jornada em microeletrônica em poucos cliques
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: 'text.secondary',
+                maxWidth: 540,
+                fontSize: '1.08rem',
+                lineHeight: 1.65,
+                fontWeight: 400,
+              }}
+            >
+              Veja como você pode iniciar seu aprendizado, pesquisar informações ou se atualizar rapidamente:
+            </Typography>
+          </Stack>
+          <Grid container spacing={5} justifyContent="center">
+            {[
+              {
+                icon: <SchoolIcon sx={{ fontSize: 32 }} />,
+                title: 'Trilha de Aprendizado',
+                description: 'Siga um caminho guiado e comece pela base certa.',
+                link: '/educacao',
+                aria: 'Abrir trilhas de educação',
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              },
+              {
+                icon: <MenuBookIcon sx={{ fontSize: 32 }} />,
+                title: 'Explorar Wiki',
+                description: 'Busque termos e conceitos essenciais rapidamente.',
+                link: '/wiki',
+                aria: 'Explorar a Wiki técnica',
+                gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              },
+              {
+                icon: <ArticleIcon sx={{ fontSize: 32 }} />,
+                title: 'Ler o Blog',
+                description: 'Tutoriais e novidades do ecossistema de microeletrônica.',
+                link: '/blog',
+                aria: 'Ir para o blog',
+                gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+              },
+            ].map((action, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Card
+                  component={RouterLink}
+                  to={action.link}
+                  aria-label={action.aria}
                   sx={{
-                    width: '100%',
-                    aspectRatio: '16 / 9',
-                    borderRadius: 2,
-                    backgroundImage: `url(${item.img})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
+                    width: 260,
+                    height: '100%',
+                    textDecoration: 'none',
+                    background: (theme) => theme.palette.background.paper,
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
+                    backdropFilter: 'blur(18px)',
+                    borderRadius: 4,
+                    boxShadow: (theme) => theme.palette.mode === 'dark'
+                      ? '0 8px 32px rgba(0,0,0,0.3)'
+                      : '0 8px 32px rgba(0,0,0,0.10)',
+                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '4px',
+                      background: action.gradient,
+                      opacity: 0.86,
+                      transition: 'opacity 0.3s',
+                    },
+                    '&:hover': {
+                      transform: 'translateY(-10px) scale(1.03)',
+                      boxShadow: (theme) => theme.palette.mode === 'dark'
+                        ? '0 20px 60px rgba(0,0,0,0.4)'
+                        : '0 20px 60px rgba(0,0,0,0.18)',
+                      '&::before': {
+                        opacity: 1,
+                      },
+                    },
                   }}
-                />
-                <Box>
-                  <Typography fontWeight={600}>{item.title}</Typography>
-                  <Typography color="text.secondary">{item.desc}</Typography>
-                </Box>
-              </Stack>
-            </Grid>
-          ))}
-        </Grid>
-      </Stack>
+                >
+                  <CardContent sx={{ p: 5 }}>
+                    <Stack spacing={3} alignItems="flex-start">
+                      <Avatar
+                        sx={{
+                          width: 70,
+                          height: 70,
+                          background: action.gradient,
+                          color: 'common.white',
+                          boxShadow: '0 10px 28px rgba(0,0,0,0.18)',
+                        }}
+                      >
+                        {action.icon}
+                      </Avatar>
+                      <Box>
+                        <Typography
+                          variant="h6"
+                          fontWeight={700}
+                          sx={{
+                            color: 'text.primary',
+                            mb: 1.1,
+                            fontSize: '1.23rem'
+                          }}
+                        >
+                          {action.title}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                            lineHeight: 1.7,
+                            fontSize: '0.95rem'
+                          }}
+                        >
+                          {action.description}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
 
-      {/* Final CTA */}
-      <Stack spacing={2} textAlign="center" alignItems="center">
-        <Typography sx={{ typography: { xs: 'h5', sm: 'h4' } }} fontWeight={800}>
-          Pronto para começar?
-        </Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
-          Junte-se ao OpenSilício hoje e faça parte de uma comunidade vibrante de aspirantes a projetistas de chips.
-          Acesse recursos exclusivos, participe de projetos empolgantes e ajude a moldar o futuro da microeletrônica.
-        </Typography>
-        <Button component={RouterLink} to="/educacao" variant="contained" size="large">
-          Junte-se à nossa comunidade
-        </Button>
-      </Stack>
+      {/* --- Spacer after Quick Start Section --- */}
+      <Box sx={{ py: { xs: 5, md: 8 } }} />
+
+      {/* About Section */}
+      <Container maxWidth="lg" sx={{ py: { xs: 10, md: 16 } }}>
+        <Grid container spacing={8} alignItems="center">
+          <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                width: '100%',
+                height: { xs: 320, md: 480 },
+                borderRadius: 4,
+                overflow: 'hidden',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                  zIndex: 1,
+                },
+                '& img': {
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  transition: 'transform 0.6s ease',
+                },
+                '&:hover img': {
+                  transform: 'scale(1.05)',
+                },
+              }}
+            >
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Stack spacing={4}>
+              <Box>
+                <Typography
+                  variant="overline"
+                  sx={{
+                    color: 'primary.main',
+                    fontWeight: 700,
+                    letterSpacing: 2,
+                    fontSize: '0.875rem',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  Sobre o OpenSilício
+                </Typography>
+              </Box>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: '2rem', md: '2.5rem' },
+                  lineHeight: 1.2,
+                  background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                Tornando a Microeletrônica Acessível
+              </Typography>
+              <Stack spacing={3}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: 'text.secondary',
+                    lineHeight: 1.8,
+                    fontSize: '1.1rem',
+                    fontWeight: 400,
+                  }}
+                >
+                  Somos o OpenSilício, um grupo de pesquisa e extensão da Escola Politécnica da USP.
+                  Nossa missão é democratizar o desenvolvimento de microeletrônica através de educação
+                  aberta e colaboração.
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: 'text.secondary',
+                    lineHeight: 1.8,
+                    fontSize: '1.1rem',
+                    fontWeight: 400,
+                  }}
+                >
+                  Unimos ensino, pesquisa e projetos práticos para formar profissionais capacitados
+                  em design de circuitos integrados, preparando-os para os desafios da indústria moderna.
+                </Typography>
+              </Stack>
+              <Box sx={{ pt: 2 }}>
+                <Button
+                  component={RouterLink}
+                  to="/blog"
+                  variant="contained"
+                  size="large"
+                  sx={{
+                    px: 6,
+                    py: 2,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
+                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    },
+                  }}
+                >
+                  Conheça Nossa História
+                </Button>
+              </Box>
+            </Stack>
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* Features Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
+          py: { xs: 10, md: 16 },
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(circle at 30% 20%, rgba(102, 126, 234, 0.05) 0%, transparent 50%), radial-gradient(circle at 70% 80%, rgba(240, 147, 251, 0.05) 0%, transparent 50%)',
+          },
+        }}
+      >
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Stack spacing={8}>
+            <Stack spacing={3} alignItems="center" textAlign="center">
+              <Typography
+                variant="overline"
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  letterSpacing: 2,
+                  fontSize: '0.875rem',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                O que oferecemos
+              </Typography>
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 800,
+                  maxWidth: 700,
+                  fontSize: { xs: '2rem', md: '2.5rem' },
+                  lineHeight: 1.2,
+                  background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                Recursos Completos para Sua Jornada
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: 'text.secondary',
+                  maxWidth: 600,
+                  fontSize: '1.1rem',
+                  lineHeight: 1.6,
+                  fontWeight: 400,
+                }}
+              >
+                Do básico ao avançado, oferecemos todo o suporte necessário para você se tornar
+                um expert em design de chips.
+              </Typography>
+            </Stack>
+
+            <Grid container spacing={4}>
+              {[
+                {
+                  icon: <SchoolIcon sx={{ fontSize: 42 }} />,
+                  title: 'Educação Estruturada',
+                  description: 'Cursos, workshops e trilhas de aprendizado organizadas para todos os níveis, do iniciante ao avançado.',
+                  gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  link: '/educacao',
+                },
+                {
+                  icon: <ArticleIcon sx={{ fontSize: 42 }} />,
+                  title: 'Blog Técnico',
+                  description: 'Tutoriais, análises e insights sobre as últimas tendências em microeletrônica e design de chips.',
+                  gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                  link: '/blog',
+                },
+                {
+                  icon: <MenuBookIcon sx={{ fontSize: 42 }} />,
+                  title: 'Wiki Técnica',
+                  description: 'Dicionário completo com termos, conceitos e definições essenciais da área de microeletrônica.',
+                  gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                  link: '/wiki',
+                },
+                {
+                  icon: <CodeIcon sx={{ fontSize: 42 }} />,
+                  title: 'Projetos Open Source',
+                  description: 'Acesso a projetos reais de circuitos integrados desenvolvidos de forma colaborativa e aberta.',
+                  gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                  link: '/blog',
+                },
+                {
+                  icon: <GroupsIcon sx={{ fontSize: 42 }} />,
+                  title: 'Comunidade Ativa',
+                  description: 'Conecte-se com estudantes, pesquisadores e profissionais da indústria através de nossa rede.',
+                  gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                  link: '/blog',
+                },
+                {
+                  icon: <RocketLaunchIcon sx={{ fontSize: 42 }} />,
+                  title: 'Eventos e Workshops',
+                  description: 'Participe de eventos, palestras e workshops com especialistas da academia e indústria.',
+                  gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                  link: '/educacao',
+                },
+              ].map((feature, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card
+                    component={RouterLink}
+                    to={feature.link}
+                    aria-label={`Abrir: ${feature.title}`}
+                    sx={{
+                      height: '100%',
+                      textDecoration: 'none',
+                      background: 'rgba(255,255,255,0.9)',
+                      backdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: 4,
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '4px',
+                        background: feature.gradient,
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                      },
+                      '&:hover': {
+                        transform: 'translateY(-12px) scale(1.02)',
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+                        '&::before': {
+                          opacity: 1,
+                        },
+                      },
+                    }}
+                  >
+                    <CardContent sx={{ p: 5 }}>
+                      <Stack spacing={3}>
+                        <Avatar
+                          sx={{
+                            width: 80,
+                            height: 80,
+                            background: feature.gradient,
+                            color: 'common.white',
+                            boxShadow: '0 12px 32px rgba(0,0,0,0.2)',
+                          }}
+                        >
+                          {feature.icon}
+                        </Avatar>
+                        <Box>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: '1.25rem',
+                              mb: 2,
+                              color: 'text.primary',
+                            }}
+                          >
+                            {feature.title}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'text.secondary',
+                              lineHeight: 1.7,
+                              fontSize: '0.95rem',
+                              fontWeight: 400,
+                            }}
+                          >
+                            {feature.description}
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Stack>
+        </Container>
+      </Box>
+
+      {/* Partners / Social Proof */}
+      <Box
+        sx={{
+          py: { xs: 8, md: 12 },
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderTop: '1px solid rgba(0,0,0,0.08)',
+        }}
+      >
+        <Container maxWidth="lg">
+          <Stack spacing={4} alignItems="center" textAlign="center">
+            <Typography
+              variant="overline"
+              sx={{
+                color: 'text.secondary',
+                letterSpacing: 2,
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                textTransform: 'uppercase',
+              }}
+            >
+              Apoiadores e Parceiros
+            </Typography>
+            <Grid container spacing={6} alignItems="center" justifyContent="center">
+              {[ '/open-silicio-logo.jpg', '/open-silicio-logo.jpg', '/open-silicio-logo.jpg', '/open-silicio-logo.jpg' ].map((src, i) => (
+                <Grid item key={i}>
+                  <Box
+                    component="img"
+                    src={src}
+                    alt="OpenSilício"
+                    sx={{
+                      height: 40,
+                      opacity: 0.6,
+                      filter: 'grayscale(100%)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        opacity: 0.9,
+                        filter: 'grayscale(0%)',
+                        transform: 'scale(1.05)',
+                      },
+                    }}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Stack>
+        </Container>
+      </Box>
+
+      {/* Topics Section */}
+      <Container maxWidth="lg" sx={{ py: { xs: 10, md: 16 } }}>
+        <Stack spacing={8}>
+          <Stack spacing={3} alignItems="center" textAlign="center">
+            <Typography
+              variant="overline"
+              sx={{
+                color: 'primary.main',
+                fontWeight: 700,
+                letterSpacing: 2,
+                fontSize: '0.875rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Áreas de Estudo
+            </Typography>
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 800,
+                maxWidth: 700,
+                fontSize: { xs: '2rem', md: '2.5rem' },
+                lineHeight: 1.2,
+                background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Aprenda com Nossos Projetos
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: 'text.secondary',
+                maxWidth: 600,
+                fontSize: '1.1rem',
+                lineHeight: 1.6,
+                fontWeight: 400,
+              }}
+            >
+              Explore os principais tópicos e áreas de conhecimento em microeletrônica.
+            </Typography>
+          </Stack>
+
+          <Grid container spacing={3} justifyContent="center">
+            {[
+              {
+                image: '/chip_closeup_stock.jpg',
+                title: 'Física de Semicondutores',
+                description: 'Entenda os fundamentos físicos dos materiais semicondutores e como eles funcionam em dispositivos eletrônicos.',
+                badge: 'Fundamentais',
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              },
+              {
+                image: '/closeup_electronic_stock.jpg',
+                title: 'Circuitos Analógicos',
+                description: 'Domine técnicas de design de circuitos analógicos para processamento de sinais e gerenciamento de energia.',
+                badge: 'Intermediário',
+                gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+              },
+              {
+                image: '/boardPCB_stocl.jpg',
+                title: 'Circuitos Digitais',
+                description: 'Aprenda sobre lógica digital, microprocessadores e arquiteturas computacionais modernas.',
+                badge: 'Avançado',
+                gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+              },
+            ].map((topic, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Card
+                    sx={{
+                      width: 260,
+                      minHeight: 220,
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                      boxShadow: (theme) => theme.palette.mode === 'dark'
+                        ? '0 2px 12px rgba(0,0,0,0.3)'
+                        : '0 2px 12px rgba(0,0,0,0.07)',
+                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      background: (theme) => theme.palette.background.paper,
+                      '&:hover': {
+                        transform: 'translateY(-4px) scale(1.025)',
+                        boxShadow: (theme) => theme.palette.mode === 'dark'
+                          ? '0 8px 24px rgba(0,0,0,0.4)'
+                          : '0 8px 24px rgba(0,0,0,0.12)',
+                      },
+                    }}
+                >
+                  <Box
+                    sx={{
+                      position: 'relative',
+                      width: '100%',
+                      height: 90,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundImage: `url(${topic.image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        transition: 'transform 0.6s ease',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 100%)',
+                        },
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        background: topic.gradient,
+                        color: 'white',
+                        px: 2.2,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        boxShadow: (theme) => theme.palette.mode === 'dark'
+                          ? '0 2px 8px rgba(0,0,0,0.3)'
+                          : '0 2px 8px rgba(0,0,0,0.09)',
+                        backdropFilter: 'blur(8px)',
+                      }}
+                    >
+                      {topic.badge}
+                    </Box>
+                  </Box>
+                  <CardContent sx={{ pt: 2.2, pb: 2.2, px: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '1.08rem',
+                        color: 'text.primary',
+                        mb: 0.5,
+                        lineHeight: 1.22,
+                      }}
+                    >
+                      {topic.title}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        lineHeight: 1.44,
+                        fontSize: '0.93rem',
+                        fontWeight: 400,
+                        minHeight: 43,
+                      }}
+                    >
+                      {topic.description}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Box sx={{ textAlign: 'center', pt: 2 }}>
+            <Button
+              component={RouterLink}
+              to="/blog"
+              variant="outlined"
+              size="large"
+              sx={{
+                px: 6,
+                py: 2,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                borderRadius: 3,
+                color: 'text.primary',
+                borderColor: 'rgba(0,0,0,0.2)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 24px rgba(102, 126, 234, 0.2)',
+                },
+              }}
+            >
+              Ver Todos os Tópicos
+            </Button>
+          </Box>
+        </Stack>
+      </Container>
+
+      {/* CTA Section */}
+      <Box
+        sx={{
+          position: 'relative',
+          py: { xs: 12, md: 18 },
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: 'url(/closeup_electronic_stock.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.1,
+            zIndex: 1,
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(circle at 30% 70%, rgba(102, 126, 234, 0.2) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(240, 147, 251, 0.15) 0%, transparent 50%)',
+            zIndex: 2,
+          },
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 3 }}>
+          <Stack spacing={6} alignItems="center" textAlign="center">
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 800,
+                color: 'common.white',
+                fontSize: { xs: '2rem', md: '2.5rem' },
+                lineHeight: 1.2,
+                textShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 50%, #e8ecff 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Pronto para Começar sua Jornada?
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'rgba(255,255,255,0.9)',
+                fontWeight: 400,
+                maxWidth: 650,
+                lineHeight: 1.8,
+                fontSize: { xs: '1.1rem', md: '1.25rem' },
+              }}
+            >
+              Junte-se ao OpenSilício e faça parte de uma comunidade vibrante de estudantes e
+              profissionais apaixonados por microeletrônica. Acesse recursos exclusivos,
+              participe de projetos e molde o futuro da tecnologia.
+            </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3}>
+              <Button
+                component={RouterLink}
+                to="/educacao"
+                variant="contained"
+                size="large"
+                sx={{
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.125rem',
+                  fontWeight: 600,
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
+                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                  },
+                }}
+              >
+                Começar Agora
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/blog"
+                variant="outlined"
+                size="large"
+                sx={{
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.125rem',
+                  fontWeight: 600,
+                  borderRadius: 3,
+                  color: 'white',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  backdropFilter: 'blur(10px)',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    borderColor: 'white',
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 32px rgba(255,255,255,0.1)',
+                  },
+                }}
+              >
+                Saiba Mais
+              </Button>
+            </Stack>
+          </Stack>
+        </Container>
+      </Box>
     </Stack>
   )
 }
-
-
