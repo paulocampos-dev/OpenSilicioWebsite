@@ -741,7 +741,7 @@ export default function Landing() {
             </Typography>
           </Stack>
 
-          <Grid container spacing={3} justifyContent="center">
+          <Grid container spacing={4} justifyContent="center">
             {[
               {
                 image: '/chip_closeup_stock.jpg',
@@ -768,8 +768,8 @@ export default function Landing() {
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Card
                     sx={{
-                      width: 260,
-                      minHeight: 220,
+                      width: 330,
+                      minHeight: 280,
                       borderRadius: 3,
                       overflow: 'hidden',
                       boxShadow: (theme) => theme.palette.mode === 'dark'
@@ -792,7 +792,7 @@ export default function Landing() {
                     sx={{
                       position: 'relative',
                       width: '100%',
-                      height: 90,
+                      height: 140,
                       overflow: 'hidden',
                     }}
                   >
@@ -821,14 +821,14 @@ export default function Landing() {
                     <Box
                       sx={{
                         position: 'absolute',
-                        top: 12,
-                        right: 12,
+                        top: 16,
+                        right: 16,
                         background: topic.gradient,
                         color: 'white',
-                        px: 2.2,
-                        py: 0.5,
+                        px: 2.6,
+                        py: 0.75,
                         borderRadius: 1,
-                        fontSize: '0.72rem',
+                        fontSize: '0.8rem',
                         fontWeight: 700,
                         boxShadow: (theme) => theme.palette.mode === 'dark'
                           ? '0 2px 8px rgba(0,0,0,0.3)'
@@ -839,14 +839,14 @@ export default function Landing() {
                       {topic.badge}
                     </Box>
                   </Box>
-                  <CardContent sx={{ pt: 2.2, pb: 2.2, px: 2 }}>
+                  <CardContent sx={{ pt: 2.8, pb: 2.8, px: 2.5 }}>
                     <Typography
                       variant="subtitle1"
                       sx={{
                         fontWeight: 700,
-                        fontSize: '1.08rem',
+                        fontSize: '1.22rem',
                         color: 'text.primary',
-                        mb: 0.5,
+                        mb: 1,
                         lineHeight: 1.22,
                       }}
                     >
@@ -856,10 +856,10 @@ export default function Landing() {
                       variant="body2"
                       sx={{
                         color: 'text.secondary',
-                        lineHeight: 1.44,
-                        fontSize: '0.93rem',
+                        lineHeight: 1.6,
+                        fontSize: '1.05rem',
                         fontWeight: 400,
-                        minHeight: 43,
+                        minHeight: 55,
                       }}
                     >
                       {topic.description}
