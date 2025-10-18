@@ -20,6 +20,24 @@ export default function Wiki() {
   const loadEntry = async () => {
     try {
       const data = await wikiApi.getBySlug(slug!);
+
+      // Development logging
+      if (import.meta.env.DEV) {
+        console.log('📖 Wiki entry loaded:', {
+          term: data.term,
+          slug: data.slug,
+          hasDefinition: !!data.definition?.trim(),
+          definitionLength: data.definition?.length || 0,
+          hasContent: !!data.content?.trim(),
+          contentLength: data.content?.length || 0,
+          contentType: data.content_type,
+        });
+
+        if (!data.definition || !data.definition.trim()) {
+          console.warn('⚠️ Wiki entry has empty definition field');
+        }
+      }
+
       setEntry(data);
     } catch (error) {
       console.error('Erro ao carregar entrada:', error);

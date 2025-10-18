@@ -8,6 +8,7 @@ import { BadRequestError, NotFoundError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
 
 export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response) => {
+  console.log('✅ [WikiController.getAllEntries] CALLED - This is the WIKI controller');
   const { published, page = '1', limit = '20' } = req.query;
 
   const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
@@ -16,6 +17,8 @@ export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response
   const publishedFilter = published === 'true' ? true : published === 'false' ? false : undefined;
 
   const result = await wikiService.getAllEntries(publishedFilter, { page: pageNum, limit: limitNum });
+  console.log('✅ [WikiController.getAllEntries] Returning', result.data.length, 'wiki entries');
+  console.log('✅ [WikiController.getAllEntries] Sample fields:', result.data[0] ? Object.keys(result.data[0]).slice(0, 5) : 'no data');
 
   res.json(result);
 });

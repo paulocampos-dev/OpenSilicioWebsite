@@ -6,6 +6,7 @@ import { BadRequestError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
 
 export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) => {
+  console.log('📝 [BlogController.getAllPosts] CALLED - This is the BLOG controller');
   const { published, page = '1', limit = '10' } = req.query;
 
   // Parse and validate pagination parameters
@@ -15,6 +16,7 @@ export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) 
   const publishedFilter = published === 'true' ? true : published === 'false' ? false : undefined;
 
   const result = await blogService.getAllPosts(publishedFilter, { page: pageNum, limit: limitNum });
+  console.log('📝 [BlogController.getAllPosts] Returning', result.data.length, 'blog posts');
 
   res.json(result);
 });

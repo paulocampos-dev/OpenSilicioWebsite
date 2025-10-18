@@ -28,6 +28,19 @@ export default function WikiList() {
     try {
       // Load all published entries with high limit for client-side filtering
       const response = await wikiApi.getAll(true, 1, 100);
+
+      // Development logging
+      if (import.meta.env.DEV) {
+        console.log('📚 Wiki entries loaded:', response.data.length);
+        console.log('📚 Sample entry:', response.data[0]);
+
+        // Check for empty definitions
+        const emptyDefs = response.data.filter((e: WikiEntry) => !e.definition || !e.definition.trim());
+        if (emptyDefs.length > 0) {
+          console.warn(`⚠️ Found ${emptyDefs.length} wiki entries with empty definitions:`, emptyDefs.map((e: WikiEntry) => e.term));
+        }
+      }
+
       setEntries(response.data);
     } catch (error) {
       console.error('Erro ao carregar entradas da wiki:', error);

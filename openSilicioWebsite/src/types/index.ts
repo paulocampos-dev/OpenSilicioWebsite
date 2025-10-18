@@ -70,18 +70,13 @@ export interface PaginatedResponse<T> {
 }
 
 // Settings
-export interface FeaturedProject {
-  image: string;
-  title: string;
-  description: string;
-  badge: string;
-  gradient: string;
-}
-
 export interface SiteSettings {
   contact_email: string;
   instagram_url: string;
   linkedin_url: string;
   address: string;
-  featured_projects: FeaturedProject[];
+  featured_education_ids: string[];
+  featured_blog_ids: string[];
+  featured_education_resources?: EducationResource[];
+  featured_blog_posts?: BlogPost[];
 }

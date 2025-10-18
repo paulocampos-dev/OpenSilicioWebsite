@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import { settingsService } from '../services/SettingsService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError } from '../errors/AppError';
+import { clearCache } from '../middleware/cache';
 
 export const getAllSettings = asyncHandler(async (req: AuthRequest, res: Response) => {
   const settings = await settingsService.getAllSettings();
@@ -10,14 +11,23 @@ export const getAllSettings = asyncHandler(async (req: AuthRequest, res: Respons
 });
 
 export const updateSettings = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { contact_email, instagram_url, linkedin_url, address, featured_projects } = req.body;
+  const {
+    contact_email,
+    instagram_url,
+    linkedin_url,
+    address,
+    featured_education_ids,
+    featured_blog_ids
+  } = req.body;
 
-  // Validate featured projects if provided
-  if (featured_projects) {
-    if (!Array.isArray(featured_projects)) {
-      throw new BadRequestError('featured_projects deve ser um array');
-    }
-    settingsService.validateFeaturedProjects(featured_projects);
+  // Validate featured education IDs if provided
+  if (featured_education_ids !== undefined) {
+    settingsService.validateFeaturedIds(featured_education_ids, 'education');
+  }
+
+  // Validate featured blog IDs if provided
+  if (featured_blog_ids !== undefined) {
+    settingsService.validateFeaturedIds(featured_blog_ids, 'blog');
   }
 
   const updates: any = {};
@@ -25,8 +35,13 @@ export const updateSettings = asyncHandler(async (req: AuthRequest, res: Respons
   if (instagram_url !== undefined) updates.instagram_url = instagram_url;
   if (linkedin_url !== undefined) updates.linkedin_url = linkedin_url;
   if (address !== undefined) updates.address = address;
-  if (featured_projects !== undefined) updates.featured_projects = featured_projects;
+  if (featured_education_ids !== undefined) updates.featured_education_ids = featured_education_ids;
+  if (featured_blog_ids !== undefined) updates.featured_blog_ids = featured_blog_ids;
 
   const settings = await settingsService.updateMultiple(updates);
+
+  // Clear settings cache after update
+  clearCache('GET:/api/settings');
+
   res.json(settings);
 });

@@ -25,13 +25,16 @@ class ResponseCache {
   /**
    * Generate cache key from request
    */
-  private generateKey(req: Request, customKey?: (req: Request) => string): string {
+  generateKey(req: Request, customKey?: (req: Request) => string): string {
     if (customKey) {
       return customKey(req);
     }
-    // Default: use method + path + query string
+    // Default: use method + originalUrl (full path including base)
+    // This is important because req.path is relative to the router
+    // e.g., /blog and /wiki both have req.path = '/' in their routers
     const queryString = new URLSearchParams(req.query as any).toString();
-    return `${req.method}:${req.path}${queryString ? '?' + queryString : ''}`;
+    const basePath = req.baseUrl + req.path;
+    return `${req.method}:${basePath}${queryString ? '?' + queryString : ''}`;
   }
 
   /**
@@ -96,6 +99,27 @@ class ResponseCache {
 const responseCache = new ResponseCache();
 
 /**
+ * Check if a response is empty and shouldn't be cached
+ */
+function isEmptyResponse(data: any): boolean {
+  if (!data) return true;
+
+  // Check for empty arrays
+  if (Array.isArray(data) && data.length === 0) {
+    return true;
+  }
+
+  // Check for paginated responses with empty data
+  if (data.data !== undefined) {
+    if (Array.isArray(data.data) && data.data.length === 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Cache middleware factory
  * Creates a caching middleware for specific routes
  */
@@ -124,8 +148,12 @@ export function cacheMiddleware(options: CacheOptions = {}) {
     // Intercept res.json to cache the response
     const originalJson = res.json.bind(res);
     res.json = function (data: any) {
-      // Only cache successful responses
-      if (res.statusCode >= 200 && res.statusCode < 300) {
+      // Only cache successful responses with actual data
+      // Don't cache empty arrays or empty paginated responses
+      const shouldCache = res.statusCode >= 200 && res.statusCode < 300 &&
+        !isEmptyResponse(data);
+
+      if (shouldCache) {
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
@@ -134,7 +162,7 @@ export function cacheMiddleware(options: CacheOptions = {}) {
 
       // Add cache miss header
       res.set({
-        'X-Cache': 'MISS',
+        'X-Cache': shouldCache ? 'MISS' : 'SKIP',
         'X-Cache-Key': cacheKey,
       });
 

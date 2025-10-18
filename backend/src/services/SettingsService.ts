@@ -10,12 +10,31 @@ export interface SiteSetting {
   updated_at: Date;
 }
 
-export interface FeaturedProject {
-  image: string;
+export interface EducationResource {
+  id: string;
   title: string;
   description: string;
-  badge: string;
-  gradient: string;
+  content: string;
+  content_type: 'wysiwyg' | 'markdown';
+  category: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  content_type: 'wysiwyg' | 'markdown';
+  author: string;
+  image_url?: string;
+  category: string;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SiteSettings {
@@ -23,7 +42,10 @@ export interface SiteSettings {
   instagram_url: string;
   linkedin_url: string;
   address: string;
-  featured_projects: FeaturedProject[];
+  featured_education_ids: string[];
+  featured_blog_ids: string[];
+  featured_education_resources?: EducationResource[];
+  featured_blog_posts?: BlogPost[];
 }
 
 class SettingsService {
@@ -55,7 +77,8 @@ class SettingsService {
 
       const settings: any = {};
       result.rows.forEach((row) => {
-        if (row.key === 'featured_projects') {
+        // Parse JSON fields
+        if (row.key === 'featured_education_ids' || row.key === 'featured_blog_ids') {
           try {
             settings[row.key] = row.value ? JSON.parse(row.value) : [];
           } catch {
@@ -65,6 +88,42 @@ class SettingsService {
           settings[row.key] = row.value;
         }
       });
+
+      // Ensure arrays exist (defaults for backward compatibility)
+      settings.featured_education_ids = settings.featured_education_ids || [];
+      settings.featured_blog_ids = settings.featured_blog_ids || [];
+
+      // Safely fetch full education resources
+      try {
+        if (settings.featured_education_ids.length > 0) {
+          const educationResult = await this.pool.query(
+            `SELECT * FROM education_resources WHERE id = ANY($1::uuid[]) AND published = true ORDER BY created_at DESC`,
+            [settings.featured_education_ids]
+          );
+          settings.featured_education_resources = educationResult.rows;
+        } else {
+          settings.featured_education_resources = [];
+        }
+      } catch (error) {
+        console.warn('Error fetching featured education resources:', error);
+        settings.featured_education_resources = [];
+      }
+
+      // Safely fetch full blog posts
+      try {
+        if (settings.featured_blog_ids.length > 0) {
+          const blogResult = await this.pool.query(
+            `SELECT * FROM blog_posts WHERE id = ANY($1::uuid[]) AND published = true ORDER BY created_at DESC`,
+            [settings.featured_blog_ids]
+          );
+          settings.featured_blog_posts = blogResult.rows;
+        } else {
+          settings.featured_blog_posts = [];
+        }
+      } catch (error) {
+        console.warn('Error fetching featured blog posts:', error);
+        settings.featured_blog_posts = [];
+      }
 
       return settings as SiteSettings;
     } catch (error) {
@@ -78,8 +137,10 @@ class SettingsService {
    */
   async updateSetting(key: string, value: any): Promise<SiteSetting> {
     try {
-      // Convert array/object to JSON string for featured_projects
-      const stringValue = key === 'featured_projects' ? JSON.stringify(value) : value;
+      // Convert array/object to JSON string for ID arrays
+      const stringValue = (key === 'featured_education_ids' || key === 'featured_blog_ids')
+        ? JSON.stringify(value)
+        : value;
 
       const result = await this.pool.query(
         `INSERT INTO site_settings (key, value)
@@ -118,16 +179,22 @@ class SettingsService {
   }
 
   /**
-   * Validate featured projects (max 3)
+   * Validate featured content IDs (max 3 each)
    */
-  validateFeaturedProjects(projects: FeaturedProject[]): void {
-    if (projects.length > 3) {
-      throw new BadRequestError('Máximo de 3 projetos em destaque permitidos');
+  validateFeaturedIds(ids: string[], type: 'education' | 'blog'): void {
+    if (!Array.isArray(ids)) {
+      throw new BadRequestError(`IDs de ${type} devem ser um array`);
     }
 
-    projects.forEach((project, index) => {
-      if (!project.image || !project.title || !project.description || !project.badge || !project.gradient) {
-        throw new BadRequestError(`Projeto ${index + 1}: Todos os campos são obrigatórios`);
+    if (ids.length > 3) {
+      throw new BadRequestError(`Máximo de 3 ${type === 'education' ? 'recursos educacionais' : 'posts de blog'} em destaque permitidos`);
+    }
+
+    // Validate UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    ids.forEach((id, index) => {
+      if (!uuidRegex.test(id)) {
+        throw new BadRequestError(`ID inválido na posição ${index + 1}`);
       }
     });
   }

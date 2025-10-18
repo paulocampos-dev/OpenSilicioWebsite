@@ -5,13 +5,78 @@ const api = axios.create({
   baseURL: '/api',
 });
 
-// Adicionar token a todas as requisições
+// Development logging
+const isDev = import.meta.env.DEV;
+
+// Request interceptor - add token and log requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // Log request in development
+  if (isDev) {
+    const method = config.method?.toUpperCase();
+    const url = config.baseURL + config.url;
+    const params = config.params ? `?${new URLSearchParams(config.params).toString()}` : '';
+
+    console.group(`🌐 API Request: ${method} ${url}${params}`);
+    console.log('📤 Config:', {
+      method: config.method,
+      url: config.url,
+      baseURL: config.baseURL,
+      params: config.params,
+      data: config.data,
+      headers: config.headers,
+    });
+    console.groupEnd();
+  }
+
   return config;
+}, (error) => {
+  if (isDev) {
+    console.error('❌ Request Error:', error);
+  }
+  return Promise.reject(error);
+});
+
+// Response interceptor - log responses
+api.interceptors.response.use((response) => {
+  // Log response in development
+  if (isDev) {
+    const method = response.config.method?.toUpperCase();
+    const url = response.config.url;
+    const status = response.status;
+    const statusColor = status >= 200 && status < 300 ? '✅' : '⚠️';
+
+    console.group(`${statusColor} API Response: ${method} ${url} (${status})`);
+    console.log('📥 Data:', response.data);
+    console.log('📊 Headers:', response.headers);
+    console.log('⏱️ Config:', response.config);
+    console.groupEnd();
+  }
+
+  return response;
+}, (error) => {
+  // Log error response in development
+  if (isDev) {
+    const method = error.config?.method?.toUpperCase();
+    const url = error.config?.url;
+    const status = error.response?.status;
+
+    console.group(`❌ API Error: ${method} ${url} (${status || 'Network Error'})`);
+    console.error('Error Details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: error.config,
+    });
+    console.groupEnd();
+  }
+
+  return Promise.reject(error);
 });
 
 // Auth

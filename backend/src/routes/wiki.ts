@@ -16,6 +16,12 @@ import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
 
+// Debug middleware to log all wiki route requests
+router.use((req, res, next) => {
+  console.log('🔍 [WIKI ROUTE] Request:', req.method, req.path, req.query);
+  next();
+});
+
 // Rotas públicas (with caching - 2 minutes)
 router.get('/', cacheMiddleware({ ttl: 120 }), getAllEntries);
 router.get('/:slug', cacheMiddleware({ ttl: 120 }), getEntryBySlug);

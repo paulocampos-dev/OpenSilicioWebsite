@@ -23,13 +23,17 @@ REM Aguardar o PostgreSQL estar pronto
 echo ⏳ Aguardando PostgreSQL estar pronto...
 timeout /t 10 /nobreak >nul
 
+REM Executar migrações do banco de dados
+echo 🗄️  Executando migrações do banco de dados...
+docker-compose -f docker/docker-compose.dev.yml exec -T backend npm run migrate
+
 REM Executar seed do admin
 echo 👤 Criando usuário administrador...
 docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/seedAdmin.ts
 
-REM Executar migração de dados
+REM Executar migração de dados (se existir)
 echo 📊 Migrando dados existentes...
-docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/migrateData.ts
+docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/migrateData.ts 2>nul || echo ⚠️  Script de migração de dados não encontrado (OK se for primeira vez)
 
 REM Testar conectividade do backend
 echo 🔍 Testando conectividade do backend...
