@@ -1,10 +1,5 @@
--- ⚠️ DEPRECATED: This file is kept for reference only
---
--- Database schema is now managed through migrations in src/migrations/
--- To set up the database, run: npm run migrate
---
--- This ensures migrations are tracked and can be versioned properly.
--- See src/migrations/README.md for more information.
+-- Initial database schema for OpenSilício
+-- Creates all core tables, indexes, and default settings
 
 -- Criar extensão para UUID
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -95,8 +90,3 @@ INSERT INTO site_settings (key, value) VALUES ('instagram_url', 'https://www.ins
 INSERT INTO site_settings (key, value) VALUES ('linkedin_url', 'https://www.linkedin.com/company/opensilicio/') ON CONFLICT (key) DO NOTHING;
 INSERT INTO site_settings (key, value) VALUES ('address', 'Escola Politécnica Prédio da Engenharia Elétrica, Av. Prof. Luciano Gualberto, trav. 3, 158, São Paulo - SP, 05508-010') ON CONFLICT (key) DO NOTHING;
 INSERT INTO site_settings (key, value) VALUES ('featured_projects', '[]') ON CONFLICT (key) DO NOTHING;
-
--- Usuário administrador será criado pelo script seedAdmin.ts
--- Username: AdmOpen
--- Password: Test123
-

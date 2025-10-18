@@ -12,13 +12,14 @@ import {
 import { authMiddleware } from '../middleware/auth';
 import { createLimiter } from '../middleware/rateLimit';
 import { validate, wikiEntrySchema, wikiLinkSchema } from '../middleware/validation';
+import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
 
-// Rotas públicas
-router.get('/', getAllEntries);
-router.get('/:slug', getEntryBySlug);
-router.get('/links/:contentType/:contentId', getWikiLinksForContent);
+// Rotas públicas (with caching - 2 minutes)
+router.get('/', cacheMiddleware({ ttl: 120 }), getAllEntries);
+router.get('/:slug', cacheMiddleware({ ttl: 120 }), getEntryBySlug);
+router.get('/links/:contentType/:contentId', cacheMiddleware({ ttl: 120 }), getWikiLinksForContent);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)
 router.post('/', authMiddleware, createLimiter, validate(wikiEntrySchema), createEntry);

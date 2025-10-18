@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import { blogService } from '../services/BlogService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError } from '../errors/AppError';
+import { clearCache } from '../middleware/cache';
 
 export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { published, page = '1', limit = '10' } = req.query;
@@ -43,6 +44,9 @@ export const createPost = asyncHandler(async (req: AuthRequest, res: Response) =
     published,
   });
 
+  // Clear blog cache after creating a post
+  clearCache('GET:/api/blog');
+
   res.status(201).json(post);
 });
 
@@ -62,12 +66,19 @@ export const updatePost = asyncHandler(async (req: AuthRequest, res: Response) =
     published,
   });
 
+  // Clear blog cache after updating a post
+  clearCache('GET:/api/blog');
+
   res.json(post);
 });
 
 export const deletePost = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   await blogService.deletePost(id);
+
+  // Clear blog cache after deleting a post
+  clearCache('GET:/api/blog');
+
   res.json({ message: 'Post deletado com sucesso' });
 });
 

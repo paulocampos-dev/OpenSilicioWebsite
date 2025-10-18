@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import { educationService } from '../services/EducationService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError } from '../errors/AppError';
+import { clearCache } from '../middleware/cache';
 
 export const getAllResources = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { published, page = '1', limit = '10' } = req.query;
@@ -39,6 +40,9 @@ export const createResource = asyncHandler(async (req: AuthRequest, res: Respons
     published,
   });
 
+  // Clear education cache after creating a resource
+  clearCache('GET:/api/education');
+
   res.status(201).json(resource);
 });
 
@@ -55,11 +59,18 @@ export const updateResource = asyncHandler(async (req: AuthRequest, res: Respons
     published,
   });
 
+  // Clear education cache after updating a resource
+  clearCache('GET:/api/education');
+
   res.json(resource);
 });
 
 export const deleteResource = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   await educationService.deleteResource(id);
+
+  // Clear education cache after deleting a resource
+  clearCache('GET:/api/education');
+
   res.json({ message: 'Recurso deletado com sucesso' });
 });

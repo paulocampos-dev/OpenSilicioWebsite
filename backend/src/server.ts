@@ -20,12 +20,16 @@ import settingsRoutes from './routes/settings';
 import { apiLimiter } from './middleware/rateLimit';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { requestIdMiddleware } from './middleware/requestId';
+import { monitoringMiddleware, getMetricsSummary } from './middleware/monitoring';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Request ID middleware - must be first to be available in all subsequent middleware
 app.use(requestIdMiddleware);
+
+// Performance monitoring middleware
+app.use(monitoringMiddleware);
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -120,6 +124,15 @@ app.get('/health', async (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
+});
+
+// Metrics endpoint (for monitoring and debugging)
+app.get('/metrics', (req, res) => {
+  const summary = getMetricsSummary();
+  res.json({
+    summary,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Error handling middlewares (MUST be after all routes)

@@ -5,6 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 import { wikiService } from '../services/WikiService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError, NotFoundError } from '../errors/AppError';
+import { clearCache } from '../middleware/cache';
 
 export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { published, page = '1', limit = '20' } = req.query;
@@ -41,6 +42,9 @@ export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) 
     published,
   });
 
+  // Clear wiki cache after creating an entry
+  clearCache('GET:/api/wiki');
+
   res.status(201).json(entry);
 });
 
@@ -57,12 +61,19 @@ export const updateEntry = asyncHandler(async (req: AuthRequest, res: Response) 
     published,
   });
 
+  // Clear wiki cache after updating an entry
+  clearCache('GET:/api/wiki');
+
   res.json(entry);
 });
 
 export const deleteEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   await wikiService.deleteEntry(id);
+
+  // Clear wiki cache after deleting an entry
+  clearCache('GET:/api/wiki');
+
   res.json({ message: 'Entrada deletada com sucesso' });
 });
 
@@ -98,6 +109,9 @@ export const createWikiLink = asyncHandler(async (req: AuthRequest, res: Respons
     [id, contentType, contentId, wikiEntryId, linkText]
   );
 
+  // Clear wiki links cache after creating a link
+  clearCache('GET:/api/wiki/links');
+
   res.status(201).json(result.rows[0]);
 });
 
@@ -112,6 +126,9 @@ export const deleteWikiLink = asyncHandler(async (req: AuthRequest, res: Respons
   if (result.rows.length === 0) {
     throw new NotFoundError('Link');
   }
+
+  // Clear wiki links cache after deleting a link
+  clearCache('GET:/api/wiki/links');
 
   res.json({ message: 'Link deletado com sucesso' });
 });
