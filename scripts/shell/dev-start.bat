@@ -31,6 +31,10 @@ REM Executar seed do admin
 echo 👤 Criando usuário administrador...
 docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/seedAdmin.ts
 
+REM Executar seed de configurações
+echo ⚙️  Inserindo configurações iniciais...
+docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/seedSettings.ts
+
 REM Executar migração de dados (se existir)
 echo 📊 Migrando dados existentes...
 docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/migrateData.ts 2>nul || echo ⚠️  Script de migração de dados não encontrado (OK se for primeira vez)

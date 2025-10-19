@@ -22,9 +22,17 @@ docker-compose -f ../../docker/docker-compose.dev.yml up --build -d
 echo "⏳ Aguardando PostgreSQL estar pronto..."
 sleep 10
 
+# Executar migrações
+echo "🔄 Executando migrações do banco de dados..."
+docker-compose -f ../../docker/docker-compose.dev.yml exec -T backend npm run migrate
+
 # Executar seed do admin
 echo "👤 Criando usuário administrador..."
 docker-compose -f ../../docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/seedAdmin.ts
+
+# Executar seed de configurações
+echo "⚙️  Inserindo configurações iniciais..."
+docker-compose -f ../../docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/seedSettings.ts
 
 # Executar migração de dados
 echo "📊 Migrando dados existentes..."

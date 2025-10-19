@@ -67,17 +67,13 @@ export default function Recurso() {
 
           <Stack spacing={3}>
             {tab === 'Visão geral' && (
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                {resource.overview || 'Nenhuma visão geral disponível.'}
-              </Typography>
+              <BlockNoteContent content={resource.overview || ''} />
             )}
             {tab === 'Conteúdo' && (
               <BlockNoteContent content={resource.content} />
             )}
             {tab === 'Recursos' && (
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                {resource.resources || 'Nenhum recurso disponível.'}
-              </Typography>
+              <BlockNoteContent content={resource.resources || ''} />
             )}
           </Stack>
         </>

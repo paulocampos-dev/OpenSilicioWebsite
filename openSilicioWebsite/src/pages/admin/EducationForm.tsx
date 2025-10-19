@@ -133,25 +133,31 @@ export default function EducationForm() {
 
               {resource.category === 'Projetos' && (
                 <>
-                  <TextField
-                    label="Visão Geral"
-                    value={resource.overview || ''}
-                    onChange={(e) => setResource({ ...resource, overview: e.target.value })}
-                    fullWidth
-                    multiline
-                    rows={4}
-                    helperText="Descrição geral do projeto (aparece na aba 'Visão Geral')"
-                  />
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Visão Geral
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                      Descrição geral do projeto (aparece na aba 'Visão Geral')
+                    </Typography>
+                    <BlockNoteEditor
+                      content={resource.overview || ''}
+                      onContentChange={(content) => setResource({ ...resource, overview: content })}
+                    />
+                  </Box>
 
-                  <TextField
-                    label="Recursos"
-                    value={resource.resources || ''}
-                    onChange={(e) => setResource({ ...resource, resources: e.target.value })}
-                    fullWidth
-                    multiline
-                    rows={4}
-                    helperText="Lista de recursos necessários (aparece na aba 'Recursos')"
-                  />
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      Recursos
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                      Lista de recursos necessários (aparece na aba 'Recursos')
+                    </Typography>
+                    <BlockNoteEditor
+                      content={resource.resources || ''}
+                      onContentChange={(content) => setResource({ ...resource, resources: content })}
+                    />
+                  </Box>
                 </>
               )}
 
@@ -201,17 +207,13 @@ export default function EducationForm() {
 
                   <Stack spacing={3}>
                     {previewTab === 'Visão geral' && (
-                      <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                        {resource.overview || 'Nenhuma visão geral disponível.'}
-                      </Typography>
+                      <BlockNoteContent content={resource.overview || ''} />
                     )}
                     {previewTab === 'Conteúdo' && (
                       <BlockNoteContent content={resource.content || ''} />
                     )}
                     {previewTab === 'Recursos' && (
-                      <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                        {resource.resources || 'Nenhum recurso disponível.'}
-                      </Typography>
+                      <BlockNoteContent content={resource.resources || ''} />
                     )}
                   </Stack>
                 </>

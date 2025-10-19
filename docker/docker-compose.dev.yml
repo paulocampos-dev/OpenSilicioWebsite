@@ -51,6 +51,7 @@ services:
       CORS_ORIGINS: http://localhost:5173,http://frontend:5173
       # Performance optimizations for nodemon/ts-node-dev
       TS_NODE_TRANSPILE_ONLY: "true"
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,8 +86,8 @@ services:
       VITE_API_URL: http://backend:3001
       NODE_ENV: development
       # Enable Vite HMR
-      CHOKIDAR_USEPOLLING: "false"
-      WATCHPACK_POLLING: "false"
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     depends_on:
       - backend
     healthcheck:

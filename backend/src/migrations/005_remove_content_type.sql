@@ -15,22 +15,10 @@ ALTER TABLE wiki_entries DROP COLUMN IF EXISTS content_type;
 TRUNCATE TABLE wiki_entries CASCADE;
 
 -- Site settings - Remove content_type fields for about sections
+-- Only delete the _type variant fields, keep the content fields intact
 DELETE FROM site_settings WHERE key IN (
-  'about_content',
   'about_content_type',
-  'about_mission',
   'about_mission_type',
-  'about_vision',
   'about_vision_type',
-  'about_history',
   'about_history_type'
 );
-
--- Re-add about content fields (without _type variants)
-INSERT INTO site_settings (key, value) VALUES
-  ('about_content', ''),
-  ('about_mission', ''),
-  ('about_vision', ''),
-  ('about_history', '')
-ON CONFLICT (key) DO UPDATE
-  SET value = EXCLUDED.value;
