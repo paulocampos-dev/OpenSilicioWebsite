@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import { Box, Paper, Stack, Typography, useTheme } from '@mui/material';
 import { BlockNoteView } from '@blocknote/mantine';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Block, BlockNoteEditor as BlockNoteEditorType } from '@blocknote/core';
 import '@blocknote/mantine/style.css';
 import { uploadApi } from '../services/api';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import BlockNoteErrorBoundary from './BlockNoteErrorBoundary';
 
 interface BlockNoteEditorProps {
   content: string;
@@ -13,11 +14,13 @@ interface BlockNoteEditorProps {
   placeholder?: string;
 }
 
-export default function BlockNoteEditor({
+function BlockNoteEditorInner({
   content,
   onContentChange,
   placeholder = 'Digite seu conteúdo aqui... (Digite "/" para ver comandos)',
 }: BlockNoteEditorProps) {
+  const theme = useTheme();
+  const blockNoteTheme = theme.palette.mode === 'dark' ? 'dark' : 'light';
   const [isUploading, setIsUploading] = useState(false);
 
   // Parse initial content
@@ -33,7 +36,7 @@ export default function BlockNoteEditor({
 
   // Create editor instance with custom upload function
   const editor = useCreateBlockNote({
-    initialContent,
+    ...(initialContent ? { initialContent } : {}),
     uploadFile: async (file: File) => {
       setIsUploading(true);
       try {
@@ -58,7 +61,14 @@ export default function BlockNoteEditor({
     };
 
     // Listen to document changes
-    editor.onChange(handleChange);
+    const unsubscribe = editor.onChange(handleChange);
+
+    // Cleanup listener on unmount
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [editor, onContentChange]);
 
   if (!editor) {
@@ -131,14 +141,14 @@ export default function BlockNoteEditor({
               color: 'text.secondary',
             },
             '& code': {
-              backgroundColor: 'rgba(0,0,0,0.05)',
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
               padding: '2px 6px',
               borderRadius: '4px',
               fontFamily: 'monospace',
               fontSize: '0.9em',
             },
             '& pre': {
-              backgroundColor: 'rgba(0,0,0,0.05)',
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
               padding: '1em',
               borderRadius: '8px',
               overflow: 'auto',
@@ -219,7 +229,7 @@ export default function BlockNoteEditor({
       >
         <BlockNoteView
           editor={editor}
-          theme="light"
+          theme={blockNoteTheme}
         />
       </Paper>
       {isUploading && (
@@ -228,5 +238,14 @@ export default function BlockNoteEditor({
         </Box>
       )}
     </Stack>
+  );
+}
+
+// Export wrapped component with error boundary
+export default function BlockNoteEditor(props: BlockNoteEditorProps) {
+  return (
+    <BlockNoteErrorBoundary>
+      <BlockNoteEditorInner {...props} />
+    </BlockNoteErrorBoundary>
   );
 }

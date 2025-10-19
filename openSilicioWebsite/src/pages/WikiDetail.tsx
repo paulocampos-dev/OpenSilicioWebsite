@@ -5,7 +5,7 @@ import { wikiApi } from '../services/api'
 import type { WikiEntry } from '../types';
 import BlockNoteContent from '../components/BlockNoteContent';
 
-export default function Wiki() {
+export default function WikiDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [entry, setEntry] = useState<WikiEntry | null>(null);
   const [loading, setLoading] = useState(true);

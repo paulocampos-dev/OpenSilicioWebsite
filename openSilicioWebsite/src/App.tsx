@@ -14,8 +14,8 @@ import Blog from './pages/Blog'
 import Post from './pages/Post'
 import Educacao from './pages/Educacao'
 import Recurso from './pages/Recurso'
-import WikiPage from './pages/WikiPage'
-import Wiki from './pages/Wiki'
+import WikiList from './pages/WikiList'
+import WikiDetail from './pages/WikiDetail'
 import About from './pages/About'
 import Login from './pages/Login'
 
@@ -25,7 +25,7 @@ import BlogList from './pages/admin/BlogList'
 import BlogForm from './pages/admin/BlogForm'
 import EducationList from './pages/admin/EducationList'
 import EducationForm from './pages/admin/EducationForm'
-import WikiList from './pages/admin/WikiList'
+import AdminWikiList from './pages/admin/WikiList'
 import WikiForm from './pages/admin/WikiForm'
 import Settings from './pages/admin/Settings'
 
@@ -85,8 +85,8 @@ function AppContent() {
               <Route path="/blog/:slug" element={<Container sx={{ py: 4 }}><Post /></Container>} />
               <Route path="/educacao" element={<Container sx={{ py: 4 }}><Educacao /></Container>} />
               <Route path="/educacao/:id" element={<Container sx={{ py: 4 }}><Recurso /></Container>} />
-              <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiPage /></Container>} />
-              <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><Wiki /></Container>} />
+              <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiList /></Container>} />
+              <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><WikiDetail /></Container>} />
               <Route path="/sobre" element={<Container sx={{ py: 4 }}><About /></Container>} />
               <Route path="/login" element={<Container sx={{ py: 4 }}><Login /></Container>} />
             </Routes>
@@ -145,7 +145,7 @@ function AppContent() {
               <Route path="/admin/wiki" element={
                 <ProtectedRoute>
                   <AdminLayout>
-                    <WikiList />
+                    <AdminWikiList />
                   </AdminLayout>
                 </ProtectedRoute>
               } />
