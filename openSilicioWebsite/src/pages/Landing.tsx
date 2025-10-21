@@ -98,7 +98,7 @@ export default function Landing() {
                 color: 'common.white',
                 fontWeight: 800,
                 maxWidth: 1000,
-                lineHeight: 1.3,
+                lineHeight: 1.5,
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word',
                 textShadow: '0 4px 24px rgba(0,0,0,0.3)',
@@ -106,7 +106,7 @@ export default function Landing() {
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                pb: 0.5,
+                pb: 1,
               }}
             >
               Democratizando o Design de Chips
