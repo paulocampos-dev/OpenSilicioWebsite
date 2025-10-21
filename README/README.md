@@ -25,10 +25,10 @@ Um website completo para o grupo universitário OpenSilício, com sistema de ger
 ### Frontend
 - React + TypeScript
 - Material-UI (MUI)
-- TipTap para editor rico
-- React Markdown
+- BlockNote para editor rico (WYSIWYG)
 - Axios para requisições HTTP
 - React Router para navegação
+- Vite para build otimizado
 
 ### DevOps
 - Docker + Docker Compose
@@ -310,6 +310,143 @@ docker-compose restart postgres
 chmod +x dev-start.sh
 ```
 
+## 🚀 Deploy em Produção
+
+### Usando Docker (Recomendado)
+
+#### 1. Configurar variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto com as configurações de produção:
+
+```env
+# Database
+POSTGRES_DB=opensilicio_prod
+POSTGRES_USER=opensilicio
+POSTGRES_PASSWORD=SUA_SENHA_FORTE_AQUI
+
+# Backend
+NODE_ENV=production
+PORT=3001
+JWT_SECRET=SEU_JWT_SECRET_SEGURO_AQUI
+DATABASE_URL=postgresql://opensilicio:SUA_SENHA_FORTE_AQUI@postgres:5432/opensilicio_prod
+
+# Frontend (build time)
+VITE_API_URL=https://seu-dominio.com/api
+```
+
+#### 2. Build e Deploy
+
+```bash
+# Windows
+scripts\production\deploy.bat
+
+# Linux/Mac
+chmod +x scripts/production/deploy.sh
+./scripts/production/deploy.sh
+```
+
+Ou manualmente:
+
+```bash
+# Build e inicie em produção
+docker-compose -f docker/docker-compose.yml up -d --build
+
+# Verificar status
+docker-compose -f docker/docker-compose.yml ps
+
+# Ver logs
+docker-compose -f docker/docker-compose.yml logs -f
+```
+
+#### 3. Executar migrações
+
+```bash
+docker-compose -f docker/docker-compose.yml exec backend npm run migrate
+```
+
+#### 4. Criar usuário admin
+
+```bash
+docker-compose -f docker/docker-compose.yml exec backend npm run seed:admin
+```
+
+### Configuração de Servidor
+
+#### Nginx (Reverse Proxy)
+
+Exemplo de configuração Nginx para produção:
+
+```nginx
+server {
+    listen 80;
+    server_name seu-dominio.com;
+
+    # Frontend
+    location / {
+        proxy_pass http://localhost:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Backend API
+    location /api {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        client_max_body_size 10M;
+    }
+
+    # Uploads
+    location /uploads {
+        alias /caminho/para/site_react/backend/uploads;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+### Backup do Banco de Dados
+
+```bash
+# Criar backup
+docker-compose -f docker/docker-compose.yml exec postgres pg_dump -U opensilicio opensilicio_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# Restaurar backup
+docker-compose -f docker/docker-compose.yml exec -T postgres psql -U opensilicio opensilicio_prod < backup.sql
+```
+
+### Monitoramento
+
+```bash
+# Ver logs em tempo real
+docker-compose -f docker/docker-compose.yml logs -f
+
+# Ver uso de recursos
+docker stats
+
+# Verificar saúde dos containers
+docker-compose -f docker/docker-compose.yml ps
+```
+
+### Atualização da Aplicação
+
+```bash
+# Pull das últimas mudanças
+git pull origin main
+
+# Rebuild e restart
+docker-compose -f docker/docker-compose.yml up -d --build
+
+# Executar migrações se necessário
+docker-compose -f docker/docker-compose.yml exec backend npm run migrate
+```
+
 ## 📈 Próximos Passos
 
 - [ ] Sistema de comentários no blog
@@ -317,8 +454,11 @@ chmod +x dev-start.sh
 - [ ] Sistema de tags
 - [ ] Busca avançada
 - [ ] Analytics de visualizações
-- [ ] Sistema de backup automático
-- [ ] Deploy em produção
+- [x] Sistema de backup automático
+- [x] Deploy em produção
+- [x] Wiki com links automáticos
+- [x] Editor rico com BlockNote
+- [x] Sistema de pending wiki links
 
 ## 🤝 Contribuição
 

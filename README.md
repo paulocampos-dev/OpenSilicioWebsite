@@ -8,11 +8,11 @@ Um website completo para o grupo universitário OpenSilício, com sistema de ger
 
 ```bash
 # Windows
-scripts\shell\dev-start.bat
+scripts\development\start.bat
 
 # Linux/Mac
-chmod +x scripts/shell/dev-start.sh
-./scripts/shell/dev-start.sh
+chmod +x scripts/development/start.sh
+./scripts/development/start.sh
 ```
 
 Isso iniciará todos os serviços em Docker com **hot reload automático**:
@@ -35,15 +35,9 @@ Isso iniciará todos os serviços em Docker com **hot reload automático**:
 Toda a documentação foi organizada em `README/`:
 
 - **[README/README.md](README/README.md)** - Documentação completa do projeto
-- **[README/QUICK_START.md](README/QUICK_START.md)** - Guia rápido de instalação
-- **[README/DEV_SETUP.md](README/DEV_SETUP.md)** - Setup detalhado para desenvolvimento
-- **[README/DOCKER_DEV_GUIDE.md](README/DOCKER_DEV_GUIDE.md)** - Guia Docker com hot reloading
-- **[README/DOCKER_OPTIMIZATION_SUMMARY.md](README/DOCKER_OPTIMIZATION_SUMMARY.md)** - Resumo das otimizações
-- **[README/.dockerdev-commands.md](README/.dockerdev-commands.md)** - Comandos Docker úteis
-- **[README/DOCKER_PROJECT_NAME.md](README/DOCKER_PROJECT_NAME.md)** - Configuração do nome do projeto no Docker
-- **[README/DATABASE_CONNECTION_FIXES.md](README/DATABASE_CONNECTION_FIXES.md)** - Correções de conexão com banco de dados
-- **[README/DOCKER_NETWORKING.md](README/DOCKER_NETWORKING.md)** - Configuração de rede Docker (proxy fix)
-- **[README/WIKI_LINKING_EXAMPLE.md](README/WIKI_LINKING_EXAMPLE.md)** - Exemplos de links na Wiki
+- **[README/DEPLOYMENT.md](README/DEPLOYMENT.md)** - Guia completo de deploy em produção
+- **[README/DATA_SAFETY.md](README/DATA_SAFETY.md)** - Segurança e backup de dados
+- **[README/SCRIPTS_GUIDE.md](README/SCRIPTS_GUIDE.md)** - Guia completo de todos os scripts
 
 ## 🗂️ Estrutura do Projeto
 
@@ -82,13 +76,16 @@ site_react/
 │   └── Dockerfile.frontend.dev  # Frontend desenvolvimento
 │
 ├── scripts/                      # Scripts utilitários
-│   └── shell/                    # Scripts shell/bat
-│       ├── dev-start.bat        # Inicia dev (Windows)
-│       ├── dev-start.sh         # Inicia dev (Linux/Mac)
-│       ├── dev-local.bat        # Dev local (Windows)
-│       ├── dev-local.sh         # Dev local (Linux/Mac)
-│       ├── stop-dev.bat         # Para serviços (Windows)
-│       └── stop-dev.sh          # Para serviços (Linux/Mac)
+│   ├── development/              # Scripts de desenvolvimento
+│   │   ├── start.bat/sh         # Inicia dev com hot reload
+│   │   ├── local.bat/sh         # Dev local (sem Docker)
+│   │   └── stop.bat/sh          # Para serviços
+│   └── production/               # Scripts de produção
+│       ├── deploy.bat/sh        # Deploy inicial
+│       ├── update.bat/sh        # Atualizar aplicação
+│       ├── backup.bat/sh        # Backup do banco
+│       ├── restore.bat/sh       # Restaurar backup
+│       └── migrate.bat          # Executar migrações
 │
 └── README/                       # Documentação
     ├── README.md                # Docs principal
@@ -109,26 +106,53 @@ site_react/
 
 - ✅ Hot reload automático (backend + frontend)
 - ✅ Sistema de autenticação com JWT
-- ✅ Upload de imagens
-- ✅ Editor rico (WYSIWYG + Markdown)
-- ✅ Wiki com links automáticos entre termos
+- ✅ Upload de imagens com otimização automática
+- ✅ Editor rico com BlockNote (WYSIWYG)
+- ✅ Wiki com links automáticos e pending links
+- ✅ Sistema de migrações de banco de dados
 - ✅ Painel administrativo completo
+- ✅ Auto-save de conteúdo
 - ✅ Responsive design
 - ✅ Dark mode
 - ✅ Docker pronto para produção
+- ✅ Scripts de deployment automatizados
+- ✅ Sistema de backup de banco de dados
 
 ## 📝 Scripts Disponíveis
 
 ### Desenvolvimento
 ```bash
-# Hot reload em Docker (Melhor opção!)
-scripts/shell/dev-start.bat
+# Iniciar com hot reload (Docker)
+scripts/development/start.bat      # Windows
+scripts/development/start.sh       # Linux/Mac
 
-# Desenvolvimento local (requer Node.js)
-scripts/shell/dev-local.bat
+# Desenvolvimento local (sem Docker)
+scripts/development/local.bat      # Windows
+scripts/development/local.sh       # Linux/Mac
 
 # Parar serviços
-scripts/shell/stop-dev.bat
+scripts/development/stop.bat       # Windows
+scripts/development/stop.sh        # Linux/Mac
+```
+
+### Produção
+```bash
+# Deploy inicial
+scripts/production/deploy.bat      # Windows
+scripts/production/deploy.sh       # Linux/Mac
+
+# Atualizar aplicação
+scripts/production/update.bat      # Windows
+scripts/production/update.sh       # Linux/Mac
+
+# Backup e restore
+scripts/production/backup.bat      # Windows
+scripts/production/backup.sh       # Linux/Mac
+scripts/production/restore.bat     # Windows
+scripts/production/restore.sh      # Linux/Mac
+
+# Migrações
+scripts/production/migrate.bat     # Windows
 ```
 
 ### Docker
