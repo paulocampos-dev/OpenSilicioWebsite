@@ -1,9 +1,10 @@
-import { Box, Breadcrumbs, Button, Link as MUILink, Stack, Tab, Tabs, Typography } from '@mui/material'
+import { Box, Breadcrumbs, Link as MUILink, Stack, Tab, Tabs, Typography } from '@mui/material'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { educationApi } from '../services/api'
 import type { EducationResource } from '../types'
 import BlockNoteContent from '../components/BlockNoteContent'
+import ShareAndCite from '../components/ShareAndCite'
 
 export default function Recurso() {
   const { id } = useParams<{ id: string }>()
@@ -82,6 +83,13 @@ export default function Recurso() {
           <BlockNoteContent content={resource.content} />
         </Stack>
       )}
+
+      <ShareAndCite
+        title={resource.title}
+        author="OpenSilício Team"
+        url={`/educacao/${resource.id}`}
+        publishedDate={resource.created_at}
+      />
     </Stack>
   )
 }

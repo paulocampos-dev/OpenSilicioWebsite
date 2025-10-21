@@ -1,12 +1,10 @@
-import { Box, Breadcrumbs, Button, Link as MUILink, Stack, Typography } from '@mui/material'
+import { Box, Breadcrumbs, Link as MUILink, Stack, Typography } from '@mui/material'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import TwitterIcon from '@mui/icons-material/Twitter'
-import LinkedInIcon from '@mui/icons-material/LinkedIn'
-import FacebookIcon from '@mui/icons-material/Facebook'
 import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
 import BlockNoteContent from '../components/BlockNoteContent'
+import ShareAndCite from '../components/ShareAndCite'
 
 export default function Post() {
   const { slug } = useParams<{ slug: string }>()
@@ -79,20 +77,13 @@ export default function Post() {
         <BlockNoteContent content={post.content} />
       </Stack>
 
-      <Stack spacing={2} alignItems="center" textAlign="center">
-        <Typography variant="subtitle1" fontWeight={700}>Compartilhar este post</Typography>
-        <Stack direction="row" spacing={1.5} justifyContent="center">
-          <Button variant="outlined" startIcon={<TwitterIcon />} onClick={() => console.log('share twitter (mock)')}>
-            Twitter
-          </Button>
-          <Button variant="outlined" startIcon={<LinkedInIcon />} onClick={() => console.log('share linkedin (mock)')}>
-            LinkedIn
-          </Button>
-          <Button variant="outlined" startIcon={<FacebookIcon />} onClick={() => console.log('share facebook (mock)')}>
-            Facebook
-          </Button>
-        </Stack>
-      </Stack>
+      <ShareAndCite
+        title={post.title}
+        author={post.author}
+        url={`/blog/${post.slug}`}
+        imageUrl={post.image_url}
+        publishedDate={post.created_at}
+      />
     </Stack>
   )
 }
