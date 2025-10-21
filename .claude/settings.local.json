@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/checkTables.ts)"
-    ],
-    "deny": [],
-    "ask": []
-  }
-}
