@@ -7,7 +7,6 @@ import MenuBookIcon from '@mui/icons-material/MenuBook'
 import CodeIcon from '@mui/icons-material/Code'
 import GroupsIcon from '@mui/icons-material/Groups'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
-import Footer from '../components/Footer'
 import { settingsApi } from '../services/api'
 import type { SiteSettings } from '../types'
 
@@ -1105,8 +1104,6 @@ export default function Landing() {
           </Stack>
         </Container>
       )}
-
-      <Footer />
     </Stack>
   )
 }
