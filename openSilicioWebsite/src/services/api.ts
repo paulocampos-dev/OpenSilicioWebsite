@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings } from '../types';
+import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings, PendingWikiLink, PendingWikiLinkGrouped } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -106,6 +106,10 @@ export const blogApi = {
     });
     return response.data;
   },
+  getById: async (id: string) => {
+    const response = await api.get<BlogPost>(`/blog/id/${id}`);
+    return response.data;
+  },
   getBySlug: async (slug: string) => {
     const response = await api.get<BlogPost>(`/blog/${slug}`);
     return response.data;
@@ -172,6 +176,17 @@ export const wikiApi = {
     const response = await api.get<WikiEntry>(`/wiki/${slug}`);
     return response.data;
   },
+  searchByTerm: async (term: string) => {
+    try {
+      const response = await api.get<WikiEntry>(`/wiki/search/${encodeURIComponent(term)}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
   create: async (data: Partial<WikiEntry>) => {
     const response = await api.post<WikiEntry>('/wiki', data);
     return response.data;
@@ -183,6 +198,16 @@ export const wikiApi = {
   delete: async (id: string) => {
     await api.delete(`/wiki/${id}`);
   },
+  // Alias management
+  addAlias: async (id: string, alias: string) => {
+    const response = await api.post<WikiEntry>(`/wiki/${id}/aliases`, { alias });
+    return response.data;
+  },
+  removeAlias: async (id: string, alias: string) => {
+    const response = await api.delete<WikiEntry>(`/wiki/${id}/aliases/${encodeURIComponent(alias)}`);
+    return response.data;
+  },
+  // Wiki links
   getLinks: async (contentType: 'blog' | 'education', contentId: string) => {
     const response = await api.get<WikiLink[]>(`/wiki/links/${contentType}/${contentId}`);
     return response.data;
@@ -198,6 +223,40 @@ export const wikiApi = {
   },
   deleteLink: async (id: string) => {
     await api.delete(`/wiki/links/${id}`);
+  },
+  // Pending wiki links
+  getPendingLinks: async (page = 1, limit = 50, grouped = false) => {
+    if (grouped) {
+      const response = await api.get<PendingWikiLinkGrouped[]>('/wiki/pending/all', {
+        params: { grouped: true },
+      });
+      return response.data;
+    } else {
+      const response = await api.get<PaginatedResponse<PendingWikiLink>>('/wiki/pending/all', {
+        params: { page, limit },
+      });
+      return response.data;
+    }
+  },
+  getPendingByTerm: async (term: string) => {
+    const response = await api.get<PendingWikiLink[]>(`/wiki/pending/term/${encodeURIComponent(term)}`);
+    return response.data;
+  },
+  getPendingCount: async () => {
+    const response = await api.get<{ total: number; uniqueTerms: number }>('/wiki/pending/count');
+    return response.data;
+  },
+  createPendingLink: async (data: {
+    term: string;
+    contentType: 'blog' | 'education';
+    contentId: string;
+    context?: string;
+  }) => {
+    const response = await api.post<PendingWikiLink>('/wiki/pending', data);
+    return response.data;
+  },
+  deletePendingLink: async (id: string) => {
+    await api.delete(`/wiki/pending/${id}`);
   },
 };
 

@@ -8,6 +8,7 @@ export interface WikiEntry {
   slug: string;
   definition: string;
   content?: string;
+  aliases?: string[];
   published: boolean;
   created_at: Date;
   updated_at: Date;
@@ -52,6 +53,7 @@ export class WikiService extends BaseService<WikiEntry> {
       id: uuidv4(),
       ...data,
       content: data.content || '',
+      aliases: data.aliases || [],
       published: data.published || false,
     };
 
@@ -61,6 +63,7 @@ export class WikiService extends BaseService<WikiEntry> {
       'slug',
       'definition',
       'content',
+      'aliases',
       'published',
     ];
 
@@ -80,6 +83,97 @@ export class WikiService extends BaseService<WikiEntry> {
    */
   async deleteEntry(id: string): Promise<void> {
     return this.delete(id);
+  }
+
+  /**
+   * Search for a wiki entry by term or alias
+   * Returns the entry if the search term matches either the main term or any alias
+   */
+  async getByTermOrAlias(searchTerm: string): Promise<WikiEntry | null> {
+    const result = await pool.query<WikiEntry>(
+      `SELECT * FROM wiki_entries
+       WHERE LOWER(term) = LOWER($1)
+       OR $1 = ANY(SELECT LOWER(unnest(aliases)))
+       LIMIT 1`,
+      [searchTerm]
+    );
+
+    return result.rows[0] || null;
+  }
+
+  /**
+   * Add an alias to a wiki entry
+   */
+  async addAlias(id: string, alias: string): Promise<WikiEntry> {
+    // First check if alias already exists
+    const entry = await this.getById(id);
+    if (!entry) {
+      throw new Error('Entrada não encontrada');
+    }
+
+    const currentAliases = entry.aliases || [];
+
+    // Check if alias already exists (case-insensitive)
+    if (currentAliases.some(a => a.toLowerCase() === alias.toLowerCase())) {
+      throw new Error('Este alias já existe para esta entrada');
+    }
+
+    // Add the new alias
+    const updatedAliases = [...currentAliases, alias];
+
+    const result = await pool.query<WikiEntry>(
+      `UPDATE wiki_entries
+       SET aliases = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [updatedAliases, id]
+    );
+
+    return result.rows[0];
+  }
+
+  /**
+   * Remove an alias from a wiki entry
+   */
+  async removeAlias(id: string, alias: string): Promise<WikiEntry> {
+    const entry = await this.getById(id);
+    if (!entry) {
+      throw new Error('Entrada não encontrada');
+    }
+
+    const currentAliases = entry.aliases || [];
+    const updatedAliases = currentAliases.filter(
+      a => a.toLowerCase() !== alias.toLowerCase()
+    );
+
+    const result = await pool.query<WikiEntry>(
+      `UPDATE wiki_entries
+       SET aliases = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [updatedAliases, id]
+    );
+
+    return result.rows[0];
+  }
+
+  /**
+   * Set all aliases for a wiki entry (replaces existing aliases)
+   */
+  async setAliases(id: string, aliases: string[]): Promise<WikiEntry> {
+    const result = await pool.query<WikiEntry>(
+      `UPDATE wiki_entries
+       SET aliases = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [aliases, id]
+    );
+
+    if (result.rows.length === 0) {
+      throw new Error('Entrada não encontrada');
+    }
+
+    return result.rows[0];
   }
 }
 

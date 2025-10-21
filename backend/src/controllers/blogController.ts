@@ -21,6 +21,12 @@ export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) 
   res.json(result);
 });
 
+export const getPostById = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const post = await blogService.getById(id);
+  res.json(post);
+});
+
 export const getPostBySlug = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { slug } = req.params;
   const post = await blogService.getBySlug(slug);
@@ -28,7 +34,7 @@ export const getPostBySlug = asyncHandler(async (req: AuthRequest, res: Response
 });
 
 export const createPost = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { slug, title, excerpt, content, content_type, author, image_url, category, published } = req.body;
+  const { slug, title, excerpt, content, author, image_url, category, published } = req.body;
 
   if (!slug || !title || !excerpt || !content) {
     throw new BadRequestError('Campos obrigatórios faltando');
@@ -39,7 +45,6 @@ export const createPost = asyncHandler(async (req: AuthRequest, res: Response) =
     title,
     excerpt,
     content,
-    content_type,
     author,
     image_url,
     category,
@@ -54,14 +59,13 @@ export const createPost = asyncHandler(async (req: AuthRequest, res: Response) =
 
 export const updatePost = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { slug, title, excerpt, content, content_type, author, image_url, category, published } = req.body;
+  const { slug, title, excerpt, content, author, image_url, category, published } = req.body;
 
   const post = await blogService.updatePost(id, {
     slug,
     title,
     excerpt,
     content,
-    content_type,
     author,
     image_url,
     category,

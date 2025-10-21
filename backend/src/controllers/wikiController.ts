@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import pool from '../config/database';
 import { AuthRequest } from '../middleware/auth';
 import { wikiService } from '../services/WikiService';
+import { pendingWikiLinksService } from '../services/PendingWikiLinksService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError, NotFoundError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
@@ -30,7 +31,7 @@ export const getEntryBySlug = asyncHandler(async (req: AuthRequest, res: Respons
 });
 
 export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { term, slug, definition, content, content_type, published } = req.body;
+  const { term, slug, definition, content, aliases, published } = req.body;
 
   if (!term || !slug || !definition) {
     throw new BadRequestError('Campos obrigatórios faltando');
@@ -41,9 +42,17 @@ export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) 
     slug,
     definition,
     content,
-    content_type,
+    aliases,
     published,
   });
+
+  // Delete any pending links for this term or its aliases
+  await pendingWikiLinksService.deletePendingByTerm(term);
+  if (aliases && Array.isArray(aliases)) {
+    for (const alias of aliases) {
+      await pendingWikiLinksService.deletePendingByTerm(alias);
+    }
+  }
 
   // Clear wiki cache after creating an entry
   clearCache('GET:/api/wiki');
@@ -53,14 +62,14 @@ export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) 
 
 export const updateEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { term, slug, definition, content, content_type, published } = req.body;
+  const { term, slug, definition, content, aliases, published } = req.body;
 
   const entry = await wikiService.updateEntry(id, {
     term,
     slug,
     definition,
     content,
-    content_type,
+    aliases,
     published,
   });
 
@@ -134,4 +143,108 @@ export const deleteWikiLink = asyncHandler(async (req: AuthRequest, res: Respons
   clearCache('GET:/api/wiki/links');
 
   res.json({ message: 'Link deletado com sucesso' });
+});
+
+// Alias management
+export const addAlias = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { alias } = req.body;
+
+  if (!alias || !alias.trim()) {
+    throw new BadRequestError('Alias não pode ser vazio');
+  }
+
+  const entry = await wikiService.addAlias(id, alias.trim());
+
+  // Clear wiki cache after adding alias
+  clearCache('GET:/api/wiki');
+
+  res.json(entry);
+});
+
+export const removeAlias = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id, alias } = req.params;
+
+  const entry = await wikiService.removeAlias(id, alias);
+
+  // Clear wiki cache after removing alias
+  clearCache('GET:/api/wiki');
+
+  res.json(entry);
+});
+
+export const searchByTerm = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { term } = req.params;
+
+  const entry = await wikiService.getByTermOrAlias(term);
+
+  if (!entry) {
+    throw new NotFoundError('Entrada da wiki');
+  }
+
+  res.json(entry);
+});
+
+// Pending wiki links management
+export const getAllPendingLinks = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { page = '1', limit = '50', grouped } = req.query;
+
+  if (grouped === 'true') {
+    const result = await pendingWikiLinksService.getPendingGroupedByTerm();
+    res.json(result);
+  } else {
+    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 50));
+
+    const result = await pendingWikiLinksService.getAllPendingWithContent({
+      page: pageNum,
+      limit: limitNum,
+    });
+    res.json(result);
+  }
+});
+
+export const getPendingLinksByTerm = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { term } = req.params;
+
+  const links = await pendingWikiLinksService.getPendingByTerm(term);
+  res.json(links);
+});
+
+export const getPendingLinksCount = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const count = await pendingWikiLinksService.getPendingCount();
+  const uniqueCount = await pendingWikiLinksService.getUniqueTermsCount();
+
+  res.json({ total: count, uniqueTerms: uniqueCount });
+});
+
+export const createPendingLink = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { term, contentType, contentId, context } = req.body;
+
+  if (!term || !contentType || !contentId) {
+    throw new BadRequestError('Campos obrigatórios faltando');
+  }
+
+  // Check if a wiki entry already exists for this term
+  const existingEntry = await wikiService.getByTermOrAlias(term);
+  if (existingEntry) {
+    throw new BadRequestError('Uma entrada da wiki já existe para este termo');
+  }
+
+  const link = await pendingWikiLinksService.createPendingLink({
+    term,
+    content_type: contentType,
+    content_id: contentId,
+    context,
+  });
+
+  res.status(201).json(link);
+});
+
+export const deletePendingLink = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+
+  await pendingWikiLinksService.deletePendingLink(id);
+
+  res.json({ message: 'Link pendente deletado com sucesso' });
 });

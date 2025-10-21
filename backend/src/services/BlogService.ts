@@ -35,6 +35,19 @@ export class BlogService extends BaseService<BlogPost> {
   }
 
   /**
+   * Get a blog post by ID
+   */
+  async getById(id: string): Promise<BlogPost> {
+    const post = await this.getByField('id', id);
+
+    if (!post) {
+      throw new Error('Post não encontrado');
+    }
+
+    return post;
+  }
+
+  /**
    * Get a blog post by slug
    */
   async getBySlug(slug: string): Promise<BlogPost> {

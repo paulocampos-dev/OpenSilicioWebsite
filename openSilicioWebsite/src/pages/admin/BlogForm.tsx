@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  Alert,
   Autocomplete,
   Box,
   Breadcrumbs,
@@ -8,6 +9,7 @@ import {
   FormControlLabel,
   Link as MUILink,
   Paper,
+  Snackbar,
   Stack,
   Switch,
   TextField,
@@ -17,6 +19,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import UploadIcon from '@mui/icons-material/Upload';
+import PublishIcon from '@mui/icons-material/Publish';
+import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import { blogApi, uploadApi } from '../../services/api'
 import type { BlogPost } from '../../types';
 import BlockNoteEditor from '../../components/BlockNoteEditor';
@@ -30,6 +34,11 @@ export default function BlogForm() {
   const [categories, setCategories] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
   const [post, setPost] = useState<Partial<BlogPost>>({
     slug: '',
     title: '',
@@ -40,12 +49,21 @@ export default function BlogForm() {
     category: '',
     published: false,
   });
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   useEffect(() => {
     loadCategories();
     if (id) {
       loadPost();
     }
+    
+    // Cleanup auto-save timeout on unmount
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
   }, [id]);
 
   const loadCategories = async () => {
@@ -59,28 +77,124 @@ export default function BlogForm() {
 
   const loadPost = async () => {
     try {
-      const data = await blogApi.getBySlug(id!);
+      const data = await blogApi.getById(id!);
       setPost(data);
+      setLastSaved(new Date(data.updated_at));
     } catch (error) {
       console.error('Erro ao carregar post:', error);
-      alert('Erro ao carregar post');
+      setSnackbar({ open: true, message: 'Erro ao carregar post', severity: 'error' });
     }
   };
+
+  // Auto-save function
+  const autoSave = useCallback(async (postData: Partial<BlogPost>) => {
+    // Only auto-save if the post already exists (has an ID)
+    if (!postData.id) return;
+
+    try {
+      await blogApi.update(postData.id, postData);
+      setLastSaved(new Date());
+      setSnackbar({ open: true, message: 'Rascunho salvo automaticamente', severity: 'info' });
+    } catch (error) {
+      console.error('Erro ao salvar automaticamente:', error);
+    }
+  }, []);
+
+  // Trigger auto-save when post content changes
+  useEffect(() => {
+    // Don't auto-save if there's no ID yet or if we're in preview mode
+    if (!post.id || showPreview) return;
+
+    // Clear existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save (30 seconds after last change)
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      autoSave(post);
+    }, 30000); // 30 seconds
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [post, showPreview, autoSave]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (id) {
-        await blogApi.update(post.id!, post);
-      } else {
-        await blogApi.create(post);
+      const savedPost = await handleSave(true);
+      // If it's a new post, navigate to edit mode
+      if (!id && savedPost) {
+        setTimeout(() => {
+          navigate(`/admin/blog/edit/${savedPost.id}`);
+        }, 1500);
       }
-      navigate('/admin/blog');
+    } catch (error) {
+      // Error already handled in handleSave
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  // Manual save function (used for auto-save before wiki link dialog)
+  const handleSave = async (showNotification = true) => {
+    try {
+      let savedPost;
+      if (post.id) {
+        savedPost = await blogApi.update(post.id, post);
+        if (showNotification) {
+          setSnackbar({ open: true, message: 'Post salvo!', severity: 'success' });
+        }
+      } else {
+        savedPost = await blogApi.create(post);
+        setPost(savedPost);
+        if (showNotification) {
+          setSnackbar({ open: true, message: 'Post criado!', severity: 'success' });
+        }
+      }
+      setLastSaved(new Date());
+      return savedPost;
     } catch (error: any) {
       console.error('Erro ao salvar post:', error);
-      alert(error.response?.data?.error || 'Erro ao salvar post');
+      if (showNotification) {
+        setSnackbar({ 
+          open: true, 
+          message: error.response?.data?.error || 'Erro ao salvar post', 
+          severity: 'error' 
+        });
+      }
+      throw error;
+    }
+  };
+
+  const handlePublish = async () => {
+    setLoading(true);
+    try {
+      const updatedPost = { ...post, published: !post.published };
+      const savedPost = await blogApi.update(post.id!, updatedPost);
+      setPost(savedPost);
+      setLastSaved(new Date());
+      setSnackbar({ 
+        open: true, 
+        message: savedPost.published ? 'Post publicado com sucesso!' : 'Post despublicado com sucesso!', 
+        severity: 'success' 
+      });
+    } catch (error: any) {
+      console.error('Erro ao publicar post:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.error || 'Erro ao publicar post', 
+        severity: 'error' 
+      });
     } finally {
       setLoading(false);
     }
@@ -107,10 +221,17 @@ export default function BlogForm() {
   return (
     <form onSubmit={handleSubmit}>
       <Stack spacing={3}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4" fontWeight={700}>
-            {id ? 'Editar Post' : 'Novo Post'}
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant="h4" fontWeight={700}>
+              {id ? 'Editar Post' : 'Novo Post'}
+            </Typography>
+            {lastSaved && (
+              <Typography variant="caption" color="text.secondary">
+                Última alteração: {lastSaved.toLocaleTimeString('pt-BR')}
+              </Typography>
+            )}
+          </Box>
           <Stack direction="row" spacing={2}>
             <Button
               variant={showPreview ? 'outlined' : 'contained'}
@@ -127,6 +248,17 @@ export default function BlogForm() {
             >
               {loading ? 'Salvando...' : 'Salvar'}
             </Button>
+            {post.id && (
+              <Button
+                variant={post.published ? 'outlined' : 'contained'}
+                color={post.published ? 'warning' : 'success'}
+                startIcon={post.published ? <UnpublishedIcon /> : <PublishIcon />}
+                onClick={handlePublish}
+                disabled={loading}
+              >
+                {post.published ? 'Despublicar' : 'Publicar'}
+              </Button>
+            )}
           </Stack>
         </Box>
 
@@ -269,18 +401,16 @@ export default function BlogForm() {
                 <BlockNoteEditor
                   content={post.content || ''}
                   onContentChange={(content) => setPost({ ...post, content })}
+                  contentType="blog"
+                  contentId={post.id}
+                  onBeforeWikiLink={async () => {
+                    // Auto-save before opening wiki link dialog
+                    if (!post.id) {
+                      await handleSave(false);
+                    }
+                  }}
                 />
               </Box>
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={post.published}
-                    onChange={(e) => setPost({ ...post, published: e.target.checked })}
-                  />
-                }
-                label="Publicar"
-              />
             </Stack>
           </Paper>
         ) : (
@@ -319,6 +449,18 @@ export default function BlogForm() {
           </Stack>
         )}
       </Stack>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </form>
   );
 }

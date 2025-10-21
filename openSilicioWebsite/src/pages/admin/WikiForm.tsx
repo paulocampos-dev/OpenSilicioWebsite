@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  Autocomplete,
   Box,
   Breadcrumbs,
   Button,
+  Chip,
   Divider,
   FormControlLabel,
   Link as MUILink,
@@ -31,6 +33,7 @@ export default function WikiForm() {
     slug: '',
     definition: '',
     content: '',
+    aliases: [],
     published: false,
   });
 
@@ -127,6 +130,34 @@ export default function WikiForm() {
                 helperText="Uma definição breve que será exibida em tooltips"
               />
 
+              <Autocomplete
+                multiple
+                freeSolo
+                options={[]}
+                value={entry.aliases || []}
+                onChange={(_, newValue) => {
+                  setEntry({ ...entry, aliases: newValue as string[] });
+                }}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                      key={option}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Aliases (Também conhecido como)"
+                    placeholder="Digite e pressione Enter para adicionar"
+                    helperText="Formas alternativas de se referir a este termo"
+                  />
+                )}
+              />
+
               <Box>
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Conteúdo Detalhado (Opcional)
@@ -161,9 +192,28 @@ export default function WikiForm() {
               <Typography variant="h3" fontWeight={700} gutterBottom>
                 {entry.term || 'Termo'}
               </Typography>
-              <Typography variant="h6" color="text.secondary">
+              <Typography variant="h6" color="text.secondary" gutterBottom>
                 {entry.definition || 'Definição curta aparecerá aqui.'}
               </Typography>
+
+              {entry.aliases && entry.aliases.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Também conhecido como:
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {entry.aliases.map((alias) => (
+                      <Chip
+                        key={alias}
+                        label={alias}
+                        variant="outlined"
+                        color="secondary"
+                        size="small"
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              )}
             </Box>
 
             <Divider />

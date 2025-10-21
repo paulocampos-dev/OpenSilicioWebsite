@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  Alert,
   Box,
   Button,
   Divider,
   FormControlLabel,
   MenuItem,
   Paper,
+  Snackbar,
   Stack,
   Switch,
   Tab,
@@ -17,6 +19,8 @@ import {
 import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
+import PublishIcon from '@mui/icons-material/Publish';
+import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import { educationApi } from '../../services/api'
 import type { EducationResource } from '../../types';
 import BlockNoteEditor from '../../components/BlockNoteEditor';
@@ -28,6 +32,11 @@ export default function EducationForm() {
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewTab, setPreviewTab] = useState<'Visão geral' | 'Conteúdo' | 'Recursos'>('Visão geral');
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
   const [resource, setResource] = useState<Partial<EducationResource>>({
     title: '',
     description: '',
@@ -35,20 +44,97 @@ export default function EducationForm() {
     category: '',
     published: false,
   });
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   useEffect(() => {
     if (id) {
       loadResource();
     }
+    
+    // Cleanup auto-save timeout on unmount
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
   }, [id]);
 
   const loadResource = async () => {
     try {
       const data = await educationApi.getById(id!);
       setResource(data);
+      setLastSaved(new Date(data.updated_at));
     } catch (error) {
       console.error('Erro ao carregar recurso:', error);
-      alert('Erro ao carregar recurso');
+      setSnackbar({ open: true, message: 'Erro ao carregar recurso', severity: 'error' });
+    }
+  };
+
+  // Auto-save function
+  const autoSave = useCallback(async (resourceData: Partial<EducationResource>) => {
+    // Only auto-save if the resource already exists (has an ID)
+    if (!resourceData.id) return;
+
+    try {
+      await educationApi.update(resourceData.id, resourceData);
+      setLastSaved(new Date());
+      setSnackbar({ open: true, message: 'Rascunho salvo automaticamente', severity: 'info' });
+    } catch (error) {
+      console.error('Erro ao salvar automaticamente:', error);
+    }
+  }, []);
+
+  // Trigger auto-save when resource content changes
+  useEffect(() => {
+    // Don't auto-save if there's no ID yet or if we're in preview mode
+    if (!resource.id || showPreview) return;
+
+    // Clear existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save (30 seconds after last change)
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      autoSave(resource);
+    }, 30000); // 30 seconds
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [resource, showPreview, autoSave]);
+
+  // Manual save function (used for auto-save before wiki link dialog)
+  const handleSave = async (showNotification = true) => {
+    try {
+      let savedResource;
+      if (resource.id) {
+        savedResource = await educationApi.update(resource.id, resource);
+        if (showNotification) {
+          setSnackbar({ open: true, message: 'Recurso salvo!', severity: 'success' });
+        }
+      } else {
+        savedResource = await educationApi.create(resource);
+        setResource(savedResource);
+        if (showNotification) {
+          setSnackbar({ open: true, message: 'Recurso criado!', severity: 'success' });
+        }
+      }
+      setLastSaved(new Date());
+      return savedResource;
+    } catch (error: any) {
+      console.error('Erro ao salvar recurso:', error);
+      if (showNotification) {
+        setSnackbar({ 
+          open: true, 
+          message: error.response?.data?.error || 'Erro ao salvar recurso', 
+          severity: 'error' 
+        });
+      }
+      throw error;
     }
   };
 
@@ -57,27 +143,62 @@ export default function EducationForm() {
     setLoading(true);
 
     try {
-      if (id) {
-        await educationApi.update(id, resource);
-      } else {
-        await educationApi.create(resource);
+      const savedResource = await handleSave(true);
+      // If it's a new resource, navigate to edit mode
+      if (!id && savedResource) {
+        setTimeout(() => {
+          navigate(`/admin/educacao/edit/${savedResource.id}`);
+        }, 1500);
       }
-      navigate('/admin/educacao');
-    } catch (error: any) {
-      console.error('Erro ao salvar recurso:', error);
-      alert(error.response?.data?.error || 'Erro ao salvar recurso');
+    } catch (error) {
+      // Error already handled in handleSave
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePublish = async () => {
+    setLoading(true);
+    try {
+      const updatedResource = { ...resource, published: !resource.published };
+      const savedResource = await educationApi.update(resource.id!, updatedResource);
+      setResource(savedResource);
+      setLastSaved(new Date());
+      setSnackbar({ 
+        open: true, 
+        message: savedResource.published ? 'Recurso publicado com sucesso!' : 'Recurso despublicado com sucesso!', 
+        severity: 'success' 
+      });
+    } catch (error: any) {
+      console.error('Erro ao publicar recurso:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.error || 'Erro ao publicar recurso', 
+        severity: 'error' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <Stack spacing={3}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h4" fontWeight={700}>
-            {id ? 'Editar Recurso' : 'Novo Recurso'}
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Box>
+            <Typography variant="h4" fontWeight={700}>
+              {id ? 'Editar Recurso' : 'Novo Recurso'}
+            </Typography>
+            {lastSaved && (
+              <Typography variant="caption" color="text.secondary">
+                Última alteração: {lastSaved.toLocaleTimeString('pt-BR')}
+              </Typography>
+            )}
+          </Box>
           <Stack direction="row" spacing={2}>
             <Button
               variant={showPreview ? 'outlined' : 'contained'}
@@ -94,6 +215,17 @@ export default function EducationForm() {
             >
               {loading ? 'Salvando...' : 'Salvar'}
             </Button>
+            {resource.id && (
+              <Button
+                variant={resource.published ? 'outlined' : 'contained'}
+                color={resource.published ? 'warning' : 'success'}
+                startIcon={resource.published ? <UnpublishedIcon /> : <PublishIcon />}
+                onClick={handlePublish}
+                disabled={loading}
+              >
+                {resource.published ? 'Despublicar' : 'Publicar'}
+              </Button>
+            )}
           </Stack>
         </Box>
 
@@ -143,6 +275,14 @@ export default function EducationForm() {
                     <BlockNoteEditor
                       content={resource.overview || ''}
                       onContentChange={(content) => setResource({ ...resource, overview: content })}
+                      contentType="education"
+                      contentId={resource.id}
+                      onBeforeWikiLink={async () => {
+                        // Auto-save before opening wiki link dialog
+                        if (!resource.id) {
+                          await handleSave(false);
+                        }
+                      }}
                     />
                   </Box>
 
@@ -156,6 +296,14 @@ export default function EducationForm() {
                     <BlockNoteEditor
                       content={resource.resources || ''}
                       onContentChange={(content) => setResource({ ...resource, resources: content })}
+                      contentType="education"
+                      contentId={resource.id}
+                      onBeforeWikiLink={async () => {
+                        // Auto-save before opening wiki link dialog
+                        if (!resource.id) {
+                          await handleSave(false);
+                        }
+                      }}
                     />
                   </Box>
                 </>
@@ -168,18 +316,16 @@ export default function EducationForm() {
                 <BlockNoteEditor
                   content={resource.content || ''}
                   onContentChange={(content) => setResource({ ...resource, content })}
+                  contentType="education"
+                  contentId={resource.id}
+                  onBeforeWikiLink={async () => {
+                    // Auto-save before opening wiki link dialog
+                    if (!resource.id) {
+                      await handleSave(false);
+                    }
+                  }}
                 />
               </Box>
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={resource.published}
-                    onChange={(e) => setResource({ ...resource, published: e.target.checked })}
-                  />
-                }
-                label="Publicar"
-              />
             </Stack>
           </Paper>
         ) : (
@@ -226,6 +372,18 @@ export default function EducationForm() {
           </Paper>
         )}
       </Stack>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </form>
   );
 }

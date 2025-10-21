@@ -1,27 +1,38 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Box, Paper, Stack, Typography, useTheme } from '@mui/material';
+import { useEffect, useMemo, useState, useRef } from 'react';
+import { Box, Button, Paper, Stack, Typography, useTheme } from '@mui/material';
 import { BlockNoteView } from '@blocknote/mantine';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Block, BlockNoteEditor as BlockNoteEditorType } from '@blocknote/core';
 import '@blocknote/mantine/style.css';
 import { uploadApi } from '../services/api';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import LinkIcon from '@mui/icons-material/Link';
 import BlockNoteErrorBoundary from './BlockNoteErrorBoundary';
+import WikiLinkInserter from './WikiLinkInserter';
 
 interface BlockNoteEditorProps {
   content: string;
   onContentChange: (content: string) => void;
   placeholder?: string;
+  contentType?: 'blog' | 'education';
+  contentId?: string;
+  onBeforeWikiLink?: () => Promise<any>;
 }
 
 function BlockNoteEditorInner({
   content,
   onContentChange,
   placeholder = 'Digite seu conteúdo aqui... (Digite "/" para ver comandos)',
+  contentType,
+  contentId,
+  onBeforeWikiLink,
 }: BlockNoteEditorProps) {
   const theme = useTheme();
   const blockNoteTheme = theme.palette.mode === 'dark' ? 'dark' : 'light';
   const [isUploading, setIsUploading] = useState(false);
+  const [wikiLinkDialogOpen, setWikiLinkDialogOpen] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
+  const isUpdatingFromProp = useRef(false);
 
   // Parse initial content
   const initialContent = useMemo(() => {
@@ -32,7 +43,7 @@ function BlockNoteEditorInner({
       // If content is not valid JSON, return undefined to start with empty editor
       return undefined;
     }
-  }, []);
+  }, [content]); // Add content as dependency
 
   // Create editor instance with custom upload function
   const editor = useCreateBlockNote({
@@ -51,11 +62,36 @@ function BlockNoteEditorInner({
     },
   });
 
-  // Handle content changes
+  // Update editor content when content prop changes (e.g., when loading a post)
+  useEffect(() => {
+    if (!editor || !content) return;
+    
+    try {
+      const newBlocks = JSON.parse(content) as Block[];
+      const currentBlocks = editor.document;
+      
+      // Only update if content is different to avoid infinite loops
+      if (JSON.stringify(currentBlocks) !== content) {
+        isUpdatingFromProp.current = true;
+        editor.replaceBlocks(editor.document, newBlocks);
+        // Reset the flag after a short delay to allow the change to propagate
+        setTimeout(() => {
+          isUpdatingFromProp.current = false;
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error updating editor content:', error);
+    }
+  }, [editor, content]);
+
+  // Handle content changes from user edits
   useEffect(() => {
     if (!editor) return;
 
     const handleChange = () => {
+      // Don't trigger onChange if we're updating from the prop
+      if (isUpdatingFromProp.current) return;
+      
       const blocks = editor.document;
       onContentChange(JSON.stringify(blocks));
     };
@@ -71,17 +107,62 @@ function BlockNoteEditorInner({
     };
   }, [editor, onContentChange]);
 
+  // Handle opening wiki link dialog
+  const handleOpenWikiLink = async () => {
+    if (!editor) return;
+    
+    // Auto-save before opening dialog if callback is provided
+    if (onBeforeWikiLink) {
+      try {
+        await onBeforeWikiLink();
+      } catch (error) {
+        console.error('Error saving before wiki link:', error);
+        // Continue anyway - user can still link to existing entries
+      }
+    }
+    
+    const selected = editor.getSelectedText();
+    setSelectedText(selected);
+    setWikiLinkDialogOpen(true);
+  };
+
+  // Handle inserting wiki link
+  const handleInsertWikiLink = (term: string, slug: string) => {
+    if (!editor) return;
+    const url = `/wiki/${slug}`;
+    // If there's selected text, createLink will replace it with the link
+    // Otherwise, we'll use the term as the link text
+    if (selectedText) {
+      editor.createLink(url);
+    } else {
+      editor.createLink(url, term);
+    }
+  };
+
   if (!editor) {
     return null;
   }
 
   return (
     <Stack spacing={2}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1 }}>
-        <InfoOutlinedIcon sx={{ fontSize: 18, color: 'info.main' }} />
-        <Typography variant="caption" color="text.secondary">
-          Digite "/" para ver comandos • Clique nas imagens para redimensionar • Arraste blocos para reordenar
-        </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <InfoOutlinedIcon sx={{ fontSize: 18, color: 'info.main' }} />
+          <Typography variant="caption" color="text.secondary">
+            Digite "/" para ver comandos • Clique nas imagens para redimensionar • Arraste blocos para reordenar
+          </Typography>
+        </Box>
+        {contentType && (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<LinkIcon />}
+            onClick={handleOpenWikiLink}
+            sx={{ whiteSpace: 'nowrap' }}
+          >
+            Adicionar Link da Wiki
+          </Button>
+        )}
       </Box>
       <Paper
         variant="outlined"
@@ -236,6 +317,16 @@ function BlockNoteEditorInner({
         <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
           Enviando arquivo...
         </Box>
+      )}
+
+      {contentType && (
+        <WikiLinkInserter
+          open={wikiLinkDialogOpen}
+          onClose={() => setWikiLinkDialogOpen(false)}
+          onInsert={handleInsertWikiLink}
+          selectedText={selectedText}
+          {...(contentId ? { contentType, contentId } : {})}
+        />
       )}
     </Stack>
   );

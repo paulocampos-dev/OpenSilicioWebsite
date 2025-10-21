@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getAllPosts,
+  getPostById,
   getPostBySlug,
   createPost,
   updatePost,
@@ -23,6 +24,7 @@ router.use((req, res, next) => {
 // Rotas públicas (with caching - 2 minutes)
 router.get('/', cacheMiddleware({ ttl: 120 }), getAllPosts);
 router.get('/categories/list', cacheMiddleware({ ttl: 300 }), getCategories); // 5 min cache
+router.get('/id/:id', cacheMiddleware({ ttl: 120 }), getPostById); // Get by ID (must be before /:slug)
 router.get('/:slug', cacheMiddleware({ ttl: 120 }), getPostBySlug);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)

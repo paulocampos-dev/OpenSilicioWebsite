@@ -80,20 +80,17 @@ function AppContent() {
         <Header mode={mode} toggleMode={toggleMode} />
         <Box sx={{ flex: 1 }}>
           {!isAdminRoute && (
-            <>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/blog" element={<Container sx={{ py: 4 }}><Blog /></Container>} />
-                <Route path="/blog/:slug" element={<Container sx={{ py: 4 }}><Post /></Container>} />
-                <Route path="/educacao" element={<Container sx={{ py: 4 }}><Educacao /></Container>} />
-                <Route path="/educacao/:id" element={<Container sx={{ py: 4 }}><Recurso /></Container>} />
-                <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiList /></Container>} />
-                <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><WikiDetail /></Container>} />
-                <Route path="/sobre" element={<Container sx={{ py: 4 }}><About /></Container>} />
-                <Route path="/login" element={<Container sx={{ py: 4 }}><Login /></Container>} />
-              </Routes>
-              <Footer />
-            </>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/blog" element={<Container sx={{ py: 4 }}><Blog /></Container>} />
+              <Route path="/blog/:slug" element={<Container sx={{ py: 4 }}><Post /></Container>} />
+              <Route path="/educacao" element={<Container sx={{ py: 4 }}><Educacao /></Container>} />
+              <Route path="/educacao/:id" element={<Container sx={{ py: 4 }}><Recurso /></Container>} />
+              <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiList /></Container>} />
+              <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><WikiDetail /></Container>} />
+              <Route path="/sobre" element={<Container sx={{ py: 4 }}><About /></Container>} />
+              <Route path="/login" element={<Container sx={{ py: 4 }}><Login /></Container>} />
+            </Routes>
           )}
           {isAdminRoute && (
             <Routes>
@@ -177,6 +174,7 @@ function AppContent() {
             </Routes>
           )}
         </Box>
+        {!isAdminRoute && <Footer />}
       </Box>
     </ThemeProvider>
   )

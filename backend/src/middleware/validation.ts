@@ -69,11 +69,6 @@ export const blogPostSchema = z.object({
     })
     .min(1, 'Conteúdo não pode ser vazio')
     .max(100000, 'Conteúdo deve ter no máximo 100000 caracteres'),
-  content_type: z
-    .enum(['wysiwyg', 'markdown'], {
-      errorMap: () => ({ message: 'Tipo de conteúdo deve ser wysiwyg ou markdown' }),
-    })
-    .optional(),
   author: z
     .string()
     .max(255, 'Nome do autor deve ter no máximo 255 caracteres')
@@ -81,10 +76,11 @@ export const blogPostSchema = z.object({
     .optional(),
   image_url: z
     .string()
-    .url('URL da imagem inválida')
     .max(2048, 'URL da imagem deve ter no máximo 2048 caracteres')
-    .optional()
-    .or(z.literal('')),
+    .refine((val) => !val || val === '' || /^https?:\/\/.+/.test(val), {
+      message: 'URL da imagem inválida',
+    })
+    .optional(),
   category: z
     .string()
     .max(100, 'Categoria deve ter no máximo 100 caracteres')
@@ -115,11 +111,6 @@ export const educationResourceSchema = z.object({
     })
     .min(1, 'Conteúdo não pode ser vazio')
     .max(100000, 'Conteúdo deve ter no máximo 100000 caracteres'),
-  content_type: z
-    .enum(['wysiwyg', 'markdown'], {
-      errorMap: () => ({ message: 'Tipo de conteúdo deve ser wysiwyg ou markdown' }),
-    })
-    .optional(),
   category: z
     .string()
     .max(100, 'Categoria deve ter no máximo 100 caracteres')
@@ -155,11 +146,6 @@ export const wikiEntrySchema = z.object({
   content: z
     .string()
     .max(100000, 'Conteúdo deve ter no máximo 100000 caracteres')
-    .optional(),
-  content_type: z
-    .enum(['wysiwyg', 'markdown'], {
-      errorMap: () => ({ message: 'Tipo de conteúdo deve ser wysiwyg ou markdown' }),
-    })
     .optional(),
   published: z.boolean().optional(),
 });

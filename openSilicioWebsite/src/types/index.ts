@@ -36,6 +36,7 @@ export interface WikiEntry {
   slug: string;
   definition: string;
   content: string;
+  aliases?: string[];
   published: boolean;
   created_at: string;
   updated_at: string;
@@ -50,6 +51,22 @@ export interface WikiLink {
   term?: string;
   slug?: string;
   created_at: string;
+}
+
+export interface PendingWikiLink {
+  id: string;
+  term: string;
+  content_type: 'blog' | 'education';
+  content_id: string;
+  context?: string;
+  created_at: string;
+  content_title?: string;
+}
+
+export interface PendingWikiLinkGrouped {
+  term: string;
+  count: number;
+  firstCreated: string;
 }
 
 // Pagination metadata
