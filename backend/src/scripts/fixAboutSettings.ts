@@ -1,30 +1,15 @@
 import pool from '../config/database';
 
-async function seedSettings() {
+/**
+ * Fix script to convert HTML about settings to BlockNote JSON format
+ * This script can be run manually to fix databases that have HTML content
+ * instead of BlockNote JSON in about settings.
+ */
+async function fixAboutSettings() {
   try {
-    console.log('⚙️  Verificando configurações da página Sobre...');
+    console.log('🔧 Fixing about settings - converting HTML to BlockNote JSON...');
 
-    // Check if about settings already exist
-    const existingSettings = await pool.query(
-      'SELECT * FROM site_settings WHERE key = $1',
-      ['about_content']
-    );
-
-    if (existingSettings.rows.length > 0) {
-      console.log('ℹ️  Configurações da página Sobre já existem, pulando seed...');
-      console.log('💡 Dica: As configurações são gerenciadas automaticamente pelas migrações.');
-      console.log('    Se precisar resetar, execute a migração 006 novamente.');
-      process.exit(0);
-    }
-
-    console.log('📝 Inserindo configurações iniciais da página Sobre...');
-
-    // Insert default about page settings
-    const settingsToInsert = [
-      {
-        key: 'about_title',
-        value: 'Sobre o OpenSilício'
-      },
+    const settingsToFix = [
       {
         key: 'about_content',
         value: JSON.stringify([{
@@ -64,36 +49,58 @@ async function seedSettings() {
           "content":[{"type":"text","text":"O OpenSilício nasceu da paixão de estudantes e professores pela área de eletrônica e circuitos integrados. Com o objetivo de facilitar o aprendizado e compartilhar conhecimento, criamos esta plataforma para reunir recursos, tutoriais e projetos práticos.","styles":{}}],
           "children":[]
         }])
-      },
-      {
-        key: 'about_team_members',
-        value: '[]'
       }
     ];
 
-    for (const setting of settingsToInsert) {
-      await pool.query(`
-        INSERT INTO site_settings (key, value, created_at, updated_at)
-        VALUES ($1, $2, NOW(), NOW())
-        ON CONFLICT (key) DO UPDATE
-        SET value = EXCLUDED.value, updated_at = NOW()
-      `, [setting.key, setting.value]);
+    let fixedCount = 0;
+    let skippedCount = 0;
+
+    for (const setting of settingsToFix) {
+      // Check if setting exists and if it's HTML
+      const result = await pool.query(
+        'SELECT value FROM site_settings WHERE key = $1',
+        [setting.key]
+      );
+
+      if (result.rows.length === 0) {
+        console.log(`   ⚠️  ${setting.key}: não encontrado, pulando...`);
+        skippedCount++;
+        continue;
+      }
+
+      const currentValue = result.rows[0].value;
+
+      // Check if it's HTML (starts with '<') or empty
+      if (!currentValue || currentValue === '' || currentValue.trim().startsWith('<')) {
+        await pool.query(
+          'UPDATE site_settings SET value = $1, updated_at = NOW() WHERE key = $2',
+          [setting.value, setting.key]
+        );
+        console.log(`   ✅ ${setting.key}: convertido para BlockNote JSON`);
+        fixedCount++;
+      } else if (currentValue.trim().startsWith('[')) {
+        console.log(`   ℹ️  ${setting.key}: já está em formato BlockNote JSON, pulando...`);
+        skippedCount++;
+      } else {
+        console.log(`   ⚠️  ${setting.key}: formato desconhecido, pulando...`);
+        skippedCount++;
+      }
     }
 
-    console.log('✅ Configurações iniciais da página Sobre inseridas com sucesso!');
-    console.log(`   - about_title`);
-    console.log(`   - about_content`);
-    console.log(`   - about_mission`);
-    console.log(`   - about_vision`);
-    console.log(`   - about_history`);
-    console.log(`   - about_team_members`);
-    
+    console.log('\n✅ Correção concluída!');
+    console.log(`   📊 Estatísticas:`);
+    console.log(`      - Corrigidos: ${fixedCount}`);
+    console.log(`      - Pulados: ${skippedCount}`);
+
+    if (fixedCount > 0) {
+      console.log('\n💡 As configurações foram atualizadas. Recarregue a página About no frontend.');
+    }
+
     process.exit(0);
   } catch (error) {
-    console.error('❌ Erro ao inserir configurações:', error);
+    console.error('❌ Erro ao corrigir configurações:', error);
     process.exit(1);
   }
 }
 
-seedSettings();
-
+fixAboutSettings();

@@ -7,7 +7,8 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "migrate": "ts-node src/migrations/migrate.ts"
+    "migrate": "ts-node src/migrations/migrate.ts",
+    "fix:about": "ts-node src/scripts/fixAboutSettings.ts"
   },
   "keywords": [],
   "author": "",
