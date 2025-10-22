@@ -24,6 +24,12 @@ export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response
   res.json(result);
 });
 
+export const getEntryById = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const entry = await wikiService.getEntryById(id);
+  res.json(entry);
+});
+
 export const getEntryBySlug = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { slug } = req.params;
   const entry = await wikiService.getBySlug(slug);

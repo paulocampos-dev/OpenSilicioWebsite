@@ -10,6 +10,7 @@ import {
   Alert,
   Box,
   Divider,
+  useTheme,
 } from '@mui/material'
 import XIcon from '@mui/icons-material/X'
 import LinkedInIcon from '@mui/icons-material/LinkedIn'
@@ -28,6 +29,7 @@ interface ShareAndCiteProps {
 }
 
 export default function ShareAndCite({ title, author, url, imageUrl, publishedDate }: ShareAndCiteProps) {
+  const theme = useTheme()
   const [showCitations, setShowCitations] = useState(false)
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
@@ -191,7 +193,7 @@ export default function ShareAndCite({ title, author, url, imageUrl, publishedDa
                   <Box
                     sx={{
                       p: 2,
-                      bgcolor: 'grey.50',
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50',
                       borderRadius: 1,
                       fontFamily: 'monospace',
                       fontSize: '0.875rem',
@@ -221,7 +223,7 @@ export default function ShareAndCite({ title, author, url, imageUrl, publishedDa
                   <Box
                     sx={{
                       p: 2,
-                      bgcolor: 'grey.50',
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50',
                       borderRadius: 1,
                       fontFamily: 'monospace',
                       fontSize: '0.875rem',
@@ -235,7 +237,7 @@ export default function ShareAndCite({ title, author, url, imageUrl, publishedDa
               </Paper>
 
               {/* Metadata */}
-              <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+              <Paper variant="outlined" sx={{ p: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50' }}>
                 <Stack spacing={0.5}>
                   <Typography variant="caption" color="text.secondary">
                     <strong>Autor:</strong> {displayAuthor}

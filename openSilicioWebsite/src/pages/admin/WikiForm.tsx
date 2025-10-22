@@ -18,6 +18,8 @@ import {
 import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
+import PublishIcon from '@mui/icons-material/Publish';
+import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import { wikiApi } from '../../services/api'
 import type { WikiEntry } from '../../types';
 import BlockNoteEditor from '../../components/BlockNoteEditor';
@@ -61,7 +63,7 @@ export default function WikiForm() {
 
   const loadEntry = async () => {
     try {
-      const data = await wikiApi.getBySlug(id!);
+      const data = await wikiApi.getById(id!);
       setEntry(data);
     } catch (error) {
       console.error('Erro ao carregar entrada:', error);
@@ -83,6 +85,21 @@ export default function WikiForm() {
     } catch (error: any) {
       console.error('Erro ao salvar entrada:', error);
       alert(error.response?.data?.error || 'Erro ao salvar entrada');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setLoading(true);
+    try {
+      const updatedEntry = { ...entry, published: !entry.published };
+      const savedEntry = await wikiApi.update(entry.id!, updatedEntry);
+      setEntry(savedEntry);
+      alert(savedEntry.published ? 'Entrada publicada com sucesso!' : 'Entrada despublicada com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao publicar entrada:', error);
+      alert(error.response?.data?.error || 'Erro ao publicar entrada');
     } finally {
       setLoading(false);
     }
@@ -111,6 +128,17 @@ export default function WikiForm() {
             >
               {loading ? 'Salvando...' : 'Salvar'}
             </Button>
+            {entry.id && (
+              <Button
+                variant={entry.published ? 'outlined' : 'contained'}
+                color={entry.published ? 'warning' : 'success'}
+                startIcon={entry.published ? <UnpublishedIcon /> : <PublishIcon />}
+                onClick={handlePublish}
+                disabled={loading}
+              >
+                {entry.published ? 'Despublicar' : 'Publicar'}
+              </Button>
+            )}
           </Stack>
         </Box>
 

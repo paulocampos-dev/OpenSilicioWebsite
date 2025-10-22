@@ -33,6 +33,13 @@ export class WikiService extends BaseService<WikiEntry> {
   }
 
   /**
+   * Get a wiki entry by ID
+   */
+  async getEntryById(id: string): Promise<WikiEntry> {
+    return this.getById(id);
+  }
+
+  /**
    * Get a wiki entry by slug
    */
   async getBySlug(slug: string): Promise<WikiEntry> {

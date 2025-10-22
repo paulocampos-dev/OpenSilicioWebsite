@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getAllEntries,
+  getEntryById,
   getEntryBySlug,
   createEntry,
   updateEntry,
@@ -42,7 +43,10 @@ router.get('/pending/term/:term', authMiddleware, getPendingLinksByTerm);
 router.post('/pending', authMiddleware, createPendingLink);
 router.delete('/pending/:id', authMiddleware, deletePendingLink);
 
-// Get entry by slug (must be after /pending/* routes to avoid conflict)
+// Get entry by ID (for admin editing - must be before slug route)
+router.get('/id/:id', cacheMiddleware({ ttl: 120 }), getEntryById);
+
+// Get entry by slug (must be after specific routes to avoid conflict)
 router.get('/:slug', cacheMiddleware({ ttl: 120 }), getEntryBySlug);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)

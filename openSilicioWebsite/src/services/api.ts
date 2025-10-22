@@ -172,6 +172,10 @@ export const wikiApi = {
     });
     return response.data;
   },
+  getById: async (id: string) => {
+    const response = await api.get<WikiEntry>(`/wiki/id/${id}`);
+    return response.data;
+  },
   getBySlug: async (slug: string) => {
     const response = await api.get<WikiEntry>(`/wiki/${slug}`);
     return response.data;
