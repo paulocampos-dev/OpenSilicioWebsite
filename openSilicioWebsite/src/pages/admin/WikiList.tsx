@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -14,19 +14,26 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Alert,
+  Divider,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import { wikiApi } from '../../services/api'
-import type { WikiEntry } from '../../types';
+import type { WikiEntry, PendingWikiLinkGrouped } from '../../types';
 
 export default function WikiList() {
+  const navigate = useNavigate();
   const [entries, setEntries] = useState<WikiEntry[]>([]);
+  const [pendingLinks, setPendingLinks] = useState<PendingWikiLinkGrouped[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingPending, setLoadingPending] = useState(true);
 
   useEffect(() => {
     loadEntries();
+    loadPendingLinks();
   }, []);
 
   const loadEntries = async () => {
@@ -38,6 +45,17 @@ export default function WikiList() {
       console.error('Erro ao carregar entradas:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPendingLinks = async () => {
+    try {
+      const data = await wikiApi.getPendingLinks(1, 100, true);
+      setPendingLinks(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Erro ao carregar links pendentes:', error);
+    } finally {
+      setLoadingPending(false);
     }
   };
 
@@ -55,6 +73,11 @@ export default function WikiList() {
     }
   };
 
+  const handleCreateFromPending = (term: string) => {
+    // Navigate to the new wiki entry form with the term pre-filled
+    navigate('/admin/wiki/new', { state: { pendingTerm: term } });
+  };
+
   return (
     <Stack spacing={3}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -70,6 +93,59 @@ export default function WikiList() {
           Nova Entrada
         </Button>
       </Box>
+
+      {/* Pending Links Section */}
+      {loadingPending ? null : pendingLinks.length > 0 && (
+        <Paper sx={{ p: 3 }}>
+          <Stack spacing={2}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <BookmarkAddIcon color="primary" />
+              <Typography variant="h6" fontWeight={600}>
+                Links Pendentes ({pendingLinks.length})
+              </Typography>
+            </Box>
+            <Alert severity="info">
+              Estes termos foram marcados em posts e recursos educacionais, mas ainda não têm uma entrada na wiki.
+            </Alert>
+            <Divider />
+            <Stack spacing={1}>
+              {pendingLinks.map((pending) => (
+                <Box
+                  key={pending.term}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    p: 2,
+                    bgcolor: 'background.default',
+                    borderRadius: 1,
+                    '&:hover': {
+                      bgcolor: 'action.hover',
+                    },
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body1" fontWeight={600}>
+                      {pending.term}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Usado {pending.count} {pending.count === 1 ? 'vez' : 'vezes'}
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={() => handleCreateFromPending(pending.term)}
+                  >
+                    Criar Entrada
+                  </Button>
+                </Box>
+              ))}
+            </Stack>
+          </Stack>
+        </Paper>
+      )}
 
       <TableContainer component={Paper}>
         <Table>

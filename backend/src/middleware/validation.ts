@@ -116,6 +116,14 @@ export const educationResourceSchema = z.object({
     .max(100, 'Categoria deve ter no máximo 100 caracteres')
     .trim()
     .optional(),
+  overview: z
+    .string()
+    .max(100000, 'Visão geral deve ter no máximo 100000 caracteres')
+    .optional(),
+  resources: z
+    .string()
+    .max(100000, 'Recursos deve ter no máximo 100000 caracteres')
+    .optional(),
   published: z.boolean().optional(),
 });
 

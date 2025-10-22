@@ -8,6 +8,7 @@ export default defineConfig({
     host: '0.0.0.0', // Required for Docker
     port: 5173,
     strictPort: true,
+    disableHostCheck: true, // Alternative to allowedHosts
     watch: {
       usePolling: false, // Use native file watching (faster)
       interval: 1000,
@@ -28,5 +29,6 @@ export default defineConfig({
         secure: false,
       },
     },
+    allowedHosts: 'all', // Allow all hosts including ngrok (safe for development)
   },
 })

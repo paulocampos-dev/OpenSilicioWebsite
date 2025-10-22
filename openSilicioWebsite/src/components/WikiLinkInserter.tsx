@@ -117,7 +117,7 @@ export default function WikiLinkInserter({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <Typography variant="h6" fontWeight={700}>
+        <Typography component="div" variant="h6" fontWeight={700}>
           Adicionar Link da Wiki
         </Typography>
         {selectedText && (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   Autocomplete,
   Box,
@@ -26,6 +26,7 @@ import BlockNoteContent from '../../components/BlockNoteContent';
 export default function WikiForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [entry, setEntry] = useState<Partial<WikiEntry>>({
@@ -40,8 +41,23 @@ export default function WikiForm() {
   useEffect(() => {
     if (id) {
       loadEntry();
+    } else {
+      // Check if we have a pending term from navigation state
+      const state = location.state as { pendingTerm?: string } | null;
+      if (state?.pendingTerm) {
+        const term = state.pendingTerm;
+        const slug = term.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        setEntry({
+          term,
+          slug,
+          definition: '',
+          content: '',
+          aliases: [],
+          published: false,
+        });
+      }
     }
-  }, [id]);
+  }, [id, location.state]);
 
   const loadEntry = async () => {
     try {

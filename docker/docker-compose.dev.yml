@@ -78,7 +78,7 @@ services:
       - ../openSilicioWebsite/src:/app/src:delegated
       - ../openSilicioWebsite/public:/app/public:delegated
       - ../openSilicioWebsite/index.html:/app/index.html:ro
-      - ../openSilicioWebsite/vite.config.js:/app/vite.config.js:ro
+      - ../openSilicioWebsite/vite.config.js:/app/vite.config.js:delegated
       - ../openSilicioWebsite/tsconfig.json:/app/tsconfig.json:ro
       # Use named volume for node_modules (prevents host/container conflicts)
       - frontend_node_modules_dev:/app/node_modules
