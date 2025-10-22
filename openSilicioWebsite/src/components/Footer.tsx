@@ -1,9 +1,10 @@
-import { Box, Container, Grid, Stack, Typography, Link, Divider } from '@mui/material'
+import { Box, Container, Grid, Stack, Typography, Link, Divider, Button } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import EmailIcon from '@mui/icons-material/Email'
 import InstagramIcon from '@mui/icons-material/Instagram'
 import LinkedInIcon from '@mui/icons-material/LinkedIn'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 
 export default function Footer() {
   return (
@@ -141,7 +142,7 @@ export default function Footer() {
               </Typography>
               <Link
                 component={RouterLink}
-                to="/blog"
+                to="/sobre"
                 sx={{
                   color: 'rgba(255,255,255,0.7)',
                   textDecoration: 'none',
@@ -319,15 +320,37 @@ export default function Footer() {
           >
             © {new Date().getFullYear()} OpenSilício - Todos os direitos reservados
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.85rem',
-            }}
-          >
-            Grupo de Pesquisa e Extensão - Poli USP
-          </Typography>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.85rem',
+              }}
+            >
+              Grupo de Pesquisa e Extensão - Poli USP
+            </Typography>
+            <Button
+              component={RouterLink}
+              to="/login"
+              variant="outlined"
+              size="small"
+              startIcon={<AdminPanelSettingsIcon />}
+              sx={{
+                color: 'rgba(255,255,255,0.7)',
+                borderColor: 'rgba(255,255,255,0.3)',
+                fontSize: '0.85rem',
+                textTransform: 'none',
+                '&:hover': {
+                  color: 'white',
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                },
+              }}
+            >
+              Admin
+            </Button>
+          </Stack>
         </Stack>
       </Container>
     </Box>

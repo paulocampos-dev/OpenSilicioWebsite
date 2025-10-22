@@ -85,7 +85,6 @@ function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void 
         <Button component={RouterLink} to="/blog" color="primary">Blog</Button>
         <Button component={RouterLink} to="/wiki" color="primary">Wiki</Button>
         <Button component={RouterLink} to="/sobre" color="primary">Sobre</Button>
-        <Button component={RouterLink} to="/login" color="primary">Entrar</Button>
         <IconButton onClick={toggleMode} color="inherit" aria-label="Alternar tema" size="large">
           {mode === 'dark' ? <Brightness7Icon fontSize="large" /> : <Brightness4Icon fontSize="large" />}
         </IconButton>
