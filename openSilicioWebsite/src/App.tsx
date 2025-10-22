@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { ThemeProvider, CssBaseline, AppBar, Toolbar, Typography, IconButton, Box, Container, Button } from '@mui/material'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
@@ -29,6 +29,40 @@ import EducationForm from './pages/admin/EducationForm'
 import AdminWikiList from './pages/admin/WikiList'
 import WikiForm from './pages/admin/WikiForm'
 import Settings from './pages/admin/Settings'
+
+// localStorage key for theme preference
+const THEME_STORAGE_KEY = 'opensilicio-theme-mode'
+
+// Get initial theme mode from localStorage or system preference
+const getInitialMode = (): ColorMode => {
+  try {
+    // First, check localStorage for saved preference
+    const savedMode = localStorage.getItem(THEME_STORAGE_KEY)
+    if (savedMode === 'light' || savedMode === 'dark') {
+      return savedMode
+    }
+
+    // If no saved preference, check system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark'
+    }
+  } catch (error) {
+    // If localStorage is not available (e.g., private browsing), fall back to system or light
+    console.warn('localStorage not available:', error)
+  }
+
+  // Default to light mode
+  return 'light'
+}
+
+// Save theme mode to localStorage
+const saveMode = (mode: ColorMode): void => {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, mode)
+  } catch (error) {
+    console.warn('Failed to save theme preference:', error)
+  }
+}
 
 function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void }) {
   const location = useLocation()
@@ -61,11 +95,47 @@ function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void 
 }
 
 function AppContent() {
-  const [mode, setMode] = useState<ColorMode>('light')
+  const [mode, setMode] = useState<ColorMode>(getInitialMode)
   const theme = useMemo(() => getTheme(mode), [mode])
-  const toggleMode = () => setMode(prev => (prev === 'light' ? 'dark' : 'light'))
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+
+  // Save theme preference to localStorage whenever it changes
+  useEffect(() => {
+    saveMode(mode)
+  }, [mode])
+
+  // Listen for system preference changes (optional enhancement)
+  useEffect(() => {
+    try {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      const handleChange = (e: MediaQueryListEvent) => {
+        // Only auto-switch if user hasn't explicitly set a preference
+        const savedMode = localStorage.getItem(THEME_STORAGE_KEY)
+        if (!savedMode) {
+          setMode(e.matches ? 'dark' : 'light')
+        }
+      }
+
+      // Modern browsers
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', handleChange)
+        return () => mediaQuery.removeEventListener('change', handleChange)
+      }
+      // Legacy browsers
+      else if (mediaQuery.addListener) {
+        mediaQuery.addListener(handleChange)
+        return () => mediaQuery.removeListener(handleChange)
+      }
+    } catch (error) {
+      console.warn('Could not set up system theme listener:', error)
+    }
+  }, [])
+
+  // Toggle between light and dark mode
+  const toggleMode = () => {
+    setMode(prev => (prev === 'light' ? 'dark' : 'light'))
+  }
 
   return (
     <ThemeProvider theme={theme}>
