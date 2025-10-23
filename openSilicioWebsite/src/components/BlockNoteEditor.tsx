@@ -1,14 +1,18 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { Box, Button, Paper, Stack, Typography, useTheme } from '@mui/material';
 import { BlockNoteView } from '@blocknote/mantine';
-import { useCreateBlockNote } from '@blocknote/react';
-import { Block, BlockNoteEditor as BlockNoteEditorType } from '@blocknote/core';
+import { useCreateBlockNote, getDefaultReactSlashMenuItems, SuggestionMenuController } from '@blocknote/react';
+import { Block, BlockNoteEditor as BlockNoteEditorType, filterSuggestionItems } from '@blocknote/core';
 import '@blocknote/mantine/style.css';
+import 'katex/dist/katex.min.css';
 import { uploadApi } from '../services/api';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LinkIcon from '@mui/icons-material/Link';
+import FunctionsIcon from '@mui/icons-material/Functions';
+import YouTubeIcon from '@mui/icons-material/YouTube';
 import BlockNoteErrorBoundary from './BlockNoteErrorBoundary';
 import WikiLinkInserter from './WikiLinkInserter';
+import { customSchema } from './blockNoteSchema';
 
 interface BlockNoteEditorProps {
   content: string;
@@ -17,6 +21,115 @@ interface BlockNoteEditorProps {
   contentType?: 'blog' | 'education';
   contentId?: string;
   onBeforeWikiLink?: () => Promise<any>;
+}
+
+// Helper function to extract YouTube ID from URL
+function extractYouTubeId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
+    /^([a-zA-Z0-9_-]{11})$/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+// Get custom slash menu items including LaTeX and YouTube
+function getCustomSlashMenuItems(
+  editor: BlockNoteEditorType<typeof customSchema>, 
+  onContentChange: (content: string) => void,
+  isCreatingBlock: React.MutableRefObject<boolean>
+) {
+  return [
+    ...getDefaultReactSlashMenuItems(editor),
+    {
+      title: 'Equação LaTeX',
+      onItemClick: () => {
+        console.log('🎯 LaTeX slash menu item clicked');
+        isCreatingBlock.current = true;
+        
+        const currentBlock = editor.getTextCursorPosition().block;
+        const isEmpty = currentBlock.content === undefined ||
+                       (Array.isArray(currentBlock.content) && currentBlock.content.length === 0);
+
+        console.log('📝 Current block state:', {
+          blockId: currentBlock.id,
+          blockType: currentBlock.type,
+          isEmpty,
+          content: currentBlock.content
+        });
+
+        if (isEmpty) {
+          console.log('🔄 Updating current block to LaTeX');
+          editor.updateBlock(currentBlock, {
+            type: 'latex',
+            props: { latex: '' },
+          });
+          // Immediately update the content to prevent sync issues
+          const newContent = JSON.stringify(editor.document);
+          console.log('🚀 Immediately updating content prop:', newContent);
+          onContentChange(newContent);
+        } else {
+          console.log('➕ Inserting new LaTeX block after current block');
+          editor.insertBlocks(
+            [
+              {
+                type: 'latex',
+                props: { latex: '' },
+              },
+            ],
+            currentBlock,
+            'after'
+          );
+          // Immediately update the content to prevent sync issues
+          const newContent = JSON.stringify(editor.document);
+          console.log('🚀 Immediately updating content prop:', newContent);
+          onContentChange(newContent);
+        }
+        
+        // Reset the flag after a short delay
+        setTimeout(() => {
+          isCreatingBlock.current = false;
+        }, 100);
+      },
+      aliases: ['latex', 'math', 'equation', 'formula', 'equação', 'matemática'],
+      group: 'Mídia',
+      icon: <FunctionsIcon />,
+      subtext: 'Inserir uma equação matemática em LaTeX',
+    },
+    {
+      title: 'Vídeo do YouTube',
+      onItemClick: () => {
+        const currentBlock = editor.getTextCursorPosition().block;
+        const isEmpty = currentBlock.content === undefined ||
+                       (Array.isArray(currentBlock.content) && currentBlock.content.length === 0);
+
+        if (isEmpty) {
+          editor.updateBlock(currentBlock, {
+            type: 'youtube',
+            props: { videoId: '', url: '', width: 100 },
+          });
+        } else {
+          editor.insertBlocks(
+            [
+              {
+                type: 'youtube',
+                props: { videoId: '', url: '', width: 100 },
+              },
+            ],
+            currentBlock,
+            'after'
+          );
+        }
+      },
+      aliases: ['youtube', 'video', 'vídeo', 'yt'],
+      group: 'Mídia',
+      icon: <YouTubeIcon />,
+      subtext: 'Incorporar um vídeo do YouTube',
+    },
+  ];
 }
 
 function BlockNoteEditorInner({
@@ -33,20 +146,26 @@ function BlockNoteEditorInner({
   const [wikiLinkDialogOpen, setWikiLinkDialogOpen] = useState(false);
   const [selectedText, setSelectedText] = useState('');
   const isUpdatingFromProp = useRef(false);
+  const isCreatingBlock = useRef(false);
 
   // Parse initial content
   const initialContent = useMemo(() => {
+    console.log('📋 Parsing initial content:', { content });
     if (!content) return undefined;
     try {
-      return JSON.parse(content) as Block[];
-    } catch {
+      const parsed = JSON.parse(content) as Block[];
+      console.log('✅ Successfully parsed content:', parsed);
+      return parsed;
+    } catch (error) {
+      console.log('❌ Failed to parse content, using undefined:', error);
       // If content is not valid JSON, return undefined to start with empty editor
       return undefined;
     }
   }, [content]); // Add content as dependency
 
-  // Create editor instance with custom upload function
+  // Create editor instance with custom schema and upload function
   const editor = useCreateBlockNote({
+    schema: customSchema,
     ...(initialContent ? { initialContent } : {}),
     uploadFile: async (file: File) => {
       setIsUploading(true);
@@ -62,25 +181,74 @@ function BlockNoteEditorInner({
     },
   });
 
+  // Auto-embed YouTube URLs when pasted
+  useEffect(() => {
+    if (!editor) return;
+
+    const handlePaste = (event: ClipboardEvent) => {
+      const text = event.clipboardData?.getData('text/plain');
+      if (!text) return;
+
+      const videoId = extractYouTubeId(text);
+      if (videoId) {
+        event.preventDefault();
+        editor.insertBlocks(
+          [
+            {
+              type: 'youtube',
+              props: { videoId, url: text, width: 100 },
+            },
+          ],
+          editor.getTextCursorPosition().block,
+          'after'
+        );
+      }
+    };
+
+    const editorElement = editor.domElement;
+    if (editorElement) {
+      editorElement.addEventListener('paste', handlePaste);
+      return () => {
+        editorElement.removeEventListener('paste', handlePaste);
+      };
+    }
+  }, [editor]);
+
   // Update editor content when content prop changes (e.g., when loading a post)
   useEffect(() => {
     if (!editor || !content) return;
+    
+    // Skip updates when we're creating a block to prevent conflicts
+    if (isCreatingBlock.current) {
+      console.log('⏸️ Skipping content update - creating block');
+      return;
+    }
     
     try {
       const newBlocks = JSON.parse(content) as Block[];
       const currentBlocks = editor.document;
       
+      console.log('🔄 Content prop changed, comparing:', {
+        currentBlocksCount: currentBlocks.length,
+        newBlocksCount: newBlocks.length,
+        currentBlocks: currentBlocks.map(b => ({ id: b.id, type: b.type, props: b.props })),
+        newBlocks: newBlocks.map(b => ({ id: b.id, type: b.type, props: b.props }))
+      });
+      
       // Only update if content is different to avoid infinite loops
       if (JSON.stringify(currentBlocks) !== content) {
+        console.log('🔄 Updating editor from prop content');
         isUpdatingFromProp.current = true;
         editor.replaceBlocks(editor.document, newBlocks);
         // Reset the flag after a short delay to allow the change to propagate
         setTimeout(() => {
           isUpdatingFromProp.current = false;
         }, 100);
+      } else {
+        console.log('⏭️ Skipping update - content is the same');
       }
     } catch (error) {
-      console.error('Error updating editor content:', error);
+      console.error('❌ Error updating editor content:', error);
     }
   }, [editor, content]);
 
@@ -90,10 +258,20 @@ function BlockNoteEditorInner({
 
     const handleChange = () => {
       // Don't trigger onChange if we're updating from the prop
-      if (isUpdatingFromProp.current) return;
+      if (isUpdatingFromProp.current) {
+        console.log('⏸️ Skipping onChange - updating from prop');
+        return;
+      }
       
       const blocks = editor.document;
-      onContentChange(JSON.stringify(blocks));
+      const contentString = JSON.stringify(blocks);
+      console.log('📄 Editor document changed:', {
+        blockCount: blocks.length,
+        blocks: blocks.map(b => ({ id: b.id, type: b.type, props: b.props })),
+        contentLength: contentString.length
+      });
+      console.log('📤 Calling onContentChange with:', contentString);
+      onContentChange(contentString);
     };
 
     // Listen to document changes
@@ -311,7 +489,15 @@ function BlockNoteEditorInner({
         <BlockNoteView
           editor={editor}
           theme={blockNoteTheme}
-        />
+          slashMenu={false}
+        >
+          <SuggestionMenuController
+            triggerCharacter={'/'}
+            getItems={async (query) =>
+              filterSuggestionItems(getCustomSlashMenuItems(editor, onContentChange, isCreatingBlock), query)
+            }
+          />
+        </BlockNoteView>
       </Paper>
       {isUploading && (
         <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>

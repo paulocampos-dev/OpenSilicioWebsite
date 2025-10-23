@@ -4,7 +4,9 @@ import { BlockNoteView } from '@blocknote/mantine';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Block } from '@blocknote/core';
 import '@blocknote/mantine/style.css';
+import 'katex/dist/katex.min.css';
 import BlockNoteErrorBoundary from './BlockNoteErrorBoundary';
+import { customSchema } from './blockNoteSchema';
 
 interface BlockNoteContentProps {
   content: string;
@@ -25,10 +27,11 @@ function BlockNoteContentInner({ content }: BlockNoteContentProps) {
     }
   }, [content]);
 
-  // Create a read-only editor instance
-  const editor = useCreateBlockNote(
-    initialContent ? { initialContent } : undefined
-  );
+  // Create a read-only editor instance with custom schema
+  const editor = useCreateBlockNote({
+    schema: customSchema,
+    ...(initialContent ? { initialContent } : {}),
+  });
 
   // Track when editor is ready
   useEffect(() => {
