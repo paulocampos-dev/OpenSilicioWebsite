@@ -1,12 +1,10 @@
 import { useMemo, useEffect, useState } from 'react';
-import { Box, useTheme, CircularProgress, Skeleton, Stack } from '@mui/material';
+import { Box, useTheme, Skeleton, Stack } from '@mui/material';
 import { BlockNoteView } from '@blocknote/mantine';
 import { useCreateBlockNote } from '@blocknote/react';
 import { Block } from '@blocknote/core';
 import '@blocknote/mantine/style.css';
-import 'katex/dist/katex.min.css';
 import BlockNoteErrorBoundary from './BlockNoteErrorBoundary';
-import { customSchema } from './blockNoteSchema';
 
 interface BlockNoteContentProps {
   content: string;
@@ -27,9 +25,8 @@ function BlockNoteContentInner({ content }: BlockNoteContentProps) {
     }
   }, [content]);
 
-  // Create a read-only editor instance with custom schema
+  // Create a read-only editor instance
   const editor = useCreateBlockNote({
-    schema: customSchema,
     ...(initialContent ? { initialContent } : {}),
   });
 

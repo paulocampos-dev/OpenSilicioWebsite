@@ -1,18 +1,14 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { Box, Button, Paper, Stack, Typography, useTheme } from '@mui/material';
 import { BlockNoteView } from '@blocknote/mantine';
-import { useCreateBlockNote, getDefaultReactSlashMenuItems, SuggestionMenuController } from '@blocknote/react';
-import { Block, BlockNoteEditor as BlockNoteEditorType, filterSuggestionItems } from '@blocknote/core';
+import { useCreateBlockNote } from '@blocknote/react';
+import { Block } from '@blocknote/core';
 import '@blocknote/mantine/style.css';
-import 'katex/dist/katex.min.css';
 import { uploadApi } from '../services/api';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LinkIcon from '@mui/icons-material/Link';
-import FunctionsIcon from '@mui/icons-material/Functions';
-import YouTubeIcon from '@mui/icons-material/YouTube';
 import BlockNoteErrorBoundary from './BlockNoteErrorBoundary';
 import WikiLinkInserter from './WikiLinkInserter';
-import { customSchema } from './blockNoteSchema';
 
 interface BlockNoteEditorProps {
   content: string;
@@ -23,114 +19,6 @@ interface BlockNoteEditorProps {
   onBeforeWikiLink?: () => Promise<any>;
 }
 
-// Helper function to extract YouTube ID from URL
-function extractYouTubeId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
-    /^([a-zA-Z0-9_-]{11})$/,
-  ];
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
-}
-
-// Get custom slash menu items including LaTeX and YouTube
-function getCustomSlashMenuItems(
-  editor: BlockNoteEditorType<typeof customSchema>, 
-  onContentChange: (content: string) => void,
-  isCreatingBlock: React.MutableRefObject<boolean>
-) {
-  return [
-    ...getDefaultReactSlashMenuItems(editor),
-    {
-      title: 'Equação LaTeX',
-      onItemClick: () => {
-        console.log('🎯 LaTeX slash menu item clicked');
-        isCreatingBlock.current = true;
-        
-        const currentBlock = editor.getTextCursorPosition().block;
-        const isEmpty = currentBlock.content === undefined ||
-                       (Array.isArray(currentBlock.content) && currentBlock.content.length === 0);
-
-        console.log('📝 Current block state:', {
-          blockId: currentBlock.id,
-          blockType: currentBlock.type,
-          isEmpty,
-          content: currentBlock.content
-        });
-
-        if (isEmpty) {
-          console.log('🔄 Updating current block to LaTeX');
-          editor.updateBlock(currentBlock, {
-            type: 'latex',
-            props: { latex: '' },
-          });
-          // Immediately update the content to prevent sync issues
-          const newContent = JSON.stringify(editor.document);
-          console.log('🚀 Immediately updating content prop:', newContent);
-          onContentChange(newContent);
-        } else {
-          console.log('➕ Inserting new LaTeX block after current block');
-          editor.insertBlocks(
-            [
-              {
-                type: 'latex',
-                props: { latex: '' },
-              },
-            ],
-            currentBlock,
-            'after'
-          );
-          // Immediately update the content to prevent sync issues
-          const newContent = JSON.stringify(editor.document);
-          console.log('🚀 Immediately updating content prop:', newContent);
-          onContentChange(newContent);
-        }
-        
-        // Reset the flag after a short delay
-        setTimeout(() => {
-          isCreatingBlock.current = false;
-        }, 100);
-      },
-      aliases: ['latex', 'math', 'equation', 'formula', 'equação', 'matemática'],
-      group: 'Mídia',
-      icon: <FunctionsIcon />,
-      subtext: 'Inserir uma equação matemática em LaTeX',
-    },
-    {
-      title: 'Vídeo do YouTube',
-      onItemClick: () => {
-        const currentBlock = editor.getTextCursorPosition().block;
-        const isEmpty = currentBlock.content === undefined ||
-                       (Array.isArray(currentBlock.content) && currentBlock.content.length === 0);
-
-        if (isEmpty) {
-          editor.updateBlock(currentBlock, {
-            type: 'youtube',
-            props: { videoId: '', url: '', width: 100 },
-          });
-        } else {
-          editor.insertBlocks(
-            [
-              {
-                type: 'youtube',
-                props: { videoId: '', url: '', width: 100 },
-              },
-            ],
-            currentBlock,
-            'after'
-          );
-        }
-      },
-      aliases: ['youtube', 'video', 'vídeo', 'yt'],
-      group: 'Mídia',
-      icon: <YouTubeIcon />,
-      subtext: 'Incorporar um vídeo do YouTube',
-    },
-  ];
-}
 
 function BlockNoteEditorInner({
   content,
@@ -146,34 +34,44 @@ function BlockNoteEditorInner({
   const [wikiLinkDialogOpen, setWikiLinkDialogOpen] = useState(false);
   const [selectedText, setSelectedText] = useState('');
   const isUpdatingFromProp = useRef(false);
-  const isCreatingBlock = useRef(false);
 
-  // Parse initial content
+  // Parse initial content only once on mount
+  // Content updates after mount are handled by the useEffect below
   const initialContent = useMemo(() => {
-    console.log('📋 Parsing initial content:', { content });
+    console.log('🔄 [INIT] Parsing initial content', {
+      contentId,
+      contentType,
+      contentLength: content?.length,
+      hasContent: !!content
+    });
     if (!content) return undefined;
     try {
       const parsed = JSON.parse(content) as Block[];
-      console.log('✅ Successfully parsed content:', parsed);
+      console.log('✅ [INIT] Successfully parsed initial content', {
+        blockCount: parsed.length,
+        blockTypes: parsed.map(b => b.type)
+      });
       return parsed;
     } catch (error) {
-      console.log('❌ Failed to parse content, using undefined:', error);
+      console.error('❌ [INIT] Failed to parse initial content:', error);
       // If content is not valid JSON, return undefined to start with empty editor
       return undefined;
     }
-  }, [content]); // Add content as dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentId, contentType]); // Only re-parse when loading a different document
 
-  // Create editor instance with custom schema and upload function
+  // Create editor instance with upload function
   const editor = useCreateBlockNote({
-    schema: customSchema,
     ...(initialContent ? { initialContent } : {}),
     uploadFile: async (file: File) => {
+      console.log('📤 [UPLOAD] Starting file upload', { fileName: file.name, fileSize: file.size });
       setIsUploading(true);
       try {
         const result = await uploadApi.uploadFile(file);
+        console.log('✅ [UPLOAD] File uploaded successfully', { url: result.url });
         return result.url;
       } catch (error) {
-        console.error('Erro ao fazer upload:', error);
+        console.error('❌ [UPLOAD] Upload error:', error);
         throw error;
       } finally {
         setIsUploading(false);
@@ -181,96 +79,97 @@ function BlockNoteEditorInner({
     },
   });
 
-  // Auto-embed YouTube URLs when pasted
+  console.log('🎯 [EDITOR] Editor instance', {
+    exists: !!editor,
+    documentBlockCount: editor?.document?.length,
+    contentId,
+    contentType
+  });
+
+
+  // Update editor content when loading a different document
+  // Note: This effect should only run when contentId/contentType changes,
+  // not when switching between preview/edit modes
   useEffect(() => {
-    if (!editor) return;
+    console.log('🔄 [SYNC] Content sync effect triggered', {
+      hasEditor: !!editor,
+      hasContent: !!content,
+      contentId,
+      contentType,
+      isUpdatingFromProp: isUpdatingFromProp.current
+    });
 
-    const handlePaste = (event: ClipboardEvent) => {
-      const text = event.clipboardData?.getData('text/plain');
-      if (!text) return;
-
-      const videoId = extractYouTubeId(text);
-      if (videoId) {
-        event.preventDefault();
-        editor.insertBlocks(
-          [
-            {
-              type: 'youtube',
-              props: { videoId, url: text, width: 100 },
-            },
-          ],
-          editor.getTextCursorPosition().block,
-          'after'
-        );
-      }
-    };
-
-    const editorElement = editor.domElement;
-    if (editorElement) {
-      editorElement.addEventListener('paste', handlePaste);
-      return () => {
-        editorElement.removeEventListener('paste', handlePaste);
-      };
-    }
-  }, [editor]);
-
-  // Update editor content when content prop changes (e.g., when loading a post)
-  useEffect(() => {
-    if (!editor || !content) return;
-    
-    // Skip updates when we're creating a block to prevent conflicts
-    if (isCreatingBlock.current) {
-      console.log('⏸️ Skipping content update - creating block');
+    if (!editor || !content) {
+      console.log('⏭️ [SYNC] Skipping - no editor or content');
       return;
     }
-    
+
     try {
       const newBlocks = JSON.parse(content) as Block[];
       const currentBlocks = editor.document;
-      
-      console.log('🔄 Content prop changed, comparing:', {
-        currentBlocksCount: currentBlocks.length,
-        newBlocksCount: newBlocks.length,
-        currentBlocks: currentBlocks.map(b => ({ id: b.id, type: b.type, props: b.props })),
-        newBlocks: newBlocks.map(b => ({ id: b.id, type: b.type, props: b.props }))
+
+      console.log('📊 [SYNC] Comparing blocks', {
+        currentBlockCount: currentBlocks.length,
+        newBlockCount: newBlocks.length,
+        currentTypes: currentBlocks.map(b => `${b.type}(${b.id.slice(0, 8)})`),
+        newTypes: newBlocks.map(b => `${b.type}(${b.id.slice(0, 8)})`)
       });
-      
-      // Only update if content is different to avoid infinite loops
-      if (JSON.stringify(currentBlocks) !== content) {
-        console.log('🔄 Updating editor from prop content');
+
+      // Normalize both for comparison to avoid false positives from formatting differences
+      const currentContent = JSON.stringify(currentBlocks);
+      const newContent = JSON.stringify(newBlocks);
+
+      // Only update if content is actually different
+      if (currentContent !== newContent) {
+        console.log('🔄 [SYNC] Content is different, updating editor');
         isUpdatingFromProp.current = true;
-        editor.replaceBlocks(editor.document, newBlocks);
-        // Reset the flag after a short delay to allow the change to propagate
+
+        // Use replaceBlocks but handle errors gracefully
+        try {
+          editor.replaceBlocks(editor.document, newBlocks);
+          console.log('✅ [SYNC] Blocks replaced successfully');
+        } catch (replaceError) {
+          console.error('❌ [SYNC] Failed to replace blocks:', replaceError);
+          console.error('❌ [SYNC] Error stack:', (replaceError as Error).stack);
+          // Don't throw or reload - just log the warning and let the editor continue
+          // This is important for preserving user edits
+        }
+
+        // Reset the flag after the change has propagated
         setTimeout(() => {
+          console.log('🏁 [SYNC] Reset isUpdatingFromProp flag');
           isUpdatingFromProp.current = false;
         }, 100);
       } else {
-        console.log('⏭️ Skipping update - content is the same');
+        console.log('⏭️ [SYNC] Content is the same, skipping update');
       }
     } catch (error) {
-      console.error('❌ Error updating editor content:', error);
+      console.error('❌ [SYNC] Error parsing editor content:', error);
     }
-  }, [editor, content]);
+    // Only trigger when loading a different document, not on every content change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, contentId, contentType]);
 
   // Handle content changes from user edits
   useEffect(() => {
     if (!editor) return;
 
+    console.log('📝 [CHANGE] Setting up onChange listener');
+
     const handleChange = () => {
       // Don't trigger onChange if we're updating from the prop
       if (isUpdatingFromProp.current) {
-        console.log('⏸️ Skipping onChange - updating from prop');
+        console.log('⏸️ [CHANGE] Skipping onChange - updating from prop');
         return;
       }
-      
+
       const blocks = editor.document;
       const contentString = JSON.stringify(blocks);
-      console.log('📄 Editor document changed:', {
+      console.log('📤 [CHANGE] Content changed by user', {
         blockCount: blocks.length,
-        blocks: blocks.map(b => ({ id: b.id, type: b.type, props: b.props })),
+        blockTypes: blocks.map(b => `${b.type}(${b.id.slice(0, 8)})`),
         contentLength: contentString.length
       });
-      console.log('📤 Calling onContentChange with:', contentString);
       onContentChange(contentString);
     };
 
@@ -279,6 +178,7 @@ function BlockNoteEditorInner({
 
     // Cleanup listener on unmount
     return () => {
+      console.log('🧹 [CHANGE] Cleaning up onChange listener');
       if (unsubscribe) {
         unsubscribe();
       }
@@ -487,17 +387,10 @@ function BlockNoteEditorInner({
         }}
       >
         <BlockNoteView
+          key={`editor-${contentType}-${contentId || 'new'}`}
           editor={editor}
           theme={blockNoteTheme}
-          slashMenu={false}
-        >
-          <SuggestionMenuController
-            triggerCharacter={'/'}
-            getItems={async (query) =>
-              filterSuggestionItems(getCustomSlashMenuItems(editor, onContentChange, isCreatingBlock), query)
-            }
-          />
-        </BlockNoteView>
+        />
       </Paper>
       {isUploading && (
         <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
