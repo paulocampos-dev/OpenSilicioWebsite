@@ -93,7 +93,7 @@ CREATE INDEX IF NOT EXISTS idx_site_settings_key ON site_settings(key);
 INSERT INTO site_settings (key, value) VALUES ('contact_email', 'opensilicio@gmail.com') ON CONFLICT (key) DO NOTHING;
 INSERT INTO site_settings (key, value) VALUES ('instagram_url', 'https://www.instagram.com/opensilicio/') ON CONFLICT (key) DO NOTHING;
 INSERT INTO site_settings (key, value) VALUES ('linkedin_url', 'https://www.linkedin.com/company/opensilicio/') ON CONFLICT (key) DO NOTHING;
-INSERT INTO site_settings (key, value) VALUES ('address', 'Escola Politécnica Prédio da Engenharia Elétrica, Av. Prof. Luciano Gualberto, trav. 3, 158, São Paulo - SP, 05508-010') ON CONFLICT (key) DO NOTHING;
+INSERT INTO site_settings (key, value) VALUES ('address', 'Escola Politécnica Prédio da Engenharia Elétrica, Sala A2-49, Av. Prof. Luciano Gualberto, 158 - Butantã, São Paulo - SP, 05508-020') ON CONFLICT (key) DO NOTHING;
 INSERT INTO site_settings (key, value) VALUES ('featured_projects', '[]') ON CONFLICT (key) DO NOTHING;
 
 -- Usuário administrador será criado pelo script seedAdmin.ts

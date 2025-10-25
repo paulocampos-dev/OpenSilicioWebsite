@@ -10,6 +10,7 @@ import { CodeHighlightNode, CodeNode } from '@lexical/code';
 import { LinkNode } from '@lexical/link';
 import { EquationNode } from './lexical/nodes/EquationNode';
 import { WikiLinkNode } from './lexical/nodes/WikiLinkNode';
+import { YouTubeNode } from './lexical/nodes/YouTubeNode';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 interface LexicalContentProps {
@@ -91,6 +92,7 @@ export default function LexicalContent({ content }: LexicalContentProps) {
       LinkNode,
       EquationNode,
       WikiLinkNode,
+      YouTubeNode,
     ],
     editable: false,
     editorState: content,
@@ -212,6 +214,12 @@ export default function LexicalContent({ content }: LexicalContentProps) {
           '& .equation-node': {
             margin: '1em 0',
             textAlign: 'center',
+          },
+          // YouTube embed styling
+          '& iframe': {
+            margin: '2em auto',
+            display: 'block',
+            maxWidth: '100%',
           },
         },
       }}

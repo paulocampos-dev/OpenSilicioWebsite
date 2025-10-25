@@ -82,12 +82,13 @@ export class EquationNode extends DecoratorNode<React.JSX.Element> {
     return this.__equation;
   }
 
-  decorate(): React.JSX.Element {
+  decorate(_editor: any, config: EditorConfig): React.JSX.Element {
     return (
       <Suspense fallback={null}>
         <KatexRenderer
           equation={this.__equation}
           inline={this.__inline}
+          nodeKey={this.getKey()}
           onDoubleClick={() => {
             // TODO: Open equation editor on double click
           }}

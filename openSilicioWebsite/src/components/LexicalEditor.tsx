@@ -19,8 +19,11 @@ import LinkIcon from '@mui/icons-material/Link';
 import WikiLinkInserter from './WikiLinkInserter';
 import EquationPlugin from './lexical/plugins/EquationPlugin';
 import WikiLinkPlugin, { INSERT_WIKI_LINK_COMMAND } from './lexical/plugins/WikiLinkPlugin';
+import YouTubePlugin from './lexical/plugins/YouTubePlugin';
+import ToolbarPlugin from './lexical/plugins/ToolbarPlugin';
 import { EquationNode } from './lexical/nodes/EquationNode';
 import { WikiLinkNode } from './lexical/nodes/WikiLinkNode';
+import { YouTubeNode } from './lexical/nodes/YouTubeNode';
 
 interface LexicalEditorProps {
   content: string;
@@ -153,8 +156,8 @@ function LexicalEditorInner({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <InfoOutlinedIcon sx={{ fontSize: 18, color: 'info.main' }} />
           <Typography variant="caption" color="text.secondary">
-            Editor de texto rico com suporte a LaTeX • Use $ para equações inline • Use $$ para
-            equações em bloco
+            Use a barra de ferramentas para formatar o texto • Insira vídeos do YouTube, equações
+            LaTeX e muito mais
           </Typography>
         </Box>
         <WikiLinkButton onOpenWikiLink={handleOpenWikiLink} contentType={contentType} />
@@ -164,7 +167,6 @@ function LexicalEditorInner({
         variant="outlined"
         sx={{
           overflow: 'hidden',
-          minHeight: 400,
           '& .editor-container': {
             position: 'relative',
             background: 'transparent',
@@ -174,8 +176,8 @@ function LexicalEditorInner({
             position: 'relative',
           },
           '& .editor-input': {
-            padding: 3,
-            minHeight: 400,
+            padding: 2,
+            minHeight: 300,
             fontSize: '1rem',
             lineHeight: 1.7,
             outline: 'none',
@@ -266,6 +268,7 @@ function LexicalEditorInner({
         }}
       >
         <div className="editor-container">
+          <ToolbarPlugin />
           <div className="editor-inner">
             <RichTextPlugin
               contentEditable={<ContentEditable className="editor-input" />}
@@ -278,6 +281,7 @@ function LexicalEditorInner({
             <ListPlugin />
             <EquationPlugin />
             <WikiLinkPlugin />
+            <YouTubePlugin />
           </div>
         </div>
       </Paper>
@@ -333,6 +337,7 @@ export default function LexicalEditor(props: LexicalEditorProps) {
       LinkNode,
       EquationNode,
       WikiLinkNode,
+      YouTubeNode,
     ],
     editorState: initialEditorState,
   };
