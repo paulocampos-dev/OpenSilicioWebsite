@@ -22,8 +22,8 @@ import PublishIcon from '@mui/icons-material/Publish';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import { wikiApi } from '../../services/api'
 import type { WikiEntry } from '../../types';
-import BlockNoteEditor from '../../components/BlockNoteEditor';
-import BlockNoteContent from '../../components/BlockNoteContent';
+import LexicalEditor from '../../components/LexicalEditor';
+import LexicalContent from '../../components/LexicalContent';
 
 export default function WikiForm() {
   const { id } = useParams<{ id: string }>();
@@ -206,7 +206,7 @@ export default function WikiForm() {
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Conteúdo Detalhado (Opcional)
                 </Typography>
-                <BlockNoteEditor
+                <LexicalEditor
                   content={entry.content || ''}
                   onContentChange={(content) => setEntry({ ...entry, content })}
                 />
@@ -264,7 +264,7 @@ export default function WikiForm() {
 
             {entry.content && (
               <Paper sx={{ p: 4 }}>
-                <BlockNoteContent content={entry.content} />
+                <LexicalContent content={entry.content} />
               </Paper>
             )}
           </Stack>

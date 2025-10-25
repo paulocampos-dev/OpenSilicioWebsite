@@ -3,7 +3,7 @@ import { useParams, Link as RouterLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
-import BlockNoteContent from '../components/BlockNoteContent'
+import LexicalContent from '../components/LexicalContent'
 import ShareAndCite from '../components/ShareAndCite'
 
 export default function Post() {
@@ -74,7 +74,7 @@ export default function Post() {
       )}
 
       <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-        <BlockNoteContent content={post.content} />
+        <LexicalContent content={post.content} />
       </Stack>
 
       <ShareAndCite

@@ -23,8 +23,8 @@ import PublishIcon from '@mui/icons-material/Publish';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import { educationApi } from '../../services/api'
 import type { EducationResource } from '../../types';
-import BlockNoteEditor from '../../components/BlockNoteEditor';
-import BlockNoteContent from '../../components/BlockNoteContent';
+import LexicalEditor from '../../components/LexicalEditor';
+import LexicalContent from '../../components/LexicalContent';
 
 export default function EducationForm() {
   const { id } = useParams<{ id: string }>();
@@ -272,7 +272,7 @@ export default function EducationForm() {
                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
                       Descrição geral do projeto (aparece na aba 'Visão Geral')
                     </Typography>
-                    <BlockNoteEditor
+                    <LexicalEditor
                       content={resource.overview || ''}
                       onContentChange={(content) => setResource({ ...resource, overview: content })}
                       contentType="education"
@@ -293,7 +293,7 @@ export default function EducationForm() {
                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
                       Lista de recursos necessários (aparece na aba 'Recursos')
                     </Typography>
-                    <BlockNoteEditor
+                    <LexicalEditor
                       content={resource.resources || ''}
                       onContentChange={(content) => setResource({ ...resource, resources: content })}
                       contentType="education"
@@ -313,7 +313,7 @@ export default function EducationForm() {
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Conteúdo
                 </Typography>
-                <BlockNoteEditor
+                <LexicalEditor
                   content={resource.content || ''}
                   onContentChange={(content) => setResource({ ...resource, content })}
                   contentType="education"
@@ -353,19 +353,19 @@ export default function EducationForm() {
 
                   <Stack spacing={3}>
                     {previewTab === 'Visão geral' && (
-                      <BlockNoteContent content={resource.overview || ''} />
+                      <LexicalContent content={resource.overview || ''} />
                     )}
                     {previewTab === 'Conteúdo' && (
-                      <BlockNoteContent content={resource.content || ''} />
+                      <LexicalContent content={resource.content || ''} />
                     )}
                     {previewTab === 'Recursos' && (
-                      <BlockNoteContent content={resource.resources || ''} />
+                      <LexicalContent content={resource.resources || ''} />
                     )}
                   </Stack>
                 </>
               ) : (
                 <Stack spacing={3}>
-                  <BlockNoteContent content={resource.content || ''} />
+                  <LexicalContent content={resource.content || ''} />
                 </Stack>
               )}
             </Stack>

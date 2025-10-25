@@ -25,7 +25,7 @@ import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
 import { settingsApi, educationApi, blogApi, uploadApi } from '../../services/api';
 import type { SiteSettings, EducationResource, BlogPost, TeamMember } from '../../types';
-import BlockNoteEditor from '../../components/BlockNoteEditor';
+import LexicalEditor from '../../components/LexicalEditor';
 
 export default function Settings() {
   const [settings, setSettings] = useState<SiteSettings>({
@@ -350,7 +350,7 @@ export default function Settings() {
                 <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                   Conteúdo Principal
                 </Typography>
-                <BlockNoteEditor
+                <LexicalEditor
                   content={settings.about_content || ''}
                   onContentChange={(content) => setSettings({ ...settings, about_content: content })}
                 />
@@ -363,7 +363,7 @@ export default function Settings() {
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Missão
               </Typography>
-              <BlockNoteEditor
+              <LexicalEditor
                 content={settings.about_mission || ''}
                 onContentChange={(content) => setSettings({ ...settings, about_mission: content })}
               />
@@ -375,7 +375,7 @@ export default function Settings() {
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 Visão
               </Typography>
-              <BlockNoteEditor
+              <LexicalEditor
                 content={settings.about_vision || ''}
                 onContentChange={(content) => setSettings({ ...settings, about_vision: content })}
               />
@@ -387,7 +387,7 @@ export default function Settings() {
               <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                 História
               </Typography>
-              <BlockNoteEditor
+              <LexicalEditor
                 content={settings.about_history || ''}
                 onContentChange={(content) => setSettings({ ...settings, about_history: content })}
               />

@@ -23,8 +23,8 @@ import PublishIcon from '@mui/icons-material/Publish';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import { blogApi, uploadApi } from '../../services/api'
 import type { BlogPost } from '../../types';
-import BlockNoteEditor from '../../components/BlockNoteEditor';
-import BlockNoteContent from '../../components/BlockNoteContent';
+import LexicalEditor from '../../components/LexicalEditor';
+import LexicalContent from '../../components/LexicalContent';
 
 export default function BlogForm() {
   const { id } = useParams<{ id: string }>();
@@ -398,7 +398,7 @@ export default function BlogForm() {
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
                   Conteúdo
                 </Typography>
-                <BlockNoteEditor
+                <LexicalEditor
                   content={post.content || ''}
                   onContentChange={(content) => setPost({ ...post, content })}
                   contentType="blog"
@@ -444,7 +444,7 @@ export default function BlogForm() {
             )}
 
             <Stack spacing={2} sx={{ maxWidth: '100%' }}>
-              <BlockNoteContent content={post.content || ''} />
+              <LexicalContent content={post.content || ''} />
             </Stack>
           </Stack>
         )}

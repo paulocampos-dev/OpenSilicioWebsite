@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { settingsApi } from '../services/api';
 import type { SiteSettings } from '../types';
-import BlockNoteContent from '../components/BlockNoteContent';
+import LexicalContent from '../components/LexicalContent';
 
 export default function About() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -51,7 +51,7 @@ export default function About() {
 
   const renderContent = (content?: string) => {
     if (!content) return null;
-    return <BlockNoteContent content={content} />;
+    return <LexicalContent content={content} />;
   };
 
   return (

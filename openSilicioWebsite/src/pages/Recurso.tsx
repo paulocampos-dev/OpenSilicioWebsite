@@ -3,7 +3,7 @@ import { Link as RouterLink, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { educationApi } from '../services/api'
 import type { EducationResource } from '../types'
-import BlockNoteContent from '../components/BlockNoteContent'
+import LexicalContent from '../components/LexicalContent'
 import ShareAndCite from '../components/ShareAndCite'
 
 export default function Recurso() {
@@ -68,19 +68,19 @@ export default function Recurso() {
 
           <Stack spacing={3}>
             {tab === 'Visão geral' && (
-              <BlockNoteContent content={resource.overview || ''} />
+              <LexicalContent content={resource.overview || ''} />
             )}
             {tab === 'Conteúdo' && (
-              <BlockNoteContent content={resource.content} />
+              <LexicalContent content={resource.content} />
             )}
             {tab === 'Recursos' && (
-              <BlockNoteContent content={resource.resources || ''} />
+              <LexicalContent content={resource.resources || ''} />
             )}
           </Stack>
         </>
       ) : (
         <Stack spacing={3}>
-          <BlockNoteContent content={resource.content} />
+          <LexicalContent content={resource.content} />
         </Stack>
       )}
 

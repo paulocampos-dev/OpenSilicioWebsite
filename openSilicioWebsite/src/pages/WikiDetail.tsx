@@ -5,7 +5,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import { wikiApi } from '../services/api'
 import type { WikiEntry } from '../types';
-import BlockNoteContent from '../components/BlockNoteContent';
+import LexicalContent from '../components/LexicalContent';
 
 export default function WikiDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -206,7 +206,7 @@ export default function WikiDetail() {
 
       {entry.content && (
         <Paper sx={{ p: 4 }}>
-          <BlockNoteContent content={entry.content} />
+          <LexicalContent content={entry.content} />
         </Paper>
       )}
     </Stack>
