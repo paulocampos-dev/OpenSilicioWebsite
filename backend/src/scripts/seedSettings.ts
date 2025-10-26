@@ -1,5 +1,43 @@
 import pool from '../config/database';
 
+// Helper functions to create Lexical format nodes
+
+function createTextNode(text: string, format = 0): any {
+  return {
+    detail: 0,
+    format,
+    mode: 'normal',
+    style: '',
+    text,
+    type: 'text',
+    version: 1,
+  };
+}
+
+function createParagraphNode(text: string): any {
+  return {
+    children: [createTextNode(text)],
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    type: 'paragraph',
+    version: 1,
+  };
+}
+
+function createLexicalDocument(nodes: any[]): string {
+  return JSON.stringify({
+    root: {
+      children: nodes,
+      direction: null,
+      format: '',
+      indent: 0,
+      type: 'root',
+      version: 1,
+    },
+  });
+}
+
 async function seedSettings() {
   try {
     console.log('⚙️  Verificando configurações da página Sobre...');
@@ -27,43 +65,27 @@ async function seedSettings() {
       },
       {
         key: 'about_content',
-        value: JSON.stringify([{
-          "id":"1",
-          "type":"paragraph",
-          "props":{"textColor":"default","backgroundColor":"default","textAlignment":"left"},
-          "content":[{"type":"text","text":"O OpenSilício é uma iniciativa dedicada a democratizar o conhecimento em eletrônica e projeto de circuitos integrados. Nossa missão é fornecer recursos educacionais de qualidade e fomentar uma comunidade ativa de aprendizado.","styles":{}}],
-          "children":[]
-        }])
+        value: createLexicalDocument([
+          createParagraphNode('O OpenSilício é uma iniciativa dedicada a democratizar o conhecimento em eletrônica e projeto de circuitos integrados. Nossa missão é fornecer recursos educacionais de qualidade e fomentar uma comunidade ativa de aprendizado.')
+        ])
       },
       {
         key: 'about_mission',
-        value: JSON.stringify([{
-          "id":"1",
-          "type":"paragraph",
-          "props":{"textColor":"default","backgroundColor":"default","textAlignment":"left"},
-          "content":[{"type":"text","text":"Democratizar o acesso ao conhecimento em eletrônica e projeto de circuitos integrados, capacitando estudantes e profissionais através de recursos educacionais de alta qualidade.","styles":{}}],
-          "children":[]
-        }])
+        value: createLexicalDocument([
+          createParagraphNode('Democratizar o acesso ao conhecimento em eletrônica e projeto de circuitos integrados, capacitando estudantes e profissionais através de recursos educacionais de alta qualidade.')
+        ])
       },
       {
         key: 'about_vision',
-        value: JSON.stringify([{
-          "id":"1",
-          "type":"paragraph",
-          "props":{"textColor":"default","backgroundColor":"default","textAlignment":"left"},
-          "content":[{"type":"text","text":"Ser referência no ensino de eletrônica e design de circuitos integrados, criando uma comunidade global de inovadores e desenvolvedores.","styles":{}}],
-          "children":[]
-        }])
+        value: createLexicalDocument([
+          createParagraphNode('Ser referência no ensino de eletrônica e design de circuitos integrados, criando uma comunidade global de inovadores e desenvolvedores.')
+        ])
       },
       {
         key: 'about_history',
-        value: JSON.stringify([{
-          "id":"1",
-          "type":"paragraph",
-          "props":{"textColor":"default","backgroundColor":"default","textAlignment":"left"},
-          "content":[{"type":"text","text":"O OpenSilício nasceu da paixão de estudantes e professores pela área de eletrônica e circuitos integrados. Com o objetivo de facilitar o aprendizado e compartilhar conhecimento, criamos esta plataforma para reunir recursos, tutoriais e projetos práticos.","styles":{}}],
-          "children":[]
-        }])
+        value: createLexicalDocument([
+          createParagraphNode('O OpenSilício nasceu da paixão de estudantes e professores pela área de eletrônica e circuitos integrados. Com o objetivo de facilitar o aprendizado e compartilhar conhecimento, criamos esta plataforma para reunir recursos, tutoriais e projetos práticos.')
+        ])
       },
       {
         key: 'about_team_members',
