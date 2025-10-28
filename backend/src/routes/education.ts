@@ -8,7 +8,7 @@ import {
 } from '../controllers/educationController';
 import { authMiddleware } from '../middleware/auth';
 import { createLimiter } from '../middleware/rateLimit';
-import { validate, educationResourceSchema } from '../middleware/validation';
+import { validate, educationResourceSchema, educationResourceUpdateSchema } from '../middleware/validation';
 import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
@@ -19,7 +19,7 @@ router.get('/:id', cacheMiddleware({ ttl: 120 }), getResourceById);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)
 router.post('/', authMiddleware, createLimiter, validate(educationResourceSchema), createResource);
-router.put('/:id', authMiddleware, validate(educationResourceSchema), updateResource);
+router.put('/:id', authMiddleware, validate(educationResourceUpdateSchema), updateResource);
 router.delete('/:id', authMiddleware, deleteResource);
 
 export default router;

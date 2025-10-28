@@ -7,6 +7,7 @@ import { pendingWikiLinksService } from '../services/PendingWikiLinksService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError, NotFoundError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
+import { filterUndefined } from '../utils/filterUndefined';
 
 export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response) => {
   console.log('✅ [WikiController.getAllEntries] CALLED - This is the WIKI controller');
@@ -70,7 +71,8 @@ export const updateEntry = asyncHandler(async (req: AuthRequest, res: Response) 
   const { id } = req.params;
   const { term, slug, definition, content, aliases, published } = req.body;
 
-  const entry = await wikiService.updateEntry(id, {
+  // Filter out undefined values to support partial updates
+  const updateData = filterUndefined({
     term,
     slug,
     definition,
@@ -78,6 +80,8 @@ export const updateEntry = asyncHandler(async (req: AuthRequest, res: Response) 
     aliases,
     published,
   });
+
+  const entry = await wikiService.updateEntry(id, updateData);
 
   // Clear wiki cache after updating an entry
   clearCache('GET:/api/wiki');

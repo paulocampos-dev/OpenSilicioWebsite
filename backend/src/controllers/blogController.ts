@@ -4,6 +4,7 @@ import { blogService } from '../services/BlogService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
+import { filterUndefined } from '../utils/filterUndefined';
 
 export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) => {
   console.log('📝 [BlogController.getAllPosts] CALLED - This is the BLOG controller');
@@ -61,7 +62,8 @@ export const updatePost = asyncHandler(async (req: AuthRequest, res: Response) =
   const { id } = req.params;
   const { slug, title, excerpt, content, author, image_url, category, published } = req.body;
 
-  const post = await blogService.updatePost(id, {
+  // Filter out undefined values to support partial updates
+  const updateData = filterUndefined({
     slug,
     title,
     excerpt,
@@ -71,6 +73,8 @@ export const updatePost = asyncHandler(async (req: AuthRequest, res: Response) =
     category,
     published,
   });
+
+  const post = await blogService.updatePost(id, updateData);
 
   // Clear blog cache after updating a post
   clearCache('GET:/api/blog');

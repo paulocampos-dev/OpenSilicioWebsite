@@ -10,7 +10,7 @@ import {
 } from '../controllers/blogController';
 import { authMiddleware } from '../middleware/auth';
 import { createLimiter } from '../middleware/rateLimit';
-import { validate, blogPostSchema } from '../middleware/validation';
+import { validate, blogPostSchema, blogPostUpdateSchema } from '../middleware/validation';
 import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
@@ -29,7 +29,7 @@ router.get('/:slug', cacheMiddleware({ ttl: 120 }), getPostBySlug);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)
 router.post('/', authMiddleware, createLimiter, validate(blogPostSchema), createPost);
-router.put('/:id', authMiddleware, validate(blogPostSchema), updatePost);
+router.put('/:id', authMiddleware, validate(blogPostUpdateSchema), updatePost);
 router.delete('/:id', authMiddleware, deletePost);
 
 export default router;

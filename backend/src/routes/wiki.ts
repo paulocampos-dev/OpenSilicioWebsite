@@ -20,7 +20,7 @@ import {
 } from '../controllers/wikiController';
 import { authMiddleware } from '../middleware/auth';
 import { createLimiter } from '../middleware/rateLimit';
-import { validate, wikiEntrySchema, wikiLinkSchema } from '../middleware/validation';
+import { validate, wikiEntrySchema, wikiEntryUpdateSchema, wikiLinkSchema } from '../middleware/validation';
 import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
@@ -51,7 +51,7 @@ router.get('/:slug', cacheMiddleware({ ttl: 120 }), getEntryBySlug);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)
 router.post('/', authMiddleware, createLimiter, validate(wikiEntrySchema), createEntry);
-router.put('/:id', authMiddleware, validate(wikiEntrySchema), updateEntry);
+router.put('/:id', authMiddleware, validate(wikiEntryUpdateSchema), updateEntry);
 router.delete('/:id', authMiddleware, deleteEntry);
 
 // Alias management routes

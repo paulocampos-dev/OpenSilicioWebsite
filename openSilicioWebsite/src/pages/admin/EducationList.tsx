@@ -18,6 +18,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import PublishIcon from '@mui/icons-material/Publish';
 import { educationApi } from '../../services/api'
 import type { EducationResource } from '../../types';
 
@@ -52,6 +53,16 @@ export default function EducationList() {
     } catch (error) {
       console.error('Erro ao deletar recurso:', error);
       alert('Erro ao deletar recurso');
+    }
+  };
+
+  const handlePublish = async (id: string) => {
+    try {
+      await educationApi.update(id, { published: true });
+      loadResources();
+    } catch (error) {
+      console.error('Erro ao publicar recurso:', error);
+      alert('Erro ao publicar recurso');
     }
   };
 
@@ -111,6 +122,16 @@ export default function EducationList() {
                     {new Date(resource.created_at).toLocaleDateString('pt-BR')}
                   </TableCell>
                   <TableCell align="right">
+                    {!resource.published && (
+                      <IconButton
+                        onClick={() => handlePublish(resource.id)}
+                        size="small"
+                        color="success"
+                        title="Publicar"
+                      >
+                        <PublishIcon />
+                      </IconButton>
+                    )}
                     <IconButton
                       component={RouterLink}
                       to={`/admin/educacao/edit/${resource.id}`}

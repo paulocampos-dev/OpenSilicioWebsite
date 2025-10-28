@@ -21,6 +21,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
+import PublishIcon from '@mui/icons-material/Publish';
 import { wikiApi } from '../../services/api'
 import type { WikiEntry, PendingWikiLinkGrouped } from '../../types';
 
@@ -70,6 +71,16 @@ export default function WikiList() {
     } catch (error) {
       console.error('Erro ao deletar entrada:', error);
       alert('Erro ao deletar entrada');
+    }
+  };
+
+  const handlePublish = async (id: string) => {
+    try {
+      await wikiApi.update(id, { published: true });
+      loadEntries();
+    } catch (error) {
+      console.error('Erro ao publicar entrada:', error);
+      alert('Erro ao publicar entrada');
     }
   };
 
@@ -191,6 +202,16 @@ export default function WikiList() {
                     {new Date(entry.created_at).toLocaleDateString('pt-BR')}
                   </TableCell>
                   <TableCell align="right">
+                    {!entry.published && (
+                      <IconButton
+                        onClick={() => handlePublish(entry.id)}
+                        size="small"
+                        color="success"
+                        title="Publicar"
+                      >
+                        <PublishIcon />
+                      </IconButton>
+                    )}
                     <IconButton
                       component={RouterLink}
                       to={`/admin/wiki/edit/${entry.id}`}

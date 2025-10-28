@@ -18,6 +18,7 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import PublishIcon from '@mui/icons-material/Publish';
 import { blogApi } from '../../services/api'
 import type { BlogPost } from '../../types';
 
@@ -52,6 +53,16 @@ export default function BlogList() {
     } catch (error) {
       console.error('Erro ao deletar post:', error);
       alert('Erro ao deletar post');
+    }
+  };
+
+  const handlePublish = async (id: string) => {
+    try {
+      await blogApi.update(id, { published: true });
+      loadPosts();
+    } catch (error) {
+      console.error('Erro ao publicar post:', error);
+      alert('Erro ao publicar post');
     }
   };
 
@@ -113,6 +124,16 @@ export default function BlogList() {
                     {new Date(post.created_at).toLocaleDateString('pt-BR')}
                   </TableCell>
                   <TableCell align="right">
+                    {!post.published && (
+                      <IconButton
+                        onClick={() => handlePublish(post.id)}
+                        size="small"
+                        color="success"
+                        title="Publicar"
+                      >
+                        <PublishIcon />
+                      </IconButton>
+                    )}
                     <IconButton
                       component={RouterLink}
                       to={`/admin/blog/edit/${post.id}`}

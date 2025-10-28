@@ -4,6 +4,7 @@ import { educationService } from '../services/EducationService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
+import { filterUndefined } from '../utils/filterUndefined';
 
 export const getAllResources = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { published, page = '1', limit = '10' } = req.query;
@@ -51,7 +52,8 @@ export const updateResource = asyncHandler(async (req: AuthRequest, res: Respons
   const { id } = req.params;
   const { title, description, content, category, overview, resources, published } = req.body;
 
-  const resource = await educationService.updateResource(id, {
+  // Filter out undefined values to support partial updates
+  const updateData = filterUndefined({
     title,
     description,
     content,
@@ -60,6 +62,8 @@ export const updateResource = asyncHandler(async (req: AuthRequest, res: Respons
     resources,
     published,
   });
+
+  const resource = await educationService.updateResource(id, updateData);
 
   // Clear education cache after updating a resource
   clearCache('GET:/api/education');

@@ -89,6 +89,9 @@ export const blogPostSchema = z.object({
   published: z.boolean().optional(),
 });
 
+// Partial schema for blog post updates (all fields optional)
+export const blogPostUpdateSchema = blogPostSchema.partial();
+
 // Education resource validation schema
 export const educationResourceSchema = z.object({
   title: z
@@ -127,6 +130,9 @@ export const educationResourceSchema = z.object({
   published: z.boolean().optional(),
 });
 
+// Partial schema for education resource updates (all fields optional)
+export const educationResourceUpdateSchema = educationResourceSchema.partial();
+
 // Wiki entry validation schema
 export const wikiEntrySchema = z.object({
   term: z
@@ -157,6 +163,9 @@ export const wikiEntrySchema = z.object({
     .optional(),
   published: z.boolean().optional(),
 });
+
+// Partial schema for wiki entry updates (all fields optional)
+export const wikiEntryUpdateSchema = wikiEntrySchema.partial();
 
 // Wiki link validation schema
 export const wikiLinkSchema = z.object({
