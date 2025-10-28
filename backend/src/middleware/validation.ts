@@ -90,7 +90,7 @@ export const blogPostSchema = z.object({
 });
 
 // Partial schema for blog post updates (all fields optional)
-export const blogPostUpdateSchema = blogPostSchema.partial();
+export const blogPostUpdateSchema = blogPostSchema.partial().strip();
 
 // Education resource validation schema
 export const educationResourceSchema = z.object({
@@ -119,19 +119,24 @@ export const educationResourceSchema = z.object({
     .max(100, 'Categoria deve ter no máximo 100 caracteres')
     .trim()
     .optional(),
+  difficulty: z
+    .enum(['Iniciante', 'Intermediário', 'Avançado'], {
+      errorMap: () => ({ message: 'Dificuldade deve ser Iniciante, Intermediário ou Avançado' }),
+    })
+    .nullish(),
   overview: z
     .string()
     .max(100000, 'Visão geral deve ter no máximo 100000 caracteres')
-    .optional(),
+    .nullish(),
   resources: z
     .string()
     .max(100000, 'Recursos deve ter no máximo 100000 caracteres')
-    .optional(),
+    .nullish(),
   published: z.boolean().optional(),
 });
 
 // Partial schema for education resource updates (all fields optional)
-export const educationResourceUpdateSchema = educationResourceSchema.partial();
+export const educationResourceUpdateSchema = educationResourceSchema.partial().strip();
 
 // Wiki entry validation schema
 export const wikiEntrySchema = z.object({
@@ -165,7 +170,7 @@ export const wikiEntrySchema = z.object({
 });
 
 // Partial schema for wiki entry updates (all fields optional)
-export const wikiEntryUpdateSchema = wikiEntrySchema.partial();
+export const wikiEntryUpdateSchema = wikiEntrySchema.partial().strip();
 
 // Wiki link validation schema
 export const wikiLinkSchema = z.object({

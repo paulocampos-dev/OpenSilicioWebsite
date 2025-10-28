@@ -37,7 +37,7 @@ export default function Educacao() {
     const q = query.trim().toLowerCase()
     return resources.filter((r) => {
       const matchesTab = tab === 'Todos' || r.category === tab
-      const matchesLevel = level === 'Todos' // For now, we'll use category as level
+      const matchesLevel = level === 'Todos' || r.difficulty === level
       const matchesQuery = !q || r.title.toLowerCase().includes(q) || r.description.toLowerCase().includes(q)
       return matchesTab && matchesLevel && matchesQuery
     })

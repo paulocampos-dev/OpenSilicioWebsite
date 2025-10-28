@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
+  Alert,
   Box,
   Button,
   Chip,
+  Divider,
   IconButton,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -14,8 +17,6 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Alert,
-  Divider,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -31,6 +32,11 @@ export default function WikiList() {
   const [pendingLinks, setPendingLinks] = useState<PendingWikiLinkGrouped[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingPending, setLoadingPending] = useState(true);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   useEffect(() => {
     loadEntries();
@@ -60,6 +66,10 @@ export default function WikiList() {
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja deletar esta entrada?')) {
       return;
@@ -68,9 +78,10 @@ export default function WikiList() {
     try {
       await wikiApi.delete(id);
       loadEntries();
+      setSnackbar({ open: true, message: 'Entrada deletada com sucesso!', severity: 'success' });
     } catch (error) {
       console.error('Erro ao deletar entrada:', error);
-      alert('Erro ao deletar entrada');
+      setSnackbar({ open: true, message: 'Erro ao deletar entrada', severity: 'error' });
     }
   };
 
@@ -78,9 +89,10 @@ export default function WikiList() {
     try {
       await wikiApi.update(id, { published: true });
       loadEntries();
+      setSnackbar({ open: true, message: 'Entrada publicada com sucesso!', severity: 'success' });
     } catch (error) {
       console.error('Erro ao publicar entrada:', error);
-      alert('Erro ao publicar entrada');
+      setSnackbar({ open: true, message: 'Erro ao publicar entrada', severity: 'error' });
     }
   };
 
@@ -233,6 +245,18 @@ export default function WikiList() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

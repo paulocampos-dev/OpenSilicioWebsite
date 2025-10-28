@@ -42,6 +42,7 @@ export default function EducationForm() {
     description: '',
     content: '',
     category: '',
+    difficulty: '',
     published: false,
   });
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -261,6 +262,20 @@ export default function EducationForm() {
                 <MenuItem value="Projetos">Projetos</MenuItem>
                 <MenuItem value="Guias">Guias</MenuItem>
                 <MenuItem value="Tutoriais">Tutoriais</MenuItem>
+              </TextField>
+
+              <TextField
+                label="Dificuldade"
+                value={resource.difficulty || ''}
+                onChange={(e) => setResource({ ...resource, difficulty: e.target.value })}
+                fullWidth
+                select
+                helperText="Selecione o nível de dificuldade deste recurso (opcional)"
+              >
+                <MenuItem value="">Nenhuma</MenuItem>
+                <MenuItem value="Iniciante">Iniciante</MenuItem>
+                <MenuItem value="Intermediário">Intermediário</MenuItem>
+                <MenuItem value="Avançado">Avançado</MenuItem>
               </TextField>
 
               {resource.category === 'Projetos' && (

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
+  Alert,
   Box,
   Button,
   Chip,
   IconButton,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -25,6 +27,11 @@ import type { BlogPost } from '../../types';
 export default function BlogList() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   useEffect(() => {
     loadPosts();
@@ -42,6 +49,10 @@ export default function BlogList() {
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja deletar este post?')) {
       return;
@@ -50,9 +61,10 @@ export default function BlogList() {
     try {
       await blogApi.delete(id);
       loadPosts();
+      setSnackbar({ open: true, message: 'Post deletado com sucesso!', severity: 'success' });
     } catch (error) {
       console.error('Erro ao deletar post:', error);
-      alert('Erro ao deletar post');
+      setSnackbar({ open: true, message: 'Erro ao deletar post', severity: 'error' });
     }
   };
 
@@ -60,9 +72,10 @@ export default function BlogList() {
     try {
       await blogApi.update(id, { published: true });
       loadPosts();
+      setSnackbar({ open: true, message: 'Post publicado com sucesso!', severity: 'success' });
     } catch (error) {
       console.error('Erro ao publicar post:', error);
-      alert('Erro ao publicar post');
+      setSnackbar({ open: true, message: 'Erro ao publicar post', severity: 'error' });
     }
   };
 
@@ -155,6 +168,18 @@ export default function BlogList() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

@@ -23,6 +23,7 @@ export interface EducationResource {
   description: string;
   content: string;
   category: string;
+  difficulty?: string;
   overview?: string;
   resources?: string;
   published: boolean;

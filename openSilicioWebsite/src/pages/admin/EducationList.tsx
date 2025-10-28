@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
+  Alert,
   Box,
   Button,
   Chip,
   IconButton,
   Paper,
+  Snackbar,
   Stack,
   Table,
   TableBody,
@@ -25,6 +27,11 @@ import type { EducationResource } from '../../types';
 export default function EducationList() {
   const [resources, setResources] = useState<EducationResource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
   useEffect(() => {
     loadResources();
@@ -42,6 +49,10 @@ export default function EducationList() {
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const handleDelete = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja deletar este recurso?')) {
       return;
@@ -50,9 +61,10 @@ export default function EducationList() {
     try {
       await educationApi.delete(id);
       loadResources();
+      setSnackbar({ open: true, message: 'Recurso deletado com sucesso!', severity: 'success' });
     } catch (error) {
       console.error('Erro ao deletar recurso:', error);
-      alert('Erro ao deletar recurso');
+      setSnackbar({ open: true, message: 'Erro ao deletar recurso', severity: 'error' });
     }
   };
 
@@ -60,9 +72,10 @@ export default function EducationList() {
     try {
       await educationApi.update(id, { published: true });
       loadResources();
+      setSnackbar({ open: true, message: 'Recurso publicado com sucesso!', severity: 'success' });
     } catch (error) {
       console.error('Erro ao publicar recurso:', error);
-      alert('Erro ao publicar recurso');
+      setSnackbar({ open: true, message: 'Erro ao publicar recurso', severity: 'error' });
     }
   };
 
@@ -153,6 +166,18 @@ export default function EducationList() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

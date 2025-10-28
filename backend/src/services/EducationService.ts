@@ -8,6 +8,7 @@ export interface EducationResource {
   description: string;
   content: string;
   category?: string;
+  difficulty?: string;
   overview?: string;
   resources?: string;
   published: boolean;
@@ -56,6 +57,7 @@ export class EducationService extends BaseService<EducationResource> {
       'description',
       'content',
       'category',
+      'difficulty',
       'overview',
       'resources',
       'published',
