@@ -3,17 +3,21 @@ import { useParams, Link as RouterLink } from 'react-router-dom';
 import { Box, Breadcrumbs, Link as MUILink, Paper, Stack, Typography, Divider, Chip, Alert, Button, Grid, Card, CardContent, CardActionArea } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import PublishIcon from '@mui/icons-material/Publish';
 import { wikiApi } from '../services/api'
 import type { WikiEntry } from '../types';
 import LexicalContent from '../components/LexicalContent';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function WikiDetail() {
   const { slug } = useParams<{ slug: string }>();
+  const { isAuthenticated } = useAuth();
   const [entry, setEntry] = useState<WikiEntry | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [pendingTerm, setPendingTerm] = useState('');
   const [otherEntries, setOtherEntries] = useState<WikiEntry[]>([]);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
     if (slug) {
@@ -29,7 +33,7 @@ export default function WikiDetail() {
         // Extract the term from the slug (remove 'pending-' prefix and replace dashes with spaces)
         const term = slug.replace('pending-', '').replace(/-/g, ' ');
         setPendingTerm(term);
-        
+
         // Load other wiki entries to suggest
         const response = await wikiApi.getAll(true, 1, 6); // Get first 6 published entries
         setOtherEntries(response.data || []);
@@ -59,6 +63,22 @@ export default function WikiDetail() {
       console.error('Erro ao carregar entrada:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleQuickPublish = async () => {
+    if (!entry) return;
+
+    setIsPublishing(true);
+    try {
+      const updated = await wikiApi.update(entry.id, { published: true });
+      setEntry(updated);
+      alert('Entrada publicada com sucesso!');
+    } catch (error) {
+      console.error('Erro ao publicar entrada:', error);
+      alert('Erro ao publicar entrada. Tente novamente.');
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -173,6 +193,27 @@ export default function WikiDetail() {
         </MUILink>
         <Typography color="text.secondary">{entry.term}</Typography>
       </Breadcrumbs>
+
+      {isAuthenticated && !entry.published && (
+        <Alert
+          severity="warning"
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              startIcon={<PublishIcon />}
+              onClick={handleQuickPublish}
+              disabled={isPublishing}
+            >
+              {isPublishing ? 'Publicando...' : 'Publicar Agora'}
+            </Button>
+          }
+        >
+          <Typography variant="body2" fontWeight={600}>
+            Rascunho - Esta entrada não está visível publicamente
+          </Typography>
+        </Alert>
+      )}
 
       <Box>
         <Typography variant="h3" fontWeight={700} gutterBottom>
