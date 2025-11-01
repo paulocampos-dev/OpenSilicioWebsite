@@ -23,7 +23,9 @@ export default function Recurso() {
       const data = await educationApi.getById(id!)
       setResource(data)
     } catch (error) {
-      console.error('Erro ao carregar recurso:', error)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar recurso:', error)
+      }
     } finally {
       setLoading(false)
     }

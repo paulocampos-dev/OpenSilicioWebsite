@@ -16,11 +16,31 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [1/6] Criando backup do banco de dados...
+REM Verificar se .env existe
+if not exist .env (
+    echo [ERRO] Arquivo .env nao encontrado!
+    echo Execute primeiro o script de deploy: scripts\production\deploy.bat
+    pause
+    exit /b 1
+)
+
+echo [1/7] Criando backup do banco de dados...
 if not exist backups mkdir backups
 set BACKUP_FILE=backups\backup_%date:~-4,4%%date:~-7,2%%date:~-10,2%_%time:~0,2%%time:~3,2%%time:~6,2%.sql
 set BACKUP_FILE=%BACKUP_FILE: =0%
-docker-compose -f docker\docker-compose.yml exec -T postgres pg_dump -U opensilicio opensilicio_prod > %BACKUP_FILE%
+
+REM Carregar variaveis do .env para obter credenciais do banco
+for /f "tokens=1,* delims==" %%a in (.env) do (
+    set "%%a=%%b"
+)
+
+REM Usar variaveis do .env ou valores padrao
+set PG_USER=%POSTGRES_USER%
+if "%PG_USER%"=="" set PG_USER=opensilicio
+set PG_DB=%POSTGRES_DB%
+if "%PG_DB%"=="" set PG_DB=opensilicio_prod
+
+docker-compose -f docker\docker-compose.prod.yml exec -T postgres pg_dump -U %PG_USER% %PG_DB% > %BACKUP_FILE%
 if errorlevel 1 (
     echo [ERRO] Falha ao criar backup!
     echo Abortando atualizacao por seguranca.
@@ -30,7 +50,7 @@ if errorlevel 1 (
 echo   ✓ Backup criado: %BACKUP_FILE%
 echo.
 
-echo [2/6] Atualizando codigo do repositorio...
+echo [2/7] Atualizando codigo do repositorio...
 git pull origin main
 if errorlevel 1 (
     echo [AVISO] Falha ao atualizar repositorio
@@ -39,14 +59,14 @@ if errorlevel 1 (
 echo   ✓ Codigo atualizado
 echo.
 
-echo [3/6] Parando containers...
-docker-compose -f docker\docker-compose.yml down
+echo [3/7] Parando containers...
+docker-compose -f docker\docker-compose.prod.yml down
 echo   ✓ Containers parados
 echo.
 
-echo [4/6] Reconstruindo imagens...
+echo [4/7] Reconstruindo imagens de producao...
 echo   (Isso pode levar alguns minutos...)
-docker-compose -f docker\docker-compose.yml build
+docker-compose -f docker\docker-compose.prod.yml build
 if errorlevel 1 (
     echo [ERRO] Falha ao construir imagens!
     pause
@@ -55,8 +75,8 @@ if errorlevel 1 (
 echo   ✓ Imagens reconstruidas
 echo.
 
-echo [5/6] Reiniciando containers...
-docker-compose -f docker\docker-compose.yml up -d
+echo [5/7] Reiniciando containers...
+docker-compose -f docker\docker-compose.prod.yml up -d
 if errorlevel 1 (
     echo [ERRO] Falha ao iniciar containers!
     pause
@@ -65,14 +85,19 @@ if errorlevel 1 (
 echo   ✓ Containers iniciados
 echo.
 
-echo [6/6] Executando migracoes do banco de dados...
-timeout /t 5 /nobreak >nul
-docker-compose -f docker\docker-compose.yml exec -T backend npm run migrate
+echo [6/7] Aguardando servicos iniciarem...
+timeout /t 10 /nobreak >nul
+echo   ✓ Servicos prontos
+echo.
+
+echo [7/7] Executando migracoes do banco de dados...
+docker-compose -f docker\docker-compose.prod.yml exec -T backend npm run migrate
 if errorlevel 1 (
     echo [AVISO] Falha ao executar migracoes automaticamente
-    echo Execute manualmente: docker-compose -f docker\docker-compose.yml exec backend npm run migrate
+    echo Execute manualmente: docker-compose -f docker\docker-compose.prod.yml exec backend npm run migrate
+) else (
+    echo   ✓ Migracoes executadas
 )
-echo   ✓ Migracoes executadas
 echo.
 
 echo ========================================
@@ -80,13 +105,14 @@ echo Atualizacao concluida com sucesso! ✅
 echo ========================================
 echo.
 echo Aplicacao atualizada e rodando em:
-echo   - Frontend: http://localhost:5173
+echo   - Frontend: http://localhost:80
 echo   - Backend:  http://localhost:3001
 echo.
+echo Backup salvo em: %BACKUP_FILE%
+echo.
 echo Comandos uteis:
-echo   - Ver logs: docker-compose -f docker\docker-compose.yml logs -f
-echo   - Reiniciar: docker-compose -f docker\docker-compose.yml restart
-echo   - Parar: docker-compose -f docker\docker-compose.yml down
+echo   - Ver logs: docker-compose -f docker\docker-compose.prod.yml logs -f
+echo   - Reiniciar: docker-compose -f docker\docker-compose.prod.yml restart
+echo   - Parar: docker-compose -f docker\docker-compose.prod.yml down
 echo.
 pause
-

@@ -27,7 +27,9 @@ export default function Blog() {
       const response = await blogApi.getAll(true, 1, 100)
       setPosts(response.data)
     } catch (error) {
-      console.error('Erro ao carregar posts:', error)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar posts:', error)
+      }
     } finally {
       setLoading(false)
     }

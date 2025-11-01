@@ -22,7 +22,9 @@ export default function Post() {
       const data = await blogApi.getBySlug(slug!)
       setPost(data)
     } catch (error) {
-      console.error('Erro ao carregar post:', error)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar post:', error)
+      }
     } finally {
       setLoading(false)
     }

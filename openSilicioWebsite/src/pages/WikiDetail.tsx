@@ -56,7 +56,9 @@ export default function WikiDetail() {
         setEntry(data);
       }
     } catch (error) {
-      console.error('Erro ao carregar entrada:', error);
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar entrada:', error);
+      }
     } finally {
       setLoading(false);
     }

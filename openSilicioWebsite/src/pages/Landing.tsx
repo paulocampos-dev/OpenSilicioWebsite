@@ -19,7 +19,9 @@ export default function Landing() {
         const data = await settingsApi.getAll()
         setSettings(data)
       } catch (error) {
-        console.error('Failed to fetch settings:', error)
+        if (import.meta.env.DEV) {
+          console.error('Failed to fetch settings:', error)
+        }
       }
     }
     fetchSettings()

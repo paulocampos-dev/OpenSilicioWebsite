@@ -43,7 +43,9 @@ export default function WikiList() {
 
       setEntries(response.data);
     } catch (error) {
-      console.error('Erro ao carregar entradas da wiki:', error);
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar entradas da wiki:', error);
+      }
     } finally {
       setLoading(false);
     }

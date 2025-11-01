@@ -27,7 +27,9 @@ export default function Educacao() {
       const response = await educationApi.getAll(true, 1, 100)
       setResources(response.data)
     } catch (error) {
-      console.error('Erro ao carregar recursos:', error)
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar recursos:', error)
+      }
     } finally {
       setLoading(false)
     }

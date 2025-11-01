@@ -27,7 +27,9 @@ export default function About() {
       const data = await settingsApi.getAll();
       setSettings(data);
     } catch (error) {
-      console.error('Erro ao carregar configurações:', error);
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar configurações:', error);
+      }
     } finally {
       setLoading(false);
     }
