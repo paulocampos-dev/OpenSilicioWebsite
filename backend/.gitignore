@@ -2,7 +2,12 @@ node_modules/
 dist/
 uploads/*
 !uploads/.gitkeep
+
+# Nota: O arquivo .env principal está na raiz do projeto.
+# Qualquer .env aqui é ignorado por segurança, mas não deve existir.
 .env
+.env.*
+
 *.log
 .DS_Store
 

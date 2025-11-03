@@ -1,13 +1,15 @@
-# Estrutura de Arquivos .env no Projeto OpenSilício
+# Gerenciamento de Variáveis de Ambiente (.env) no Projeto OpenSilício
 
-## 📁 Localização dos Arquivos .env
+## 📁 Localização do Arquivo .env
 
-### 1. Raiz do Projeto (`/.env` e `/.env.example`)
-**Uso:** Produção e scripts de deploy
+### ✅ Arquivo .env Único (`/.env` e `/.env.example`)
+**Uso:** Produção, desenvolvimento e scripts
 
 **Arquivos:**
-- `.env` - Variáveis de ambiente para produção (NÃO commitado no git)
+- `.env` - Variáveis de ambiente para todos os ambientes (NÃO commitado no git)
 - `.env.example` - Template com todas as variáveis necessárias (commitado no git)
+
+**⚠️ IMPORTANTE:** Há apenas **UM** arquivo `.env` na raiz do projeto. Não use `.env` em subdiretórios.
 
 **Variáveis Configuradas:**
 ```env
@@ -33,31 +35,10 @@ FRONTEND_PORT=80
 - Scripts de produção (`deploy.bat/sh`, `test-production.bat/sh`, etc.)
 - Build do Docker (variáveis passadas como `--env-file`)
 
-**Nota:** `DATABASE_URL` é construído automaticamente pelo `docker-compose.prod.yml` a partir das variáveis `POSTGRES_*`.
-
----
-
-### 2. Backend (`/backend/.env` e `/backend/.env.example`)
-**Uso:** Desenvolvimento local do backend
-
-**Arquivos:**
-- `.env` - Variáveis de ambiente para desenvolvimento local (NÃO commitado no git)
-- `.env.example` - Template para desenvolvimento (commitado no git)
-
-**Variáveis Configuradas:**
-```env
-DATABASE_URL=postgresql://admin:admin123@localhost:5432/opensilicio
-JWT_SECRET=<secret_para_desenvolvimento>
-PORT=3001
-NODE_ENV=development
-```
-
-**Usado por:**
-- `backend/src/server.ts` - Carrega via `dotenv.config()` quando executado localmente
-- Scripts do backend quando executados diretamente (sem Docker)
-- Desenvolvimento local sem Docker
-
-**Nota:** Quando o backend roda no Docker, as variáveis são passadas pelo `docker-compose`, não pelo arquivo `.env`.
+**Notas:**
+- `DATABASE_URL` é construído automaticamente pelo `docker-compose` a partir das variáveis `POSTGRES_*`
+- Para desenvolvimento local, o backend busca o `.env` **na raiz do projeto** (não em `/backend/`)
+- Em Docker, as variáveis são passadas diretamente pelos arquivos `docker-compose`
 
 ---
 
@@ -74,9 +55,11 @@ NODE_ENV=development
 3. Variáveis estão hardcoded para desenvolvimento
 
 ### Desenvolvimento Local (Sem Docker)
-1. Backend usa `dotenv.config()` em `server.ts` para carregar `/backend/.env`
+1. Backend usa `dotenv.config()` em `server.ts` - procura `.env` no diretório de trabalho
+   - **Execute sempre a partir da raiz do projeto** (ex: `npm run dev` na raiz)
+   - O `.env` deve estar na raiz do projeto
 2. Frontend usa variáveis via `import.meta.env.VITE_*` durante o build
-3. Variáveis devem estar disponíveis no ambiente onde o código roda
+3. Todas as variáveis vêm do arquivo `.env` da raiz do projeto
 
 ---
 
@@ -105,9 +88,9 @@ NODE_ENV=development
 - [ ] Verificar que `.env` está no `.gitignore`
 
 ### Para Desenvolvimento Local:
-- [ ] Copiar `backend/.env.example` para `backend/.env`
-- [ ] Configurar `DATABASE_URL` apontando para banco local ou Docker
-- [ ] Configurar outras variáveis conforme necessário
+- [ ] Usar o mesmo `.env` da raiz do projeto
+- [ ] Configurar `DATABASE_URL` apontando para banco local ou Docker (se necessário)
+- [ ] `NODE_ENV` deve ser `development` para desenvolvimento local
 
 ---
 
@@ -138,10 +121,10 @@ NODE_ENV=development
 
 ## 📚 Referências
 
-- `.env.example` na raiz - Template completo para produção
-- `backend/.env.example` - Template para desenvolvimento local
-- `docker/docker-compose.prod.yml` - Como variáveis são passadas para containers
-- `backend/src/server.ts` - Como backend carrega variáveis
+- `.env.example` na raiz - Template completo e único para o projeto
+- `docker/docker-compose.prod.yml` - Como variáveis são passadas para containers em produção
+- `docker/docker-compose.dev.yml` - Como variáveis são passadas para containers em desenvolvimento
+- `backend/src/server.ts` - Como backend carrega variáveis (busca na raiz do projeto)
 
 ---
 
