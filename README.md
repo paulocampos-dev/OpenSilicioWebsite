@@ -35,6 +35,7 @@ Isso iniciará todos os serviços em Docker com **hot reload automático**:
 Toda a documentação foi organizada em `README/`:
 
 - **[README/README.md](README/README.md)** - Documentação completa do projeto
+- **[README/DEVELOPMENT_GUIDE.md](README/DEVELOPMENT_GUIDE.md)** - ⭐ Guia completo de desenvolvimento e teste de produção
 - **[README/DEPLOYMENT.md](README/DEPLOYMENT.md)** - Guia completo de deploy em produção
 - **[README/DATA_SAFETY.md](README/DATA_SAFETY.md)** - Segurança e backup de dados
 - **[README/SCRIPTS_GUIDE.md](README/SCRIPTS_GUIDE.md)** - Guia completo de todos os scripts

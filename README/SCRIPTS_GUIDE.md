@@ -27,6 +27,8 @@ scripts/
     ├── restore.sh       # Restaurar backup do banco (Linux/Mac)
     ├── validate-env.bat # Validar variáveis de ambiente (Windows)
     ├── validate-env.sh  # Validar variáveis de ambiente (Linux/Mac)
+    ├── test-production.bat # Teste completo de produção (Windows)
+    ├── test-production.sh  # Teste completo de produção (Linux/Mac)
     └── migrate.bat      # Executar migrações do banco (Windows)
 ```
 
@@ -266,6 +268,45 @@ scripts\production\migrate.bat
 - Depois de adicionar novas migrations
 - Para configurar banco novo
 
+### test-production - Teste Completo de Produção
+
+Testa o ambiente de produção completo: cria dados de teste, executa testes, aplica migrações e verifica se os dados foram preservados.
+
+```bash
+# Windows
+scripts\production\test-production.bat
+
+# Linux/Mac
+chmod +x scripts/production/test-production.sh
+./scripts/production/test-production.sh
+```
+
+**O que faz:**
+1. ✅ Cria backup inicial do banco
+2. ✅ Inicia ambiente de produção completo
+3. ✅ Executa migrações iniciais
+4. ✅ Cria usuário admin
+5. ✅ Cria dados de teste (blog posts, education resources, wiki entries, settings)
+6. ✅ Salva snapshot dos dados criados
+7. ✅ Executa testes de integração
+8. ✅ Executa migrações pendentes
+9. ✅ Verifica integridade dos dados (contagem + conteúdo)
+10. ✅ Gera relatório de verificação
+11. ✅ Oferece opção de limpeza no final
+
+**Arquivos gerados:**
+- `test-data-snapshot.json` - Snapshot dos dados criados antes da migração
+- `test-integrity-report.json` - Relatório completo da verificação de integridade
+- `backups/backup_before_test_*.sql` - Backup criado antes do teste
+
+**Quando usar:**
+- Antes de fazer deploy em produção
+- Após criar novas migrações para garantir que não quebram dados existentes
+- Para validar que o ambiente de produção está funcionando corretamente
+- Antes de atualizar produção após mudanças significativas
+
+**Nota:** O script mantém o ambiente rodando ao final para inspeção manual. Você pode escolher limpar tudo ou manter para verificar os dados.
+
 ## 📋 Fluxos Comuns
 
 ### Primeiro Deploy
@@ -328,6 +369,19 @@ scripts/production/backup.sh
 
 # 3. Se der errado, restaurar
 scripts/production/restore.sh backups/backup_YYYYMMDD_HHMMSS.sql
+```
+
+### Testar Produção Antes de Deploy
+
+```bash
+# 1. Executar teste completo de produção
+scripts/production/test-production.sh  # ou test-production.bat no Windows
+
+# 2. Verificar relatório gerado
+cat test-integrity-report.json
+
+# 3. Se tudo estiver OK, fazer deploy real
+scripts/production/deploy.sh
 ```
 
 ## 🔧 Troubleshooting

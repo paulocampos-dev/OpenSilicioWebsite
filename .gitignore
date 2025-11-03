@@ -27,3 +27,7 @@ node_modules/
 dist/
 build/
 
+# Test data snapshots and reports
+test-data-snapshot.json
+test-integrity-report.json
+

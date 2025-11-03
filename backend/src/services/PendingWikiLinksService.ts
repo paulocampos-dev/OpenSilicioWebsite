@@ -131,7 +131,7 @@ export class PendingWikiLinksService extends BaseService<PendingWikiLink> {
     const linkData = {
       id: uuidv4(),
       ...data,
-      context: data.context || null,
+      context: data.context || undefined,
     };
 
     const fields = ['id', 'term', 'content_type', 'content_id', 'context'];

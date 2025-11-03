@@ -7,7 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies (including dev dependencies for build)
-RUN npm ci
+# Try npm ci first, fallback to npm install if lock file is out of sync
+RUN (npm ci || (echo "Warning: package-lock.json out of sync, updating..." && npm install && npm cache clean --force)) && echo "Dependencies installed successfully"
 
 # Copy source code
 COPY . .
@@ -24,10 +25,14 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+# Try npm ci first, fallback to npm install if lock file is out of sync
+RUN (npm ci --only=production || (echo "Warning: package-lock.json out of sync, updating..." && npm install --only=production && npm cache clean --force)) && echo "Production dependencies installed successfully"
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
+
+# Copy migration SQL files to dist/migrations (where the compiled scripts expect them)
+COPY --from=builder /app/src/migrations/*.sql ./dist/migrations/
 
 # Copy uploads directory structure (if needed)
 RUN mkdir -p uploads

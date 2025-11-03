@@ -15,7 +15,9 @@ if (!DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // SSL: only enable if DATABASE_SSL is explicitly set to 'true' (e.g., for managed databases like AWS RDS)
+  // For Docker/local production, SSL is not needed
+  ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 interface Migration {

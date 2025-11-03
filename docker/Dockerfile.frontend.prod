@@ -7,13 +7,30 @@ WORKDIR /app
 COPY openSilicioWebsite/package*.json ./
 
 # Install dependencies
-RUN npm ci
+# Use npm ci for reproducible builds (requires package-lock.json)
+RUN npm ci || (echo "Warning: package-lock.json out of sync, updating..." && npm install && npm cache clean --force)
 
 # Copy source code and config files
 COPY openSilicioWebsite/ ./
 
 # Copy nginx config from docker directory
 COPY docker/nginx/nginx.conf ./nginx.conf
+
+# Fix Lexical packages exports field - add missing "." specifier
+RUN for pkg in react code file history link list markdown rich-text utils selection; do \
+      PKG_JSON="node_modules/@lexical/$pkg/package.json"; \
+      if [ -f "$PKG_JSON" ]; then \
+        node -e " \
+          const fs = require('fs'); \
+          const pkg = JSON.parse(fs.readFileSync('$PKG_JSON', 'utf8')); \
+          if (pkg.exports && !pkg.exports['.']) { \
+            pkg.exports['.'] = pkg.module || pkg.main || './dist/index.js'; \
+            fs.writeFileSync('$PKG_JSON', JSON.stringify(pkg, null, 2)); \
+            console.log('Fixed $pkg exports'); \
+          } \
+        "; \
+      fi; \
+    done
 
 # Build arguments for environment variables
 ARG VITE_API_URL

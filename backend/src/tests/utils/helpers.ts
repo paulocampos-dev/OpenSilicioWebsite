@@ -1,4 +1,7 @@
-import { testPool } from '../setup';
+import { testPool, cleanDatabase } from '../setup';
+
+// Re-export cleanDatabase for convenience
+export { cleanDatabase };
 
 /**
  * Create a test blog post
