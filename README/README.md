@@ -9,9 +9,11 @@ Um website completo para o grupo universitário OpenSilício, com sistema de ger
 - **Educação** - Recursos educacionais organizados por categoria
 - **Wiki** - Dicionário de termos técnicos com links automáticos
 - **Painel Administrativo** - Interface completa para gerenciar conteúdo
-- **Editor Rico** - Suporte a WYSIWYG e Markdown com upload de imagens
+- **Editor Rico** - Suporte a Lexical com upload de imagens
 - **Autenticação** - Sistema de login seguro com JWT
 - **Docker** - Ambiente de desenvolvimento containerizado
+- **Testes de Integração** - Suite completa de testes automatizados
+- **Deploy Simplificado** - Scripts automatizados para produção
 
 ## 🛠️ Tecnologias
 
@@ -21,11 +23,12 @@ Um website completo para o grupo universitário OpenSilício, com sistema de ger
 - JWT para autenticação
 - Multer para upload de arquivos
 - bcrypt para hash de senhas
+- Jest + Supertest para testes
 
 ### Frontend
 - React + TypeScript
 - Material-UI (MUI)
-- BlockNote para editor rico (WYSIWYG)
+- Lexical para editor rico
 - Axios para requisições HTTP
 - React Router para navegação
 - Vite para build otimizado
@@ -33,6 +36,9 @@ Um website completo para o grupo universitário OpenSilício, com sistema de ger
 ### DevOps
 - Docker + Docker Compose
 - Scripts de desenvolvimento automatizados
+- Scripts de produção com validação
+- Nginx para servir frontend em produção
+- Sistema de backup automatizado
 
 ## 📋 Pré-requisitos
 
@@ -133,7 +139,7 @@ docker-compose -f docker-compose.dev.yml up
 
 **Usuário Administrador:**
 - Username: `AdmOpen`
-- Password: `Test123`
+- Password: `ADMOpenSilicio123!@2025`
 
 ## 📁 Estrutura do Projeto
 
@@ -218,7 +224,7 @@ docker-compose exec backend npx ts-node src/scripts/seedAdmin.ts
 ### 1. Acessar o Painel Administrativo
 1. Acesse http://localhost:5173
 2. Clique em "Entrar" no menu superior
-3. Faça login com as credenciais: `AdmOpen` / `Test123`
+3. Faça login com as credenciais: `AdmOpen` / `ADMOpenSilicio123!@2025`
 4. Você será redirecionado para o painel administrativo
 
 ### 2. Gerenciar Conteúdo
@@ -312,7 +318,25 @@ chmod +x dev-start.sh
 
 ## 🚀 Deploy em Produção
 
-### Usando Docker (Recomendado)
+### Deploy Rápido (Recomendado)
+
+Use o script de quick-start para deploy inicial simplificado:
+
+```bash
+# Windows
+scripts\production\quick-start.bat
+
+# Linux/Mac
+chmod +x scripts/production/quick-start.sh
+./scripts/production/quick-start.sh
+```
+
+O script:
+1. Verifica se `.env` existe (cria de `.env.example` se necessário)
+2. Valida variáveis de ambiente obrigatórias
+3. Executa deploy completo
+
+### Deploy Manual
 
 #### 1. Configurar variáveis de ambiente
 
@@ -328,11 +352,14 @@ POSTGRES_PASSWORD=SUA_SENHA_FORTE_AQUI
 NODE_ENV=production
 PORT=3001
 JWT_SECRET=SEU_JWT_SECRET_SEGURO_AQUI
-DATABASE_URL=postgresql://opensilicio:SUA_SENHA_FORTE_AQUI@postgres:5432/opensilicio_prod
+# DATABASE_URL é construído automaticamente pelo docker-compose.prod.yml
 
 # Frontend (build time)
 VITE_API_URL=https://seu-dominio.com/api
+CORS_ORIGINS=https://seu-dominio.com,https://www.seu-dominio.com
 ```
+
+**Nota:** `DATABASE_URL` é construído automaticamente a partir das variáveis de PostgreSQL. Não é necessário configurá-lo manualmente.
 
 #### 2. Build e Deploy
 
@@ -345,30 +372,27 @@ chmod +x scripts/production/deploy.sh
 ./scripts/production/deploy.sh
 ```
 
-Ou manualmente:
+O script usa `docker-compose.prod.yml` que:
+- Constrói imagens otimizadas de produção
+- Serve frontend via Nginx
+- Executa migrações automaticamente
+- Oferece criar usuário admin e configurações iniciais
+
+#### 3. Atualizar Aplicação
 
 ```bash
-# Build e inicie em produção
-docker-compose -f docker/docker-compose.yml up -d --build
+# Windows
+scripts\production\update.bat
 
-# Verificar status
-docker-compose -f docker/docker-compose.yml ps
-
-# Ver logs
-docker-compose -f docker/docker-compose.yml logs -f
+# Linux/Mac
+./scripts/production/update.sh
 ```
 
-#### 3. Executar migrações
-
-```bash
-docker-compose -f docker/docker-compose.yml exec backend npm run migrate
-```
-
-#### 4. Criar usuário admin
-
-```bash
-docker-compose -f docker/docker-compose.yml exec backend npm run seed:admin
-```
+O script:
+- Cria backup automático antes de atualizar
+- Atualiza código do repositório
+- Reconstrói imagens
+- Executa migrações se necessário
 
 ### Configuração de Servidor
 
@@ -447,18 +471,52 @@ docker-compose -f docker/docker-compose.yml up -d --build
 docker-compose -f docker/docker-compose.yml exec backend npm run migrate
 ```
 
-## 📈 Próximos Passos
+## 🧪 Testes
+
+O projeto inclui uma suite completa de testes de integração que testam os endpoints da API da mesma forma que o frontend os usa.
+
+### Executar Testes
+
+```bash
+cd backend
+npm test                # Executar todos os testes
+npm run test:watch      # Modo watch para desenvolvimento
+npm run test:coverage   # Gerar relatório de cobertura
+npm run test:integration # Apenas testes de integração
+```
+
+### Estrutura dos Testes
+
+- `backend/src/tests/integration/auth.test.ts` - Testes de autenticação
+- `backend/src/tests/integration/blog.test.ts` - Testes de blog
+- `backend/src/tests/integration/education.test.ts` - Testes de educação
+- `backend/src/tests/integration/wiki.test.ts` - Testes de wiki
+- `backend/src/tests/integration/settings.test.ts` - Testes de configurações
+
+Para mais detalhes, veja [backend/src/tests/README.md](../backend/src/tests/README.md)
+
+## 📈 Status do Projeto
+
+### ✅ Implementado
+
+- [x] Sistema de backup automático
+- [x] Deploy em produção com Docker otimizado
+- [x] Wiki com links automáticos
+- [x] Editor rico com Lexical
+- [x] Sistema de pending wiki links
+- [x] Scripts de produção automatizados
+- [x] Validação de variáveis de ambiente
+- [x] Frontend servido via Nginx em produção
+- [x] Testes de integração completos
+- [x] Console logs apenas em desenvolvimento
+
+### 🔄 Próximos Passos
 
 - [ ] Sistema de comentários no blog
 - [ ] Notificações por email
 - [ ] Sistema de tags
 - [ ] Busca avançada
 - [ ] Analytics de visualizações
-- [x] Sistema de backup automático
-- [x] Deploy em produção
-- [x] Wiki com links automáticos
-- [x] Editor rico com BlockNote
-- [x] Sistema de pending wiki links
 
 ## 🤝 Contribuição
 

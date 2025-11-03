@@ -15,6 +15,8 @@ scripts/
 │   └── stop.sh          # Parar todos os serviços (Linux/Mac)
 │
 └── production/          # Scripts de produção
+    ├── quick-start.bat  # Deploy rápido inicial (Windows)
+    ├── quick-start.sh   # Deploy rápido inicial (Linux/Mac)
     ├── deploy.bat       # Deploy inicial em produção (Windows)
     ├── deploy.sh        # Deploy inicial em produção (Linux/Mac)
     ├── update.bat       # Atualizar aplicação em produção (Windows)
@@ -23,6 +25,8 @@ scripts/
     ├── backup.sh        # Criar backup do banco de dados (Linux/Mac)
     ├── restore.bat      # Restaurar backup do banco (Windows)
     ├── restore.sh       # Restaurar backup do banco (Linux/Mac)
+    ├── validate-env.bat # Validar variáveis de ambiente (Windows)
+    ├── validate-env.sh  # Validar variáveis de ambiente (Linux/Mac)
     └── migrate.bat      # Executar migrações do banco (Windows)
 ```
 
@@ -87,6 +91,52 @@ chmod +x scripts/development/stop.sh
 
 ## 🏭 Scripts de Produção
 
+### quick-start - Deploy Rápido (Novo!)
+
+Script simplificado para primeiro deploy em produção. Ideal para quem está fazendo deploy pela primeira vez.
+
+```bash
+# Windows
+scripts\production\quick-start.bat
+
+# Linux/Mac
+chmod +x scripts/production/quick-start.sh
+./scripts/production/quick-start.sh
+```
+
+**O que faz:**
+1. ✅ Verifica se `.env` existe (cria de `.env.example` se necessário)
+2. ✅ Abre `.env` para edição
+3. ✅ Valida variáveis de ambiente obrigatórias
+4. ✅ Executa deploy completo
+
+**Quando usar:**
+- Primeiro deploy em produção
+- Configuração inicial do ambiente
+
+### validate-env - Validar Variáveis de Ambiente
+
+Valida se todas as variáveis de ambiente obrigatórias estão configuradas corretamente.
+
+```bash
+# Windows
+scripts\production\validate-env.bat
+
+# Linux/Mac
+chmod +x scripts/production/validate-env.sh
+./scripts/production/validate-env.sh
+```
+
+**O que valida:**
+- `POSTGRES_PASSWORD` (obrigatório)
+- `JWT_SECRET` (obrigatório, mínimo 32 caracteres)
+- `VITE_API_URL` (obrigatório)
+- `POSTGRES_DB` (opcional, padrão: opensilicio_prod)
+- `POSTGRES_USER` (opcional, padrão: opensilicio)
+- `CORS_ORIGINS` (opcional)
+
+**Nota:** `DATABASE_URL` é construído automaticamente e não precisa ser validado.
+
 ### deploy - Deploy Inicial
 
 Faz o deploy completo da aplicação em produção pela primeira vez.
@@ -102,11 +152,19 @@ chmod +x scripts/production/deploy.sh
 
 **O que faz:**
 1. ✅ Verifica arquivo `.env`
-2. ✅ Para containers existentes
-3. ✅ Constrói imagens de produção
-4. ✅ Inicia containers
-5. ✅ Executa migrações do banco
-6. ✅ Pronto para uso!
+2. ✅ Valida variáveis de ambiente obrigatórias
+3. ✅ Para containers existentes
+4. ✅ Constrói imagens de produção otimizadas
+5. ✅ Inicia containers usando `docker-compose.prod.yml`
+6. ✅ Executa migrações do banco automaticamente
+7. ✅ Oferece criar usuário admin e configurações iniciais
+8. ✅ Pronto para uso!
+
+**Melhorias:**
+- Frontend servido via Nginx (não Vite dev server)
+- Build otimizado de produção
+- Validação de ambiente antes do deploy
+- DATABASE_URL construído automaticamente
 
 **Pré-requisitos:**
 - Arquivo `.env` configurado (o script cria um template se não existir)
@@ -129,9 +187,9 @@ chmod +x scripts/production/update.sh
 1. ✅ **Cria backup automático** do banco (se falhar, aborta!)
 2. ✅ Atualiza código do repositório
 3. ✅ Para containers
-4. ✅ Reconstrói imagens
-5. ✅ Reinicia containers
-6. ✅ Executa novas migrações
+4. ✅ Reconstrói imagens de produção
+5. ✅ Reinicia containers usando `docker-compose.prod.yml`
+6. ✅ Executa novas migrações automaticamente
 
 **Segurança:**
 - Backup automático antes de qualquer mudança
@@ -213,14 +271,22 @@ scripts\production\migrate.bat
 ### Primeiro Deploy
 
 ```bash
+# Opção 1: Quick Start (mais fácil)
+scripts/production/quick-start.sh  # ou quick-start.bat no Windows
+
+# Opção 2: Manual
 # 1. Configurar ambiente
 # Edite .env com suas senhas e configurações
+# (lembre-se: DATABASE_URL é construído automaticamente!)
 
-# 2. Deploy
+# 2. Validar ambiente (opcional mas recomendado)
+scripts/production/validate-env.sh
+
+# 3. Deploy
 scripts/production/deploy.sh
 
-# 3. Verificar
-docker-compose -f docker/docker-compose.yml logs -f
+# 4. Verificar
+docker-compose -f docker/docker-compose.prod.yml logs -f
 ```
 
 ### Desenvolvimento Diário
@@ -244,11 +310,12 @@ git add .
 git commit -m "Feature XYZ"
 git push origin main
 
-# 2. No servidor, atualizar
-scripts/production/update.sh
+# 2. No servidor, atualizar (backup automático incluído)
+scripts/production/update.sh  # ou update.bat no Windows
 
 # 3. Verificar
-docker-compose -f docker/docker-compose.yml ps
+docker-compose -f docker/docker-compose.prod.yml ps
+docker-compose -f docker/docker-compose.prod.yml logs -f
 ```
 
 ### Backup Antes de Mudança Arriscada
@@ -301,10 +368,13 @@ netstat -ano | findstr :3001
 
 ```bash
 # Verificar se PostgreSQL está rodando
-docker-compose -f docker/docker-compose.yml ps postgres
+docker-compose -f docker/docker-compose.prod.yml ps postgres
 
 # Verificar logs
-docker-compose -f docker/docker-compose.yml logs postgres
+docker-compose -f docker/docker-compose.prod.yml logs postgres
+
+# Verificar variáveis de ambiente (certifique-se de que POSTGRES_USER e POSTGRES_DB estão corretos)
+scripts/production/validate-env.sh
 ```
 
 ## 💡 Dicas

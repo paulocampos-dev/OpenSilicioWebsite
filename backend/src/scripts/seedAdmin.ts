@@ -4,7 +4,7 @@ import pool from '../config/database';
 async function seedAdmin() {
   try {
     const username = 'AdmOpen';
-    const password = 'Test123';
+    const password = 'ADMOpenSilicio123!@2025';
     
     // Gerar hash da senha
     const passwordHash = await bcrypt.hash(password, 10);

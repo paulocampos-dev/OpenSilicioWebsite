@@ -141,18 +141,20 @@ app.get('/metrics', (req, res) => {
 app.use(notFoundHandler); // 404 handler
 app.use(errorHandler); // Centralized error handler
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log('\n========================================');
-  console.log('🚀 OpenSilício Backend Server');
-  console.log('========================================');
-  console.log(`📡 API disponível em http://localhost:${PORT}`);
-  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
-  console.log(`🔒 CORS Origins: ${allowedOrigins.join(', ')}`);
-  console.log('========================================\n');
-  console.log('⏳ Aguardando requisições...\n');
-});
+// Iniciar servidor (only if not in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log('\n========================================');
+    console.log('🚀 OpenSilício Backend Server');
+    console.log('========================================');
+    console.log(`📡 API disponível em http://localhost:${PORT}`);
+    console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
+    console.log(`🔒 CORS Origins: ${allowedOrigins.join(', ')}`);
+    console.log('========================================\n');
+    console.log('⏳ Aguardando requisições...\n');
+  });
+}
 
 export default app;
 

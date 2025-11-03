@@ -157,7 +157,7 @@ echo   - Backend logs: logs\backend.log
 echo.
 echo %BLUE%Admin Credentials:%RESET%
 echo   - Username: AdmOpen
-echo   - Password: Test123
+echo   - Password: ADMOpenSilicio123!@2025
 echo.
 echo %YELLOW%Commands:%RESET%
 echo   - Restart all:     dev-local.bat restart

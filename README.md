@@ -28,7 +28,7 @@ Isso iniciará todos os serviços em Docker com **hot reload automático**:
 ### Credenciais
 
 - **Username**: `AdmOpen`
-- **Password**: `Test123`
+- **Password**: `ADMOpenSilicio123!@2025`
 
 ## 📚 Documentação Completa
 
@@ -107,7 +107,7 @@ site_react/
 - ✅ Hot reload automático (backend + frontend)
 - ✅ Sistema de autenticação com JWT
 - ✅ Upload de imagens com otimização automática
-- ✅ Editor rico com BlockNote (WYSIWYG)
+- ✅ Editor rico com Lexical
 - ✅ Wiki com links automáticos e pending links
 - ✅ Sistema de migrações de banco de dados
 - ✅ Painel administrativo completo
@@ -117,6 +117,10 @@ site_react/
 - ✅ Docker pronto para produção
 - ✅ Scripts de deployment automatizados
 - ✅ Sistema de backup de banco de dados
+- ✅ Testes de integração completos
+- ✅ Frontend servido via Nginx em produção
+- ✅ Validação de ambiente antes do deploy
+- ✅ Console logs apenas em desenvolvimento
 
 ## 📝 Scripts Disponíveis
 
@@ -137,6 +141,10 @@ scripts/development/stop.sh        # Linux/Mac
 
 ### Produção
 ```bash
+# Deploy rápido inicial (primeira vez)
+scripts/production/quick-start.bat # Windows
+scripts/production/quick-start.sh  # Linux/Mac
+
 # Deploy inicial
 scripts/production/deploy.bat      # Windows
 scripts/production/deploy.sh       # Linux/Mac
@@ -144,6 +152,10 @@ scripts/production/deploy.sh       # Linux/Mac
 # Atualizar aplicação
 scripts/production/update.bat      # Windows
 scripts/production/update.sh       # Linux/Mac
+
+# Validar ambiente
+scripts/production/validate-env.bat # Windows
+scripts/production/validate-env.sh  # Linux/Mac
 
 # Backup e restore
 scripts/production/backup.bat      # Windows
@@ -160,14 +172,25 @@ scripts/production/migrate.bat     # Windows
 # Dev com hot reload
 docker-compose -f docker/docker-compose.dev.yml up
 
-# Produção
-docker-compose -f docker/docker-compose.yml up --build
+# Produção (usa docker-compose.prod.yml)
+docker-compose -f docker/docker-compose.prod.yml up --build
 
 # Ver logs
-docker-compose -f docker/docker-compose.dev.yml logs -f
+docker-compose -f docker/docker-compose.dev.yml logs -f    # Dev
+docker-compose -f docker/docker-compose.prod.yml logs -f    # Produção
 
 # Parar e limpar
-docker-compose -f docker/docker-compose.dev.yml down -v
+docker-compose -f docker/docker-compose.dev.yml down -v      # Dev (seguro)
+docker-compose -f docker/docker-compose.prod.yml down        # Produção (SEM -v para preservar dados!)
+```
+
+### Testes
+```bash
+cd backend
+npm test                # Executar todos os testes
+npm run test:watch      # Modo watch
+npm run test:coverage   # Relatório de cobertura
+npm run test:integration # Apenas testes de integração
 ```
 
 ## 🤝 Contribuindo
