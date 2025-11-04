@@ -36,14 +36,23 @@ chmod +x scripts/development/start.sh
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
-- Admin: `AdmOpen` / `ADMOpenSilicio123!@2025`
+- Admin: `AdmOpen` / senha configurada no `ADMIN_PASSWORD` (padrão: `Dev123!@LocalOnly`)
 
 **Para parar:**
 
 ```bash
-scripts\development\stop.bat  # Windows
-scripts/development/stop.sh   # Linux/Mac
+scripts\dev\stop.bat  # Windows
+scripts/dev/stop.sh   # Linux/Mac
 ```
+
+**Para iniciar com testes automáticos:**
+
+```bash
+scripts\dev\start-with-tests.bat  # Windows
+scripts/dev/start-with-tests.sh   # Linux/Mac
+```
+
+Isso iniciará o ambiente e rodará os testes de integração automaticamente.
 
 ### Opção 2: Desenvolvimento Local (Sem Docker)
 
@@ -151,7 +160,7 @@ docker-compose -f docker/docker-compose.prod.yml exec backend npm run seed:admin
 
 - **Frontend (via Nginx):** http://localhost:80
 - **Backend API:** http://localhost:3001
-- **Admin:** `AdmOpen` / `ADMOpenSilicio123!@2025`
+- **Admin:** `AdmOpen` / senha do `.env` (`ADMIN_PASSWORD`)
 
 **O que verificar:**
 

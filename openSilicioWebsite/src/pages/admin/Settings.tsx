@@ -44,6 +44,13 @@ export default function Settings() {
   const [aboutTab, setAboutTab] = useState<'main' | 'mission' | 'vision' | 'history' | 'team'>('main');
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -81,6 +88,60 @@ export default function Settings() {
       setMessage({ type: 'error', text: error.response?.data?.error || 'Erro ao salvar configurações' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setChangingPassword(true);
+    setPasswordMessage(null);
+
+    // Validação básica
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'Todos os campos são obrigatórios' });
+      setChangingPassword(false);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'As senhas não coincidem' });
+      setChangingPassword(false);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordMessage({ type: 'error', text: 'A nova senha deve ter pelo menos 8 caracteres' });
+      setChangingPassword(false);
+      return;
+    }
+
+    // Validação de complexidade
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumber = /\d/.test(newPassword);
+    const hasSpecialChar = /[@$!%*?&]/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+      setPasswordMessage({ 
+        type: 'error', 
+        text: 'A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais (@$!%*?&)' 
+      });
+      setChangingPassword(false);
+      return;
+    }
+
+    try {
+      await authApi.changePassword(currentPassword, newPassword);
+      setPasswordMessage({ type: 'success', text: 'Senha alterada com sucesso!' });
+      
+      // Limpar campos
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.response?.data?.details?.[0]?.message || 'Erro ao alterar senha';
+      setPasswordMessage({ type: 'error', text: errorMessage });
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -545,6 +606,61 @@ export default function Settings() {
               )}
             </Stack>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Password Change */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Alterar Senha
+          </Typography>
+          <Typography color="text.secondary" sx={{ mb: 3 }}>
+            Altere a senha de acesso à área administrativa
+          </Typography>
+
+          {passwordMessage && (
+            <Alert severity={passwordMessage.type} onClose={() => setPasswordMessage(null)} sx={{ mb: 3 }}>
+              {passwordMessage.text}
+            </Alert>
+          )}
+
+          <Stack spacing={3}>
+            <TextField
+              label="Senha Atual"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              fullWidth
+              disabled={changingPassword}
+            />
+            <TextField
+              label="Nova Senha"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              fullWidth
+              disabled={changingPassword}
+              helperText="Mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais"
+            />
+            <TextField
+              label="Confirmar Nova Senha"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              fullWidth
+              disabled={changingPassword}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                onClick={handleChangePassword}
+                disabled={changingPassword}
+              >
+                {changingPassword ? 'Alterando...' : 'Alterar Senha'}
+              </Button>
+            </Box>
+          </Stack>
         </CardContent>
       </Card>
 

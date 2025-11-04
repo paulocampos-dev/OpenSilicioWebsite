@@ -11,6 +11,7 @@
     "seed:admin": "test -f dist/scripts/seedAdmin.js && node dist/scripts/seedAdmin.js || ts-node src/scripts/seedAdmin.ts",
     "seed:settings": "test -f dist/scripts/seedSettings.js && node dist/scripts/seedSettings.js || ts-node src/scripts/seedSettings.ts",
     "fix:about": "test -f dist/scripts/fixAboutSettings.js && node dist/scripts/fixAboutSettings.js || ts-node src/scripts/fixAboutSettings.ts",
+    "change-password": "test -f dist/scripts/changeAdminPassword.js && node dist/scripts/changeAdminPassword.js || ts-node src/scripts/changeAdminPassword.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

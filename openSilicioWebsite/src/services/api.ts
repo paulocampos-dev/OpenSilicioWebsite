@@ -92,6 +92,13 @@ export const authApi = {
     const response = await api.get('/auth/verify');
     return response.data;
   },
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await api.put<{ success: boolean; message: string }>('/auth/change-password', {
+      currentPassword,
+      newPassword,
+    });
+    return response.data;
+  },
 };
 
 // Blog

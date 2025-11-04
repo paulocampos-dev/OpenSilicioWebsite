@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import pool from '../config/database';
 import { BaseService, PaginationOptions, WhereCondition } from './BaseService';
+import { NotFoundError } from '../errors/AppError';
 
 export interface BlogPost {
   id: string;
@@ -41,7 +42,7 @@ export class BlogService extends BaseService<BlogPost> {
     const post = await this.getByField('id', id);
 
     if (!post) {
-      throw new Error('Post não encontrado');
+      throw new NotFoundError('Post não encontrado');
     }
 
     return post;
@@ -54,7 +55,7 @@ export class BlogService extends BaseService<BlogPost> {
     const post = await this.getByField('slug', slug);
 
     if (!post) {
-      throw new Error('Post não encontrado');
+      throw new NotFoundError('Post não encontrado');
     }
 
     return post;

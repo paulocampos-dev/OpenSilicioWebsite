@@ -22,19 +22,18 @@ export default defineConfig(({ mode }) => {
       noExternal: [/@lexical\/.*/],
     },
     // Optimize dependencies
+    // NOTE: Lexical packages are handled by ssr.noExternal below
+    // Don't include them here to avoid entry point resolution conflicts
     optimizeDeps: {
       include: [
-        '@lexical/react',
-        '@lexical/code',
-        '@lexical/file',
-        '@lexical/history',
-        '@lexical/link',
-        '@lexical/list',
-        '@lexical/markdown',
-        '@lexical/rich-text',
-        '@lexical/utils',
-        'lexical',
+        'react',
+        'react-dom',
+        '@mui/material',
+        '@mui/icons-material',
       ],
+      esbuildOptions: {
+        resolveExtensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+      },
     },
     // Production build optimizations
     build: {

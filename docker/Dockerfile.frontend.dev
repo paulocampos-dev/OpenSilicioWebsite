@@ -9,6 +9,9 @@ RUN npm install
 # Source code will be mounted as volume
 # Don't copy source code here for better hot reloading
 
+# Increase Node.js memory limit for Vite dev server
+ENV NODE_OPTIONS=--max-old-space-size=4096
+
 EXPOSE 5173
 
 # Vite dev server with host exposed

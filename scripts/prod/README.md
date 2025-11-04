@@ -49,6 +49,32 @@ Scripts para deploy e gerenciamento do ambiente de produção.
 
 ---
 
+### `change-password.bat` / `change-password.sh`
+**Alterar senha do administrador**
+
+```bash
+# Windows
+.\scripts\prod\change-password.bat
+
+# Linux/Mac
+./scripts/prod/change-password.sh
+```
+
+**O que faz:**
+1. 🔐 Conecta ao container backend em produção
+2. 💬 Solicita nome de usuário (padrão: AdmOpen)
+3. 🔑 Solicita e valida nova senha
+4. ✅ Atualiza senha no banco de dados
+
+**Use quando:** 
+- Alterar senha do administrador por linha de comando
+- Recuperar acesso após esquecer a senha
+- Definir senha inicial após deploy
+
+**Nota:** Você também pode alterar a senha pela interface web em "Configurações → Alterar Senha".
+
+---
+
 ### `backup.bat` / `backup.sh`
 **Cria backup do banco de dados**
 

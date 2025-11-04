@@ -28,6 +28,57 @@ Scripts para gerenciar o ambiente de desenvolvimento local com Docker.
 
 ---
 
+### `start-with-tests.bat` / `start-with-tests.sh`
+**Inicia o ambiente de desenvolvimento E roda os testes**
+
+```bash
+# Windows
+.\scripts\dev\start-with-tests.bat
+
+# Linux/Mac
+./scripts/dev/start-with-tests.sh
+```
+
+**O que faz:**
+1. ✅ Executa tudo que o `start.bat` faz
+2. ⏳ Aguarda ambiente estabilizar
+3. 🧪 Roda testes de integração automaticamente
+4. 📊 Mostra relatório dos testes
+
+**Use quando:** 
+- Quer verificar se tudo está funcionando após mudanças
+- Desenvolvimento TDD (Test-Driven Development)
+- Antes de fazer commit/push de código
+
+---
+
+### `clear-cache.bat` / `clear-cache.sh`
+**Limpa cache e força rebuild completo**
+
+```bash
+# Windows
+.\scripts\dev\clear-cache.bat
+
+# Linux/Mac
+./scripts/dev/clear-cache.sh
+```
+
+**O que faz:**
+1. ⏹️ Para todos os containers
+2. 🗑️ Remove volumes (node_modules, Vite cache)
+3. 🧹 Limpa cache do Docker Builder
+4. 🔄 Remove imagens antigas
+
+**Use quando:**
+- Erros de resolução de módulos (ex: Lexical, Vite)
+- Após atualizar dependências no package.json
+- "Failed to resolve entry" ou similar
+- Comportamento estranho de cache
+
+**Nota:** Após rodar, execute `.\scripts\dev\start.bat` para rebuildar tudo do zero.
+
+---
+
 ### `stop.bat` / `stop.sh`
 **Para todos os containers de desenvolvimento**
 
@@ -80,6 +131,15 @@ cp .env.example .env
 .\scripts\dev\start.bat
 ```
 
+### 4. Desenvolvimento com testes:
+```bash
+# Iniciar e rodar testes automaticamente
+.\scripts\dev\start-with-tests.bat
+
+# Ou rodar testes manualmente depois
+docker-compose -f docker/docker-compose.dev.yml exec backend npm test
+```
+
 ---
 
 ## 🔧 Comandos Úteis
@@ -97,6 +157,21 @@ docker-compose -f docker/docker-compose.dev.yml exec postgres psql -U admin -d o
 ### Executar migrações manualmente:
 ```bash
 docker-compose -f docker/docker-compose.dev.yml exec backend npm run migrate
+```
+
+### Rodar testes:
+```bash
+# Todos os testes
+docker-compose -f docker/docker-compose.dev.yml exec backend npm test
+
+# Apenas testes de integração
+docker-compose -f docker/docker-compose.dev.yml exec backend npm run test:integration
+
+# Com watch mode (re-roda ao salvar)
+docker-compose -f docker/docker-compose.dev.yml exec backend npm run test:watch
+
+# Com coverage
+docker-compose -f docker/docker-compose.dev.yml exec backend npm run test:coverage
 ```
 
 ### Reiniciar apenas um serviço:
@@ -121,7 +196,14 @@ netstat -ano | findstr :3001
 ### Containers não iniciam:
 ```bash
 # Limpar tudo e começar do zero
-docker-compose -f docker/docker-compose.dev.yml down -v
+.\scripts\dev\clear-cache.bat
+.\scripts\dev\start.bat
+```
+
+### Erros de módulo/dependência (Lexical, Vite, etc):
+```bash
+# Limpar cache e rebuildar
+.\scripts\dev\clear-cache.bat
 .\scripts\dev\start.bat
 ```
 

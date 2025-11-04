@@ -13,11 +13,11 @@ echo ✅ Docker está rodando
 
 REM Parar containers antigos se existirem
 echo 🔄 Parando containers antigos...
-docker-compose -f docker/docker-compose.dev.yml down -v
+docker-compose -f docker/docker-compose.dev.yml --env-file .env down -v
 
 REM Iniciar containers
 echo 🏗️  Construindo e iniciando containers...
-docker-compose -f docker/docker-compose.dev.yml up --build -d
+docker-compose -f docker/docker-compose.dev.yml --env-file .env up --build -d
 
 REM Aguardar o PostgreSQL estar pronto
 echo ⏳ Aguardando PostgreSQL estar pronto...
@@ -25,19 +25,19 @@ timeout /t 10 /nobreak >nul
 
 REM Executar migrações do banco de dados
 echo 🗄️  Executando migrações do banco de dados...
-docker-compose -f docker/docker-compose.dev.yml exec -T backend npm run migrate
+docker-compose -f docker/docker-compose.dev.yml --env-file .env exec -T backend npm run migrate
 
 REM Executar seed do admin
 echo 👤 Criando usuário administrador...
-docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/seedAdmin.ts
+docker-compose -f docker/docker-compose.dev.yml --env-file .env exec -T backend npx ts-node src/scripts/seedAdmin.ts
 
 REM Executar seed de configurações
 echo ⚙️  Inserindo configurações iniciais...
-docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/seedSettings.ts
+docker-compose -f docker/docker-compose.dev.yml --env-file .env exec -T backend npx ts-node src/scripts/seedSettings.ts
 
 REM Executar migração de dados (se existir)
 echo 📊 Migrando dados existentes...
-docker-compose -f docker/docker-compose.dev.yml exec -T backend npx ts-node src/scripts/migrateData.ts 2>nul || echo ⚠️  Script de migração de dados não encontrado (OK se for primeira vez)
+docker-compose -f docker/docker-compose.dev.yml --env-file .env exec -T backend npx ts-node src/scripts/migrateData.ts 2>nul || echo ⚠️  Script de migração de dados não encontrado (OK se for primeira vez)
 
 REM Testar conectividade do backend
 echo 🔍 Testando conectividade do backend...
@@ -58,18 +58,17 @@ echo 🗄️  PostgreSQL: localhost:5432
 echo.
 echo 👤 Usuário Admin:
 echo    Username: AdmOpen
-echo    Password: ADMOpenSilicio123!@2025
+echo    Password: Dev123!@LocalOnly (padrão de desenvolvimento)
 echo.
 echo 🔥 Hot Reload ATIVADO:
 echo    - Backend: Edite arquivos em backend/src/ (~2s reload)
 echo    - Frontend: Edite arquivos em openSilicioWebsite/src/ (instantâneo)
 echo.
-echo Para ver logs: docker-compose -f docker/docker-compose.dev.yml logs -f
-echo Para parar: docker-compose -f docker/docker-compose.dev.yml down
+echo Para ver logs: docker-compose -f docker/docker-compose.dev.yml --env-file .env logs -f
+echo Para parar: docker-compose -f docker/docker-compose.dev.yml --env-file .env down
 echo.
 
 REM Abrir navegador
 start http://localhost:5173
 
 pause
-

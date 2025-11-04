@@ -9,7 +9,7 @@ export { cleanDatabase };
 export const createTestBlogPost = async (overrides: Partial<any> = {}) => {
   const defaultPost = {
     title: 'Test Blog Post',
-    slug: `test-post-${Date.now()}`,
+    slug: `test-post-${Date.now()}-${Math.random().toString(36).substring(7)}`,
     excerpt: 'This is a test excerpt',
     content: JSON.stringify({ root: { children: [{ type: 'paragraph', children: [{ text: 'Test content' }] }] } }),
     author: 'Test Author',
@@ -71,9 +71,10 @@ export const createTestEducationResource = async (overrides: Partial<any> = {}) 
  * Create a test wiki entry
  */
 export const createTestWikiEntry = async (overrides: Partial<any> = {}) => {
+  const randomId = Math.random().toString(36).substring(7);
   const defaultEntry = {
-    term: `Test Term ${Date.now()}`,
-    slug: `test-term-${Date.now()}`,
+    term: `Test Term ${Date.now()}-${randomId}`,
+    slug: `test-term-${Date.now()}-${randomId}`,
     definition: 'This is a test definition',
     content: JSON.stringify({ root: { children: [{ type: 'paragraph', children: [{ text: 'Test content' }] }] } }),
     published: true,
@@ -98,6 +99,7 @@ export const createTestWikiEntry = async (overrides: Partial<any> = {}) => {
 
 /**
  * Create test site settings
+ * Settings are stored as key-value pairs in the database
  */
 export const createTestSiteSettings = async (overrides: Partial<any> = {}) => {
   const defaultSettings = {
@@ -110,42 +112,19 @@ export const createTestSiteSettings = async (overrides: Partial<any> = {}) => {
     ...overrides,
   };
 
-  // Check if settings exist
-  const existing = await testPool.query('SELECT * FROM site_settings LIMIT 1');
-  
-  if (existing.rows.length > 0) {
-    // Update existing settings
-    const result = await testPool.query(
-      `UPDATE site_settings 
-       SET contact_email = $1, instagram_url = $2, linkedin_url = $3, address = $4,
-           featured_education_ids = $5, featured_blog_ids = $6
-       RETURNING *`,
-      [
-        defaultSettings.contact_email,
-        defaultSettings.instagram_url,
-        defaultSettings.linkedin_url,
-        defaultSettings.address,
-        JSON.stringify(defaultSettings.featured_education_ids),
-        JSON.stringify(defaultSettings.featured_blog_ids),
-      ]
+  // Delete existing settings to start fresh
+  await testPool.query('DELETE FROM site_settings');
+
+  // Insert each setting as a key-value pair
+  for (const [key, value] of Object.entries(defaultSettings)) {
+    const settingValue = Array.isArray(value) ? JSON.stringify(value) : String(value);
+    await testPool.query(
+      `INSERT INTO site_settings (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP`,
+      [key, settingValue]
     );
-    return result.rows[0];
-  } else {
-    // Insert new settings
-    const result = await testPool.query(
-      `INSERT INTO site_settings (contact_email, instagram_url, linkedin_url, address, featured_education_ids, featured_blog_ids)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
-      [
-        defaultSettings.contact_email,
-        defaultSettings.instagram_url,
-        defaultSettings.linkedin_url,
-        defaultSettings.address,
-        JSON.stringify(defaultSettings.featured_education_ids),
-        JSON.stringify(defaultSettings.featured_blog_ids),
-      ]
-    );
-    return result.rows[0];
   }
+
+  return defaultSettings;
 };
 

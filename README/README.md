@@ -139,7 +139,10 @@ docker-compose -f docker-compose.dev.yml up
 
 **Usuário Administrador:**
 - Username: `AdmOpen`
-- Password: `ADMOpenSilicio123!@2025`
+- Password: Configurada no `.env` via `ADMIN_PASSWORD`
+  - Desenvolvimento: `Dev123!@LocalOnly` (padrão)
+  - Produção: Configure uma senha forte no arquivo `.env`
+  - **⚠️ Altere a senha após o primeiro acesso!** Use a área administrativa (Configurações → Alterar Senha) ou o script `scripts/prod/change-password.bat`
 
 ## 📁 Estrutura do Projeto
 
@@ -224,8 +227,11 @@ docker-compose exec backend npx ts-node src/scripts/seedAdmin.ts
 ### 1. Acessar o Painel Administrativo
 1. Acesse http://localhost:5173
 2. Clique em "Entrar" no menu superior
-3. Faça login com as credenciais: `AdmOpen` / `ADMOpenSilicio123!@2025`
+3. Faça login com as credenciais:
+   - Username: `AdmOpen`
+   - Password: senha configurada no `.env` (`ADMIN_PASSWORD`, padrão: `Dev123!@LocalOnly`)
 4. Você será redirecionado para o painel administrativo
+5. **Recomendado:** Altere a senha em "Configurações → Alterar Senha"
 
 ### 2. Gerenciar Conteúdo
 

@@ -109,7 +109,12 @@ echo ""
 # Perguntar sobre seed de admin
 echo "Deseja criar o usuario administrador padrao?"
 echo "  Username: AdmOpen"
-echo "  Password: ADMOpenSilicio123!@2025"
+if [ -n "$ADMIN_PASSWORD" ]; then
+    echo "  Password: $ADMIN_PASSWORD"
+else
+    echo "  Password: Dev123!@LocalOnly (padrao de desenvolvimento)"
+    echo "  [AVISO] Configure ADMIN_PASSWORD no .env para producao!"
+fi
 read -p "Criar usuario admin? (S/N): " CREATE_ADMIN
 if [ "$CREATE_ADMIN" = "S" ] || [ "$CREATE_ADMIN" = "s" ]; then
     echo "Criando usuario administrador..."

@@ -25,6 +25,9 @@ PORT=3001
 JWT_SECRET=<secret_aleatorio_32_chars>
 CORS_ORIGINS=http://localhost
 
+# Admin
+ADMIN_PASSWORD=<senha_admin_forte>
+
 # Frontend
 VITE_API_URL=http://localhost:3001/api
 FRONTEND_PORT=80
@@ -83,6 +86,7 @@ FRONTEND_PORT=80
 - [ ] Copiar `.env.example` para `.env` na raiz do projeto
 - [ ] Configurar `POSTGRES_PASSWORD` com senha forte
 - [ ] Gerar `JWT_SECRET` aleatório (mínimo 32 caracteres)
+- [ ] **Configurar `ADMIN_PASSWORD` com senha forte para o usuário admin**
 - [ ] Configurar `VITE_API_URL` com URL real da API em produção
 - [ ] Configurar `CORS_ORIGINS` com domínios permitidos
 - [ ] Verificar que `.env` está no `.gitignore`

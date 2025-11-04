@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import pool from '../config/database';
 import { BaseService, PaginationOptions, WhereCondition } from './BaseService';
+import { NotFoundError } from '../errors/AppError';
 
 export interface WikiEntry {
   id: string;
@@ -46,7 +47,7 @@ export class WikiService extends BaseService<WikiEntry> {
     const entry = await this.getByField('slug', slug);
 
     if (!entry) {
-      throw new Error('Entrada não encontrada');
+      throw new NotFoundError('Entrada não encontrada');
     }
 
     return entry;

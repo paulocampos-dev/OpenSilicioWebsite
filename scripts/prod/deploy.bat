@@ -117,7 +117,12 @@ echo.
 REM Perguntar sobre seed de admin
 echo Deseja criar o usuario administrador padrao?
 echo   Username: AdmOpen
-echo   Password: ADMOpenSilicio123!@2025
+if not "%ADMIN_PASSWORD%"=="" (
+    echo   Password: %ADMIN_PASSWORD%
+) else (
+    echo   Password: Dev123!@LocalOnly ^(padrao de desenvolvimento^)
+    echo   [AVISO] Configure ADMIN_PASSWORD no .env para producao!
+)
 set /p CREATE_ADMIN="Criar usuario admin? (S/N): "
 if /i "%CREATE_ADMIN%"=="S" (
     echo Criando usuario administrador...

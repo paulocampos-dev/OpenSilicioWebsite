@@ -39,6 +39,24 @@ export const loginSchema = z.object({
     .max(100, 'Senha deve ter no máximo 100 caracteres'),
 });
 
+export const changePasswordSchema = z.object({
+  currentPassword: z
+    .string({
+      required_error: 'Senha atual é obrigatória',
+    })
+    .min(1, 'Senha atual não pode ser vazia'),
+  newPassword: z
+    .string({
+      required_error: 'Nova senha é obrigatória',
+    })
+    .min(8, 'Nova senha deve ter no mínimo 8 caracteres')
+    .max(100, 'Nova senha deve ter no máximo 100 caracteres')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      'Nova senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial'
+    ),
+});
+
 // Blog validation schemas
 export const blogPostSchema = z.object({
   slug: z

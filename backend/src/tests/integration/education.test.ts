@@ -49,7 +49,8 @@ describe('Education API', () => {
         .query({ published: true });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.every((resource: any) => resource.published === true)).toBe(true);
+      const allPublished = response.body.data.every((resource: any) => resource.published === true);
+      expect(allPublished).toBe(true);
     });
   });
 
