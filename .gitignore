@@ -31,3 +31,5 @@ build/
 test-data-snapshot.json
 test-integrity-report.json
 
+backend_logs.txt
+logs.txt
