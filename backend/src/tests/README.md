@@ -109,6 +109,6 @@ DATABASE_URL=postgresql://admin:admin123@localhost:5432/opensilicio_test npm run
 ## Notas
 
 - Os testes limpam automaticamente o banco de dados entre suites de teste
-- O usuário admin de teste (AdmOpen/ADMOpenSilicio123!@2025) é criado automaticamente
+- O usuário admin de teste (AdmOpen/Dev123!@LocalOnly) é criado automaticamente
 - Os testes executam em ambiente de teste (NODE_ENV=test)
 - A saída do console é suprimida durante os testes, a menos que esteja em modo debug

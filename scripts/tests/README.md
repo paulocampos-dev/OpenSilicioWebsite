@@ -78,6 +78,9 @@ Tests use the following credentials:
 
 These are automatically configured in the test setup.
 
+claude mcp add context7 -- npx -y @upstash/context7-mcp --api-key ctx7sk-5b917a52-f94a-494f-a623-ea82bf6621ba
+
+
 ## Test Results
 
 All test scripts will:

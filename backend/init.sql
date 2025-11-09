@@ -98,5 +98,5 @@ INSERT INTO site_settings (key, value) VALUES ('featured_projects', '[]') ON CON
 
 -- Usuário administrador será criado pelo script seedAdmin.ts
 -- Username: AdmOpen
--- Password: ADMOpenSilicio123!@2025
+-- Password: Dev123!@LocalOnly
 

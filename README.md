@@ -28,7 +28,7 @@ Isso iniciará todos os serviços em Docker com **hot reload automático**:
 ### Credenciais
 
 - **Username**: `AdmOpen`
-- **Password**: `ADMOpenSilicio123!@2025`
+- **Password**: `Dev123!@LocalOnly`
 
 ## 📚 Documentação Completa
 
