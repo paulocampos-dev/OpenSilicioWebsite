@@ -5,6 +5,11 @@ import {
   Box,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   Paper,
@@ -32,6 +37,7 @@ export default function WikiList() {
   const [pendingLinks, setPendingLinks] = useState<PendingWikiLinkGrouped[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingPending, setLoadingPending] = useState(true);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
     open: false,
     message: '',
@@ -70,19 +76,27 @@ export default function WikiList() {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja deletar esta entrada?')) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      await wikiApi.delete(id);
+      await wikiApi.delete(deleteId);
       loadEntries();
       setSnackbar({ open: true, message: 'Entrada deletada com sucesso!', severity: 'success' });
     } catch (error) {
       console.error('Erro ao deletar entrada:', error);
       setSnackbar({ open: true, message: 'Erro ao deletar entrada', severity: 'error' });
+    } finally {
+      setDeleteId(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteId(null);
   };
 
   const handlePublish = async (id: string) => {
@@ -232,7 +246,7 @@ export default function WikiList() {
                       <EditIcon />
                     </IconButton>
                     <IconButton
-                      onClick={() => handleDelete(entry.id)}
+                      onClick={() => handleDeleteClick(entry.id)}
                       size="small"
                       color="error"
                     >
@@ -257,6 +271,22 @@ export default function WikiList() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteId} onClose={handleCancelDelete}>
+        <DialogTitle>Confirmar Exclusão</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Tem certeza que deseja deletar esta entrada? Esta ação não pode ser desfeita.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete}>Cancelar</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained" autoFocus>
+            Deletar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }

@@ -40,7 +40,7 @@ function WikiLinkButton({
   contentType,
 }: {
   onOpenWikiLink: () => void;
-  contentType?: string;
+  contentType?: 'blog' | 'education' | string;
 }) {
   if (!contentType) return null;
 
@@ -160,7 +160,7 @@ function LexicalEditorInner({
             LaTeX e muito mais
           </Typography>
         </Box>
-        <WikiLinkButton onOpenWikiLink={handleOpenWikiLink} contentType={contentType} />
+        <WikiLinkButton onOpenWikiLink={handleOpenWikiLink} {...(contentType ? { contentType } : {})} />
       </Box>
 
       <Paper
@@ -273,7 +273,7 @@ function LexicalEditorInner({
             <RichTextPlugin
               contentEditable={<ContentEditable className="editor-input" />}
               placeholder={<div className="editor-placeholder">{placeholder}</div>}
-              ErrorBoundary={LexicalErrorBoundary}
+              ErrorBoundary={LexicalErrorBoundary as any}
             />
             <OnChangePlugin onChange={handleChange} />
             <HistoryPlugin />
@@ -319,7 +319,7 @@ export default function LexicalEditor(props: LexicalEditorProps) {
   }
 
   // Initial config for the editor
-  const initialConfig = {
+  const initialConfig: any = {
     namespace: 'OpenSilicioEditor',
     theme: {
       // Theme styles (can be customized)
@@ -339,8 +339,11 @@ export default function LexicalEditor(props: LexicalEditorProps) {
       WikiLinkNode,
       YouTubeNode,
     ],
-    editorState: initialEditorState,
   };
+
+  if (initialEditorState !== undefined) {
+    initialConfig.editorState = initialEditorState;
+  }
 
   return (
     <LexicalComposer initialConfig={initialConfig}>

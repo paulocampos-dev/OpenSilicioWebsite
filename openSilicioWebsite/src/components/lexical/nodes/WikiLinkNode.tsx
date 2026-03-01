@@ -48,10 +48,10 @@ export class WikiLinkNode extends LinkNode {
     const node = $createWikiLinkNode(
       serializedNode.url,
       {
-        rel: serializedNode.rel,
-        target: serializedNode.target,
-        title: serializedNode.title,
-      },
+        rel: serializedNode.rel || null,
+        target: serializedNode.target || null,
+        title: serializedNode.title || null,
+      } as any,
       serializedNode.isPending,
     );
     return node;
@@ -67,7 +67,7 @@ export class WikiLinkNode extends LinkNode {
   }
 
   createDOM(config: EditorConfig): HTMLAnchorElement {
-    const element = super.createDOM(config);
+    const element = super.createDOM(config) as unknown as HTMLAnchorElement;
 
     // Add custom class for wiki links
     addClassNamesToElement(element, 'wiki-link');
@@ -85,7 +85,7 @@ export class WikiLinkNode extends LinkNode {
     anchor: HTMLAnchorElement,
     config: EditorConfig,
   ): boolean {
-    const updated = super.updateDOM(prevNode, anchor, config);
+    const updated = super.updateDOM(prevNode as any, anchor as any, config);
 
     // Update pending class if status changed
     if (prevNode.__isPending !== this.__isPending) {
@@ -120,7 +120,7 @@ export class WikiLinkNode extends LinkNode {
   insertNewAfter(
     selection: any,
     restoreSelection = true,
-  ): null | LexicalNode {
+  ): any {
     const element = this.getParentOrThrow().insertNewAfter(
       selection,
       restoreSelection,
@@ -135,7 +135,7 @@ export class WikiLinkNode extends LinkNode {
         },
         this.__isPending,
       );
-      element.append(linkNode);
+      (element as any).append(linkNode);
       return linkNode;
     }
     return null;

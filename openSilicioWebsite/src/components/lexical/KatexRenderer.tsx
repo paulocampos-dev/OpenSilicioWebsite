@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getNodeByKey, NodeKey } from 'lexical';
@@ -28,7 +29,7 @@ export default function KatexRenderer({
   inline: boolean;
   nodeKey?: NodeKey;
   onDoubleClick?: () => void;
-}>): JSX.Element {
+}>): React.JSX.Element {
   const katexElementRef = useRef<HTMLSpanElement>(null);
   const [editor] = useLexicalComposerContext();
   const [isHovered, setIsHovered] = useState(false);

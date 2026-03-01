@@ -42,7 +42,7 @@ function LexicalContentInner() {
     );
   }
 
-  return <RichTextPlugin contentEditable={<ContentEditable />} placeholder={null} ErrorBoundary={LexicalErrorBoundary} />;
+  return <RichTextPlugin contentEditable={<ContentEditable />} placeholder={null} ErrorBoundary={LexicalErrorBoundary as any} />;
 }
 
 export default function LexicalContent({ content }: LexicalContentProps) {
