@@ -59,7 +59,7 @@ export interface SiteSettings {
 }
 
 class SettingsService {
-  constructor(private pool: Pool) {}
+  constructor(private pool: Pool) { }
 
   /**
    * Get a single setting by key
@@ -102,6 +102,12 @@ class SettingsService {
       // Ensure arrays exist (defaults for backward compatibility)
       settings.featured_education_ids = settings.featured_education_ids || [];
       settings.featured_blog_ids = settings.featured_blog_ids || [];
+
+      // Ensure general settings exist
+      settings.contact_email = settings.contact_email || '';
+      settings.instagram_url = settings.instagram_url || '';
+      settings.linkedin_url = settings.linkedin_url || '';
+      settings.address = settings.address || '';
 
       // Safely fetch full education resources
       try {

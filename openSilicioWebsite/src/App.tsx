@@ -1,7 +1,9 @@
 import { useMemo, useState, useEffect } from 'react'
-import { ThemeProvider, CssBaseline, AppBar, Toolbar, Typography, IconButton, Box, Container, Button } from '@mui/material'
+import { ThemeProvider, CssBaseline, AppBar, Toolbar, Typography, IconButton, Box, Container, Button, Drawer, List, ListItem, ListItemButton, ListItemText, useMediaQuery, useTheme } from '@mui/material'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
+import MenuIcon from '@mui/icons-material/Menu'
+import CloseIcon from '@mui/icons-material/Close'
 import { BrowserRouter, Routes, Route, Link as RouterLink, useLocation } from 'react-router-dom'
 import { getTheme, type ColorMode } from './theme'
 import { AuthProvider } from './contexts/AuthContext'
@@ -66,29 +68,104 @@ const saveMode = (mode: ColorMode): void => {
 
 function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void }) {
   const location = useLocation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const isAdminRoute = location.pathname.startsWith('/admin')
   
   if (isAdminRoute) {
     return null
   }
 
+  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event.type === 'keydown' &&
+      ((event as React.KeyboardEvent).key === 'Tab' ||
+        (event as React.KeyboardEvent).key === 'Shift')
+    ) {
+      return
+    }
+    setDrawerOpen(open)
+  }
+
+  const menuItems = [
+    { label: 'Início', path: '/' },
+    { label: 'Educação', path: '/educacao' },
+    { label: 'Blog', path: '/blog' },
+    { label: 'Wiki', path: '/wiki' },
+    { label: 'Sobre', path: '/sobre' },
+  ]
+
   return (
     <AppBar position="static" color="transparent" elevation={0}>
-      <Toolbar sx={{ gap: 2, minHeight: 80 }}>
+      <Toolbar sx={{ gap: { xs: 1, md: 2 }, minHeight: 80, justifyContent: 'space-between' }}>
         <Box component={RouterLink} to="/" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
-          <Box component="img" src="/open-silicio-logo.jpg" alt="OpenSilício" sx={{ width: 56, height: 56, mr: 1, borderRadius: 1 }} />
-          <Typography variant="h5" fontWeight={700}>OpenSilício</Typography>
+          <Box component="img" src="/open-silicio-logo.jpg" alt="OpenSilício" sx={{ width: { xs: 40, md: 56 }, height: { xs: 40, md: 56 }, mr: 1, borderRadius: 1 }} />
+          <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>OpenSilício</Typography>
         </Box>
-        <Box sx={{ flexGrow: 1 }} />
-        <Button component={RouterLink} to="/" color="primary">Início</Button>
-        <Button component={RouterLink} to="/educacao" color="primary">Educação</Button>
-        <Button component={RouterLink} to="/blog" color="primary">Blog</Button>
-        <Button component={RouterLink} to="/wiki" color="primary">Wiki</Button>
-        <Button component={RouterLink} to="/sobre" color="primary">Sobre</Button>
-        <IconButton onClick={toggleMode} color="inherit" aria-label="Alternar tema" size="large">
-          {mode === 'dark' ? <Brightness7Icon fontSize="large" /> : <Brightness4Icon fontSize="large" />}
-        </IconButton>
+        
+        {/* Desktop Menu */}
+        {!isMobile && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {menuItems.map((item) => (
+              <Button key={item.path} component={RouterLink} to={item.path} color="primary">
+                {item.label}
+              </Button>
+            ))}
+            <IconButton onClick={toggleMode} color="inherit" aria-label="Alternar tema" size="large">
+              {mode === 'dark' ? <Brightness7Icon fontSize="large" /> : <Brightness4Icon fontSize="large" />}
+            </IconButton>
+          </Box>
+        )}
+
+        {/* Mobile Menu Toggle */}
+        {isMobile && (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton onClick={toggleMode} color="inherit" aria-label="Alternar tema" size="large">
+              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={toggleDrawer(true)}
+              size="large"
+            >
+              <MenuIcon fontSize="large" />
+            </IconButton>
+          </Box>
+        )}
       </Toolbar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+        PaperProps={{
+          sx: { width: 250, pt: 2, px: 2 }
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <IconButton onClick={toggleDrawer(false)} size="large">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <List>
+          {menuItems.map((item) => (
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                component={RouterLink}
+                to={item.path}
+                onClick={toggleDrawer(false)}
+                sx={{ borderRadius: 2, mb: 1 }}
+              >
+                <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 600 }} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
     </AppBar>
   )
 }

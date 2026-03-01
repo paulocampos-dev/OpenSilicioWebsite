@@ -1,0 +1,906 @@
+
+> opensilicio-backend@1.0.0 test
+> jest --bail --detectOpenHandles
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+  console.log
+    [2026-03-01T15:11:36.158Z] [12af3a92-5952-474c-abf5-d8e796f116e4] GET /api/blog
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: GET / { published: 'true', page: '1', limit: '10' }
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    📝 [BlogController.getAllPosts] CALLED - This is the BLOG controller
+
+      at src/controllers/blogController.ts:10:11
+
+  console.log
+    📝 [BlogController.getAllPosts] Returning 2 blog posts
+
+      at src/controllers/blogController.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.158Z] [12af3a92-5952-474c-abf5-d8e796f116e4] GET / [32m200[0m - 21ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.201Z] [026fb426-f938-41ca-8755-ea8793e50afc] GET /api/blog
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: GET / { published: 'true' }
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    📝 [BlogController.getAllPosts] CALLED - This is the BLOG controller
+
+      at src/controllers/blogController.ts:10:11
+
+  console.log
+    📝 [BlogController.getAllPosts] Returning 1 blog posts
+
+      at src/controllers/blogController.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.201Z] [026fb426-f938-41ca-8755-ea8793e50afc] GET / [32m200[0m - 6ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.223Z] [4e4c13e1-9e22-423b-803d-b666f93d1e76] GET /api/blog/test-post-slug
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: GET /test-post-slug {}
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.223Z] [4e4c13e1-9e22-423b-803d-b666f93d1e76] GET /test-post-slug [32m200[0m - 5ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.240Z] [36510299-7354-46d1-b617-7626d66f7f9d] GET /api/blog/non-existent-slug
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: GET /non-existent-slug {}
+
+      at src/routes/blog.ts:20:11
+
+  console.error
+    ❌ Error [36510299-7354-46d1-b617-7626d66f7f9d]: {
+      name: 'Error',
+      message: 'Post não encontrado não encontrado',
+      path: '/api/blog/non-existent-slug',
+      method: 'GET',
+      stack: undefined
+    }
+
+    [0m [90m 18 |[39m
+     [90m 19 |[39m   [90m// Log error for debugging[39m
+    [31m[1m>[22m[39m[90m 20 |[39m   console[33m.[39merror([32m`❌ Error [${requestId}]:`[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 21 |[39m     name[33m:[39m err[33m.[39mname[33m,[39m
+     [90m 22 |[39m     message[33m:[39m err[33m.[39mmessage[33m,[39m
+     [90m 23 |[39m     path[33m:[39m req[33m.[39mpath[33m,[39m[0m
+
+      at errorHandler (src/middleware/errorHandler.ts:20:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+
+  console.log
+    [2026-03-01T15:11:36.240Z] [36510299-7354-46d1-b617-7626d66f7f9d] GET /api/blog/non-existent-slug [31m404[0m - 7ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.268Z] [0542e128-9ab8-4437-8c59-26d1b8070c73] GET /api/blog/categories/list
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: GET /categories/list {}
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.268Z] [0542e128-9ab8-4437-8c59-26d1b8070c73] GET /categories/list [32m200[0m - 4ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.284Z] [4b97542b-9f95-4624-8731-9b023e3f7e0d] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.284Z] [4b97542b-9f95-4624-8731-9b023e3f7e0d] POST /login [32m200[0m - 60ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.349Z] [d395ea57-4fed-4a83-8086-9663eff893be] POST /api/blog
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: POST / {}
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.349Z] [d395ea57-4fed-4a83-8086-9663eff893be] POST / [32m201[0m - 8ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.370Z] [5348cecd-1030-4192-a55a-22e67afec052] POST /api/blog
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: POST / {}
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.370Z] [5348cecd-1030-4192-a55a-22e67afec052] POST / [31m401[0m - 5ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.385Z] [506ef9ce-ab65-4769-a49d-39d43f6c5d5f] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.385Z] [506ef9ce-ab65-4769-a49d-39d43f6c5d5f] POST /login [32m200[0m - 54ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.447Z] [c7161ef1-8b1f-471b-9f78-14241de563b3] PUT /api/blog/c3cff367-45e3-47f9-bc42-58dbb59ef513
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: PUT /c3cff367-45e3-47f9-bc42-58dbb59ef513 {}
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.447Z] [c7161ef1-8b1f-471b-9f78-14241de563b3] PUT /c3cff367-45e3-47f9-bc42-58dbb59ef513 [32m200[0m - 7ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.468Z] [5605103d-2bfb-4384-b3d0-aa497fc026b1] PUT /api/blog/5f813f13-fbfe-415f-b103-075e9e4adeab
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [BLOG ROUTE] Request: PUT /5f813f13-fbfe-415f-b103-075e9e4adeab {}
+
+      at src/routes/blog.ts:20:11
+
+  console.log
+    [2026-03-01T15:11:36.468Z] [5605103d-2bfb-4384-b3d0-aa497fc026b1] PUT /5f813f13-fbfe-415f-b103-075e9e4adeab [31m401[0m - 4ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+PASS src/tests/integration/blog.test.ts
+  Blog API
+    GET /api/blog
+      √ should return blog posts with pagination (62 ms)
+      √ should filter by published status (23 ms)
+    GET /api/blog/:slug
+      √ should return blog post by slug (20 ms)
+      √ should return 404 for non-existent slug (19 ms)
+    GET /api/blog/categories/list
+      √ should return list of categories (25 ms)
+    POST /api/blog
+      √ should create a new blog post when authenticated (85 ms)
+      √ should reject unauthenticated requests (17 ms)
+    PUT /api/blog/:id
+      √ should update blog post when authenticated (80 ms)
+      √ should reject unauthenticated requests (17 ms)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+  console.log
+    [2026-03-01T15:11:36.736Z] [f4be6e33-cb2b-4ca3-b96c-f57b470e70fb] GET /api/education
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.736Z] [f4be6e33-cb2b-4ca3-b96c-f57b470e70fb] GET / [32m200[0m - 8ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.764Z] [00360c8f-38a4-41d6-bc34-a8b314426789] GET /api/education
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.764Z] [00360c8f-38a4-41d6-bc34-a8b314426789] GET / [32m200[0m - 12ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.794Z] [8ed500dd-0b2c-4804-8f5f-b77e5c822a74] GET /api/education/bdfad097-f41b-4263-b63c-6ab6d451a6ec
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.794Z] [8ed500dd-0b2c-4804-8f5f-b77e5c822a74] GET /bdfad097-f41b-4263-b63c-6ab6d451a6ec [32m200[0m - 4ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.812Z] [0b9d5e3b-e249-462c-bee5-ec3e947f9d3c] GET /api/education/00000000-0000-0000-0000-000000000000
+
+      at src/server.ts:42:11
+
+  console.error
+    ❌ Error [0b9d5e3b-e249-462c-bee5-ec3e947f9d3c]: {
+      name: 'Error',
+      message: 'Recurso educacional não encontrado',
+      path: '/api/education/00000000-0000-0000-0000-000000000000',
+      method: 'GET',
+      stack: undefined
+    }
+
+    [0m [90m 18 |[39m
+     [90m 19 |[39m   [90m// Log error for debugging[39m
+    [31m[1m>[22m[39m[90m 20 |[39m   console[33m.[39merror([32m`❌ Error [${requestId}]:`[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 21 |[39m     name[33m:[39m err[33m.[39mname[33m,[39m
+     [90m 22 |[39m     message[33m:[39m err[33m.[39mmessage[33m,[39m
+     [90m 23 |[39m     path[33m:[39m req[33m.[39mpath[33m,[39m[0m
+
+      at errorHandler (src/middleware/errorHandler.ts:20:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+
+  console.log
+    [2026-03-01T15:11:36.812Z] [0b9d5e3b-e249-462c-bee5-ec3e947f9d3c] GET /api/education/00000000-0000-0000-0000-000000000000 [31m404[0m - 5ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.830Z] [b0158edc-73e0-408b-862b-7147b7062416] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.830Z] [b0158edc-73e0-408b-862b-7147b7062416] POST /login [32m200[0m - 54ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.888Z] [c68e5ac2-3d32-4e49-8f13-efdd2996aeb8] POST /api/education
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.888Z] [c68e5ac2-3d32-4e49-8f13-efdd2996aeb8] POST / [32m201[0m - 7ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.910Z] [ba9fcb82-05d4-470b-9474-827b6275c6c9] POST /api/education
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.910Z] [ba9fcb82-05d4-470b-9474-827b6275c6c9] POST / [31m401[0m - 3ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.923Z] [f973d5a7-8c86-4505-b79e-cef81c1016fb] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.923Z] [f973d5a7-8c86-4505-b79e-cef81c1016fb] POST /login [32m200[0m - 51ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:36.981Z] [9374c0dc-4275-41ad-b27c-c68581b4e9c8] PUT /api/education/03b26ab7-3153-4215-9e61-ab114d6e16de
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:36.981Z] [9374c0dc-4275-41ad-b27c-c68581b4e9c8] PUT /03b26ab7-3153-4215-9e61-ab114d6e16de [32m200[0m - 6ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.002Z] [554d6511-86d1-4d24-bfcd-65c733d0f901] PUT /api/education/16099d70-14e6-434f-87c8-2c12fc1bb923
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.002Z] [554d6511-86d1-4d24-bfcd-65c733d0f901] PUT /16099d70-14e6-434f-87c8-2c12fc1bb923 [31m401[0m - 3ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+PASS src/tests/integration/education.test.ts
+  Education API
+    GET /api/education
+      √ should return education resources with pagination (38 ms)
+      √ should filter by published status (31 ms)
+    GET /api/education/:id
+      √ should return education resource by ID (21 ms)
+      √ should return 404 for non-existent ID (19 ms)
+    POST /api/education
+      √ should create a new education resource when authenticated (77 ms)
+      √ should reject unauthenticated requests (18 ms)
+    PUT /api/education/:id
+      √ should update education resource when authenticated (74 ms)
+      √ should reject unauthenticated requests (18 ms)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+  console.log
+    [2026-03-01T15:11:37.245Z] [12cd82dd-2e33-48e1-ae75-2255110eea84] GET /api/wiki
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: GET / { published: 'true', page: '1', limit: '10' }
+
+      at src/routes/wiki.ts:30:11
+
+  console.log
+    ✅ [WikiController.getAllEntries] CALLED - This is the WIKI controller
+
+      at src/controllers/wikiController.ts:13:11
+
+  console.log
+    ✅ [WikiController.getAllEntries] Returning 2 wiki entries
+
+      at src/controllers/wikiController.ts:22:11
+
+  console.log
+    ✅ [WikiController.getAllEntries] Sample fields: [ 'id', 'term', 'slug', 'definition', 'content' ]
+
+      at src/controllers/wikiController.ts:23:11
+
+  console.log
+    [2026-03-01T15:11:37.245Z] [12cd82dd-2e33-48e1-ae75-2255110eea84] GET / [32m200[0m - 11ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.273Z] [ed55ade5-3544-41fc-a00a-e62f3d98cf8e] GET /api/wiki
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: GET / { published: 'true' }
+
+      at src/routes/wiki.ts:30:11
+
+  console.log
+    ✅ [WikiController.getAllEntries] CALLED - This is the WIKI controller
+
+      at src/controllers/wikiController.ts:13:11
+
+  console.log
+    ✅ [WikiController.getAllEntries] Returning 1 wiki entries
+
+      at src/controllers/wikiController.ts:22:11
+
+  console.log
+    ✅ [WikiController.getAllEntries] Sample fields: [ 'id', 'term', 'slug', 'definition', 'content' ]
+
+      at src/controllers/wikiController.ts:23:11
+
+  console.log
+    [2026-03-01T15:11:37.273Z] [ed55ade5-3544-41fc-a00a-e62f3d98cf8e] GET / [32m200[0m - 6ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.296Z] [662e2eff-f962-4d31-b814-b194175a7537] GET /api/wiki/test-term-slug
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: GET /test-term-slug {}
+
+      at src/routes/wiki.ts:30:11
+
+  console.log
+    [2026-03-01T15:11:37.296Z] [662e2eff-f962-4d31-b814-b194175a7537] GET /test-term-slug [32m200[0m - 4ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.312Z] [d7239417-b7a3-4a2f-902a-40190f780465] GET /api/wiki/non-existent-slug
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: GET /non-existent-slug {}
+
+      at src/routes/wiki.ts:30:11
+
+  console.error
+    ❌ Error [d7239417-b7a3-4a2f-902a-40190f780465]: {
+      name: 'Error',
+      message: 'Entrada não encontrada não encontrado',
+      path: '/api/wiki/non-existent-slug',
+      method: 'GET',
+      stack: undefined
+    }
+
+    [0m [90m 18 |[39m
+     [90m 19 |[39m   [90m// Log error for debugging[39m
+    [31m[1m>[22m[39m[90m 20 |[39m   console[33m.[39merror([32m`❌ Error [${requestId}]:`[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 21 |[39m     name[33m:[39m err[33m.[39mname[33m,[39m
+     [90m 22 |[39m     message[33m:[39m err[33m.[39mmessage[33m,[39m
+     [90m 23 |[39m     path[33m:[39m req[33m.[39mpath[33m,[39m[0m
+
+      at errorHandler (src/middleware/errorHandler.ts:20:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+
+  console.log
+    [2026-03-01T15:11:37.312Z] [d7239417-b7a3-4a2f-902a-40190f780465] GET /api/wiki/non-existent-slug [31m404[0m - 5ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.327Z] [571c38b6-56d2-47ea-9759-1fc8e81fe93b] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.327Z] [571c38b6-56d2-47ea-9759-1fc8e81fe93b] POST /login [32m200[0m - 55ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.387Z] [642785ed-2046-4a2f-a890-49105704c52a] POST /api/wiki
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: POST / {}
+
+      at src/routes/wiki.ts:30:11
+
+  console.log
+    [2026-03-01T15:11:37.387Z] [642785ed-2046-4a2f-a890-49105704c52a] POST / [32m201[0m - 10ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.410Z] [d7afa721-28c3-4cdd-9298-998a369e4964] POST /api/wiki
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: POST / {}
+
+      at src/routes/wiki.ts:30:11
+
+  console.log
+    [2026-03-01T15:11:37.410Z] [d7afa721-28c3-4cdd-9298-998a369e4964] POST / [31m401[0m - 3ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.424Z] [ee54eced-7f18-4cdf-aaeb-e6c447cfc5ca] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.424Z] [ee54eced-7f18-4cdf-aaeb-e6c447cfc5ca] POST /login [32m200[0m - 54ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.486Z] [2191e903-5abe-4341-8bf1-97959dcfb64a] PUT /api/wiki/1e6b6cb9-d8b8-49ca-b794-7be02ffe6ec8
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: PUT /1e6b6cb9-d8b8-49ca-b794-7be02ffe6ec8 {}
+
+      at src/routes/wiki.ts:30:11
+
+  console.log
+    [2026-03-01T15:11:37.486Z] [2191e903-5abe-4341-8bf1-97959dcfb64a] PUT /1e6b6cb9-d8b8-49ca-b794-7be02ffe6ec8 [32m200[0m - 11ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.514Z] [7bb5a649-e8a5-4c27-9e47-85bf7701b310] PUT /api/wiki/aabcc52d-060d-410f-b068-eaac8740ca68
+
+      at src/server.ts:42:11
+
+  console.log
+    🔍 [WIKI ROUTE] Request: PUT /aabcc52d-060d-410f-b068-eaac8740ca68 {}
+
+      at src/routes/wiki.ts:30:11
+
+  console.log
+    [2026-03-01T15:11:37.514Z] [7bb5a649-e8a5-4c27-9e47-85bf7701b310] PUT /aabcc52d-060d-410f-b068-eaac8740ca68 [31m401[0m - 5ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+PASS src/tests/integration/wiki.test.ts
+  Wiki API
+    GET /api/wiki
+      √ should return wiki entries with pagination (35 ms)
+      √ should filter by published status (22 ms)
+    GET /api/wiki/:slug
+      √ should return wiki entry by slug (21 ms)
+      √ should return 404 for non-existent slug (16 ms)
+    POST /api/wiki
+      √ should create a new wiki entry when authenticated (80 ms)
+      √ should reject unauthenticated requests (16 ms)
+    PUT /api/wiki/:id
+      √ should update wiki entry when authenticated (84 ms)
+      √ should reject unauthenticated requests (22 ms)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+  console.log
+    [2026-03-01T15:11:37.769Z] [1eb30f8b-00c3-402a-8600-b63f313ba4dc] GET /api/settings
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.769Z] [1eb30f8b-00c3-402a-8600-b63f313ba4dc] GET / [32m200[0m - 6ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.791Z] [989ccb36-4f2d-4db1-a26b-b21f7c36a905] GET /api/settings
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.791Z] [989ccb36-4f2d-4db1-a26b-b21f7c36a905] GET / [32m200[0m - 3ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.805Z] [2f5c68d3-d633-49ea-82b0-d648c449e67b] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.805Z] [2f5c68d3-d633-49ea-82b0-d648c449e67b] POST /login [32m200[0m - 52ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.876Z] [372e5df5-b1a4-4549-b1ed-0e926e8c8cb0] PUT /api/settings
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.876Z] [372e5df5-b1a4-4549-b1ed-0e926e8c8cb0] PUT / [32m200[0m - 19ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:37.906Z] [c9db2c15-0d78-483d-825a-90cd2cb5d1bc] PUT /api/settings
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:37.906Z] [c9db2c15-0d78-483d-825a-90cd2cb5d1bc] PUT / [31m401[0m - 3ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+PASS src/tests/integration/settings.test.ts
+  Settings API
+    GET /api/settings
+      √ should return site settings (41 ms)
+      √ should return default settings if none exist (16 ms)
+    PUT /api/settings
+      √ should update settings when authenticated (101 ms)
+      √ should reject unauthenticated requests (14 ms)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+  console.log
+    [2026-03-01T15:11:38.140Z] [fdd4cfb7-57a3-4bdf-bf58-91bc4431ee6d] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:38.140Z] [fdd4cfb7-57a3-4bdf-bf58-91bc4431ee6d] POST /login [32m200[0m - 66ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:38.213Z] [eeb273be-1f3f-441f-816f-a7e7ce6907f0] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.error
+    ❌ Error [eeb273be-1f3f-441f-816f-a7e7ce6907f0]: {
+      name: 'Error',
+      message: 'Credenciais inválidas',
+      path: '/api/auth/login',
+      method: 'POST',
+      stack: undefined
+    }
+
+    [0m [90m 18 |[39m
+     [90m 19 |[39m   [90m// Log error for debugging[39m
+    [31m[1m>[22m[39m[90m 20 |[39m   console[33m.[39merror([32m`❌ Error [${requestId}]:`[39m[33m,[39m {
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 21 |[39m     name[33m:[39m err[33m.[39mname[33m,[39m
+     [90m 22 |[39m     message[33m:[39m err[33m.[39mmessage[33m,[39m
+     [90m 23 |[39m     path[33m:[39m req[33m.[39mpath[33m,[39m[0m
+
+      at errorHandler (src/middleware/errorHandler.ts:20:11)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:71:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Layer.handle_error (node_modules/express/lib/router/layer.js:67:12)
+      at trim_prefix (node_modules/express/lib/router/index.js:326:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at router.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/express/lib/router/index.js:646:15
+      at next (node_modules/express/lib/router/index.js:265:14)
+      at next (node_modules/express/lib/router/route.js:141:14)
+
+  console.log
+    [2026-03-01T15:11:38.213Z] [eeb273be-1f3f-441f-816f-a7e7ce6907f0] POST /api/auth/login [31m401[0m - 56ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:38.275Z] [62391ced-2101-4a1c-9a20-b7aa43db2d21] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:38.275Z] [62391ced-2101-4a1c-9a20-b7aa43db2d21] POST /login [31m400[0m - 4ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:38.285Z] [0f6d2072-2026-4140-8351-b01533b4df19] POST /api/auth/login
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:38.285Z] [0f6d2072-2026-4140-8351-b01533b4df19] POST /login [32m200[0m - 51ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:38.341Z] [0311cf13-1480-4509-a87f-90b094ac4df3] GET /api/auth/verify
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:38.341Z] [0311cf13-1480-4509-a87f-90b094ac4df3] GET /verify [32m200[0m - 2ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:38.348Z] [4e038acf-c363-48e3-8f77-c9f18c0cc1a9] GET /api/auth/verify
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:38.348Z] [4e038acf-c363-48e3-8f77-c9f18c0cc1a9] GET /verify [31m401[0m - 2ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+  console.log
+    [2026-03-01T15:11:38.359Z] [1dfdffa1-d39c-4d9e-a8fd-9b2d366f5e5f] GET /api/auth/verify
+
+      at src/server.ts:42:11
+
+  console.log
+    [2026-03-01T15:11:38.359Z] [1dfdffa1-d39c-4d9e-a8fd-9b2d366f5e5f] GET /verify [31m401[0m - 2ms
+
+      at ServerResponse.<anonymous> (src/server.ts:49:13)
+
+PASS src/tests/integration/auth.test.ts
+  Auth API
+    POST /api/auth/login
+      √ should login with valid credentials (74 ms)
+      √ should reject invalid credentials (63 ms)
+      √ should reject missing credentials (9 ms)
+    GET /api/auth/verify
+      √ should verify valid token (64 ms)
+      √ should reject request without token (7 ms)
+      √ should reject invalid token (11 ms)
+
+Test Suites: 5 passed, 5 total
+Tests:       35 passed, 35 total
+Snapshots:   0 total
+Time:        3.953 s
+Ran all test suites.
+
+Jest has detected the following 5 open handles potentially keeping Jest from exiting:
+
+  ●  TCPWRAP
+
+      30 |   for (let i = 0; i < retries; i++) {
+      31 |     try {
+    > 32 |       await pool.query('SELECT NOW()');
+         |                  ^
+      33 |       console.log('✅ Database connected successfully');
+      34 |       return;
+      35 |     } catch (err) {
+
+      at Connection.connect (node_modules/pg/lib/connection.js:43:17)
+      at Client._connect (node_modules/pg/lib/client.js:117:11)
+      at Client.connect (node_modules/pg/lib/client.js:166:12)
+      at BoundPool.newClient (node_modules/pg-pool/index.js:252:12)
+      at BoundPool.connect (node_modules/pg-pool/index.js:227:10)
+      at BoundPool.query (node_modules/pg-pool/index.js:411:10)
+      at testConnection (src/config/database.ts:32:18)
+      at Object.<anonymous> (src/config/database.ts:49:1)
+      at Object.<anonymous> (src/server.ts:11:1)
+      at Object.<anonymous> (src/tests/integration/blog.test.ts:2:1)
+
+
+  ●  TCPWRAP
+
+      30 |   for (let i = 0; i < retries; i++) {
+      31 |     try {
+    > 32 |       await pool.query('SELECT NOW()');
+         |                  ^
+      33 |       console.log('✅ Database connected successfully');
+      34 |       return;
+      35 |     } catch (err) {
+
+      at Connection.connect (node_modules/pg/lib/connection.js:43:17)
+      at Client._connect (node_modules/pg/lib/client.js:117:11)
+      at Client.connect (node_modules/pg/lib/client.js:166:12)
+      at BoundPool.newClient (node_modules/pg-pool/index.js:252:12)
+      at BoundPool.connect (node_modules/pg-pool/index.js:227:10)
+      at BoundPool.query (node_modules/pg-pool/index.js:411:10)
+      at testConnection (src/config/database.ts:32:18)
+      at Object.<anonymous> (src/config/database.ts:49:1)
+      at Object.<anonymous> (src/server.ts:11:1)
+      at Object.<anonymous> (src/tests/integration/education.test.ts:2:1)
+
+
+  ●  TCPWRAP
+
+      30 |   for (let i = 0; i < retries; i++) {
+      31 |     try {
+    > 32 |       await pool.query('SELECT NOW()');
+         |                  ^
+      33 |       console.log('✅ Database connected successfully');
+      34 |       return;
+      35 |     } catch (err) {
+
+      at Connection.connect (node_modules/pg/lib/connection.js:43:17)
+      at Client._connect (node_modules/pg/lib/client.js:117:11)
+      at Client.connect (node_modules/pg/lib/client.js:166:12)
+      at BoundPool.newClient (node_modules/pg-pool/index.js:252:12)
+      at BoundPool.connect (node_modules/pg-pool/index.js:227:10)
+      at BoundPool.query (node_modules/pg-pool/index.js:411:10)
+      at testConnection (src/config/database.ts:32:18)
+      at Object.<anonymous> (src/config/database.ts:49:1)
+      at Object.<anonymous> (src/server.ts:11:1)
+      at Object.<anonymous> (src/tests/integration/wiki.test.ts:2:1)
+
+
+  ●  TCPWRAP
+
+      30 |   for (let i = 0; i < retries; i++) {
+      31 |     try {
+    > 32 |       await pool.query('SELECT NOW()');
+         |                  ^
+      33 |       console.log('✅ Database connected successfully');
+      34 |       return;
+      35 |     } catch (err) {
+
+      at Connection.connect (node_modules/pg/lib/connection.js:43:17)
+      at Client._connect (node_modules/pg/lib/client.js:117:11)
+      at Client.connect (node_modules/pg/lib/client.js:166:12)
+      at BoundPool.newClient (node_modules/pg-pool/index.js:252:12)
+      at BoundPool.connect (node_modules/pg-pool/index.js:227:10)
+      at BoundPool.query (node_modules/pg-pool/index.js:411:10)
+      at testConnection (src/config/database.ts:32:18)
+      at Object.<anonymous> (src/config/database.ts:49:1)
+      at Object.<anonymous> (src/server.ts:11:1)
+      at Object.<anonymous> (src/tests/integration/settings.test.ts:2:1)
+
+
+  ●  TCPWRAP
+
+      30 |   for (let i = 0; i < retries; i++) {
+      31 |     try {
+    > 32 |       await pool.query('SELECT NOW()');
+         |                  ^
+      33 |       console.log('✅ Database connected successfully');
+      34 |       return;
+      35 |     } catch (err) {
+
+      at Connection.connect (node_modules/pg/lib/connection.js:43:17)
+      at Client._connect (node_modules/pg/lib/client.js:117:11)
+      at Client.connect (node_modules/pg/lib/client.js:166:12)
+      at BoundPool.newClient (node_modules/pg-pool/index.js:252:12)
+      at BoundPool.connect (node_modules/pg-pool/index.js:227:10)
+      at BoundPool.query (node_modules/pg-pool/index.js:411:10)
+      at testConnection (src/config/database.ts:32:18)
+      at Object.<anonymous> (src/config/database.ts:49:1)
+      at Object.<anonymous> (src/server.ts:11:1)
+      at Object.<anonymous> (src/tests/integration/auth.test.ts:2:1)
+

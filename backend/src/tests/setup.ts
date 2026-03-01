@@ -1,6 +1,8 @@
 import { Pool } from "pg";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
+import { clearCache } from "../middleware/cache";
+import appPool from "../config/database";
 
 // Load test environment variables if .env.test exists
 dotenv.config({ path: ".env.test" });
@@ -54,8 +56,11 @@ beforeAll(async () => {
 
 // Global test cleanup
 afterAll(async () => {
-  // Close database connections
+  // Close test database connection
   await testPool.end();
+
+  // Close the main application database pool
+  await appPool.end();
 });
 
 // Helper to clean database tables (use with caution)
@@ -68,4 +73,7 @@ export const cleanDatabase = async () => {
   await testPool.query("DELETE FROM blog_posts");
   await testPool.query("DELETE FROM site_settings");
   // Note: Don't delete users as we need admin user for auth tests
+
+  // Clear application cache to prevent test pollution
+  clearCache();
 };

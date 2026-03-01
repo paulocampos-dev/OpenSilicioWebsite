@@ -1,0 +1,827 @@
+
+> opensilicio-backend@1.0.0 test
+> jest
+
+  console.error
+    Failed to connect to test database: error: database "opensilicio_test" does not exist
+        at C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\node_modules\pg-pool\index.js:45:11
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at Object.<anonymous> (C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\src\tests\setup.ts:45:5) {
+      length: 102,
+      severity: 'FATAL',
+      code: '3D000',
+      detail: undefined,
+      hint: undefined,
+      position: undefined,
+      internalPosition: undefined,
+      internalQuery: undefined,
+      where: undefined,
+      schema: undefined,
+      table: undefined,
+      column: undefined,
+      dataType: undefined,
+      constraint: undefined,
+      file: 'postinit.c',
+      line: '1021',
+      routine: 'InitPostgres'
+    }
+
+    [0m [90m 45 |[39m     [36mawait[39m testPool[33m.[39mquery([32m"SELECT 1"[39m)[33m;[39m
+     [90m 46 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 47 |[39m     console[33m.[39merror([32m"Failed to connect to test database:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 48 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 49 |[39m   }
+     [90m 50 |[39m[0m
+
+      at Object.<anonymous> (src/tests/setup.ts:47:13)
+
+FAIL src/tests/integration/auth.test.ts
+  Auth API
+    POST /api/auth/login
+      × should login with valid credentials (5 ms)
+      × should reject invalid credentials
+      × should reject missing credentials
+    GET /api/auth/verify
+      × should verify valid token
+      × should reject request without token
+      × should reject invalid token
+
+  ● Auth API › POST /api/auth/login › should login with valid credentials
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Auth API › POST /api/auth/login › should reject invalid credentials
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Auth API › POST /api/auth/login › should reject missing credentials
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Auth API › GET /api/auth/verify › should verify valid token
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Auth API › GET /api/auth/verify › should reject request without token
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Auth API › GET /api/auth/verify › should reject invalid token
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  console.error
+    Failed to connect to test database: error: database "opensilicio_test" does not exist
+        at C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\node_modules\pg-pool\index.js:45:11
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at Object.<anonymous> (C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\src\tests\setup.ts:45:5) {
+      length: 102,
+      severity: 'FATAL',
+      code: '3D000',
+      detail: undefined,
+      hint: undefined,
+      position: undefined,
+      internalPosition: undefined,
+      internalQuery: undefined,
+      where: undefined,
+      schema: undefined,
+      table: undefined,
+      column: undefined,
+      dataType: undefined,
+      constraint: undefined,
+      file: 'postinit.c',
+      line: '1021',
+      routine: 'InitPostgres'
+    }
+
+    [0m [90m 45 |[39m     [36mawait[39m testPool[33m.[39mquery([32m"SELECT 1"[39m)[33m;[39m
+     [90m 46 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 47 |[39m     console[33m.[39merror([32m"Failed to connect to test database:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 48 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 49 |[39m   }
+     [90m 50 |[39m[0m
+
+      at Object.<anonymous> (src/tests/setup.ts:47:13)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "⏳ Database not ready yet. Retrying in 2s... (9 attempts left)".
+
+      34 |       return;
+      35 |     } catch (err) {
+    > 36 |       const attemptsLeft = retries - i - 1;
+         |                         ^
+      37 |       if (attemptsLeft > 0) {
+      38 |         console.log(`⏳ Database not ready yet. Retrying in ${delay/1000}s... (${attemptsLeft} attempts left)`);
+      39 |         await new Promise(resolve => setTimeout(resolve, delay));
+
+      at console.log (node_modules/@jest/console/build/CustomConsole.js:141:10)
+      at testConnection (src/config/database.ts:36:25)
+
+  console.log
+    ⏳ Database not ready yet. Retrying in 2s... (9 attempts left)
+
+      at testConnection (src/config/database.ts:38:17)
+
+  console.error
+    Failed to connect to test database: error: database "opensilicio_test" does not exist
+        at C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\node_modules\pg-pool\index.js:45:11
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at Object.<anonymous> (C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\src\tests\setup.ts:45:5) {
+      length: 102,
+      severity: 'FATAL',
+      code: '3D000',
+      detail: undefined,
+      hint: undefined,
+      position: undefined,
+      internalPosition: undefined,
+      internalQuery: undefined,
+      where: undefined,
+      schema: undefined,
+      table: undefined,
+      column: undefined,
+      dataType: undefined,
+      constraint: undefined,
+      file: 'postinit.c',
+      line: '1021',
+      routine: 'InitPostgres'
+    }
+
+    [0m [90m 45 |[39m     [36mawait[39m testPool[33m.[39mquery([32m"SELECT 1"[39m)[33m;[39m
+     [90m 46 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 47 |[39m     console[33m.[39merror([32m"Failed to connect to test database:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 48 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 49 |[39m   }
+     [90m 50 |[39m[0m
+
+      at Object.<anonymous> (src/tests/setup.ts:47:13)
+
+FAIL src/tests/integration/education.test.ts
+  Education API
+    GET /api/education
+      × should return education resources with pagination (4 ms)
+      × should filter by published status
+    GET /api/education/:id
+      × should return education resource by ID
+      × should return 404 for non-existent ID
+    POST /api/education
+      × should create a new education resource when authenticated
+      × should reject unauthenticated requests
+    PUT /api/education/:id
+      × should update education resource when authenticated
+      × should reject unauthenticated requests
+
+  ● Education API › GET /api/education › should return education resources with pagination
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Education API › GET /api/education › should filter by published status
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Education API › GET /api/education/:id › should return education resource by ID
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Education API › GET /api/education/:id › should return 404 for non-existent ID
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Education API › POST /api/education › should create a new education resource when authenticated
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Education API › POST /api/education › should reject unauthenticated requests
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Education API › PUT /api/education/:id › should update education resource when authenticated
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Education API › PUT /api/education/:id › should reject unauthenticated requests
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "⏳ Database not ready yet. Retrying in 2s... (9 attempts left)".
+
+      34 |       return;
+      35 |     } catch (err) {
+    > 36 |       const attemptsLeft = retries - i - 1;
+         |                         ^
+      37 |       if (attemptsLeft > 0) {
+      38 |         console.log(`⏳ Database not ready yet. Retrying in ${delay/1000}s... (${attemptsLeft} attempts left)`);
+      39 |         await new Promise(resolve => setTimeout(resolve, delay));
+
+      at console.log (node_modules/@jest/console/build/CustomConsole.js:141:10)
+      at testConnection (src/config/database.ts:36:25)
+
+FAIL src/tests/integration/settings.test.ts
+  Settings API
+    GET /api/settings
+      × should return site settings (5 ms)
+      × should return default settings if none exist
+    PUT /api/settings
+      × should update settings when authenticated
+      × should reject unauthenticated requests
+
+  ● Settings API › GET /api/settings › should return site settings
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Settings API › GET /api/settings › should return default settings if none exist
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Settings API › PUT /api/settings › should update settings when authenticated
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Settings API › PUT /api/settings › should reject unauthenticated requests
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  console.log
+    ⏳ Database not ready yet. Retrying in 2s... (9 attempts left)
+
+      at testConnection (src/config/database.ts:38:17)
+
+  console.error
+    Failed to connect to test database: error: database "opensilicio_test" does not exist
+        at C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\node_modules\pg-pool\index.js:45:11
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at Object.<anonymous> (C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\src\tests\setup.ts:45:5) {
+      length: 102,
+      severity: 'FATAL',
+      code: '3D000',
+      detail: undefined,
+      hint: undefined,
+      position: undefined,
+      internalPosition: undefined,
+      internalQuery: undefined,
+      where: undefined,
+      schema: undefined,
+      table: undefined,
+      column: undefined,
+      dataType: undefined,
+      constraint: undefined,
+      file: 'postinit.c',
+      line: '1021',
+      routine: 'InitPostgres'
+    }
+
+    [0m [90m 45 |[39m     [36mawait[39m testPool[33m.[39mquery([32m"SELECT 1"[39m)[33m;[39m
+     [90m 46 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 47 |[39m     console[33m.[39merror([32m"Failed to connect to test database:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 48 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 49 |[39m   }
+     [90m 50 |[39m[0m
+
+      at Object.<anonymous> (src/tests/setup.ts:47:13)
+
+  console.error
+    Failed to connect to test database: error: database "opensilicio_test" does not exist
+        at C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\node_modules\pg-pool\index.js:45:11
+        at processTicksAndRejections (node:internal/process/task_queues:105:5)
+        at Object.<anonymous> (C:\Users\pcampos\Desktop\projetos\lsi\site_react\backend\src\tests\setup.ts:45:5) {
+      length: 102,
+      severity: 'FATAL',
+      code: '3D000',
+      detail: undefined,
+      hint: undefined,
+      position: undefined,
+      internalPosition: undefined,
+      internalQuery: undefined,
+      where: undefined,
+      schema: undefined,
+      table: undefined,
+      column: undefined,
+      dataType: undefined,
+      constraint: undefined,
+      file: 'postinit.c',
+      line: '1021',
+      routine: 'InitPostgres'
+    }
+
+    [0m [90m 45 |[39m     [36mawait[39m testPool[33m.[39mquery([32m"SELECT 1"[39m)[33m;[39m
+     [90m 46 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 47 |[39m     console[33m.[39merror([32m"Failed to connect to test database:"[39m[33m,[39m error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 48 |[39m     [36mthrow[39m error[33m;[39m
+     [90m 49 |[39m   }
+     [90m 50 |[39m[0m
+
+      at Object.<anonymous> (src/tests/setup.ts:47:13)
+
+FAIL src/tests/integration/wiki.test.ts
+  Wiki API
+    GET /api/wiki
+      × should return wiki entries with pagination (4 ms)
+      × should filter by published status
+    GET /api/wiki/:slug
+      × should return wiki entry by slug
+      × should return 404 for non-existent slug
+    POST /api/wiki
+      × should create a new wiki entry when authenticated
+      × should reject unauthenticated requests
+    PUT /api/wiki/:id
+      × should update wiki entry when authenticated
+      × should reject unauthenticated requests
+
+  ● Wiki API › GET /api/wiki › should return wiki entries with pagination
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Wiki API › GET /api/wiki › should filter by published status
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Wiki API › GET /api/wiki/:slug › should return wiki entry by slug
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Wiki API › GET /api/wiki/:slug › should return 404 for non-existent slug
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Wiki API › POST /api/wiki › should create a new wiki entry when authenticated
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Wiki API › POST /api/wiki › should reject unauthenticated requests
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Wiki API › PUT /api/wiki/:id › should update wiki entry when authenticated
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Wiki API › PUT /api/wiki/:id › should reject unauthenticated requests
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "⏳ Database not ready yet. Retrying in 2s... (9 attempts left)".
+
+      34 |       return;
+      35 |     } catch (err) {
+    > 36 |       const attemptsLeft = retries - i - 1;
+         |                         ^
+      37 |       if (attemptsLeft > 0) {
+      38 |         console.log(`⏳ Database not ready yet. Retrying in ${delay/1000}s... (${attemptsLeft} attempts left)`);
+      39 |         await new Promise(resolve => setTimeout(resolve, delay));
+
+      at console.log (node_modules/@jest/console/build/CustomConsole.js:141:10)
+      at testConnection (src/config/database.ts:36:25)
+
+FAIL src/tests/integration/blog.test.ts
+  Blog API
+    GET /api/blog
+      × should return blog posts with pagination (3 ms)
+      × should filter by published status
+    GET /api/blog/:slug
+      × should return blog post by slug
+      × should return 404 for non-existent slug
+    GET /api/blog/categories/list
+      × should return list of categories
+    POST /api/blog
+      × should create a new blog post when authenticated
+      × should reject unauthenticated requests
+    PUT /api/blog/:id
+      × should update blog post when authenticated
+      × should reject unauthenticated requests
+
+  ● Blog API › GET /api/blog › should return blog posts with pagination
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › GET /api/blog › should filter by published status
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › GET /api/blog/:slug › should return blog post by slug
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › GET /api/blog/:slug › should return 404 for non-existent slug
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › GET /api/blog/categories/list › should return list of categories
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › POST /api/blog › should create a new blog post when authenticated
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › POST /api/blog › should reject unauthenticated requests
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › PUT /api/blog/:id › should update blog post when authenticated
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+  ● Blog API › PUT /api/blog/:id › should reject unauthenticated requests
+
+    error: database "opensilicio_test" does not exist
+
+      43 |   // Test database connection
+      44 |   try {
+    > 45 |     await testPool.query("SELECT 1");
+         |     ^
+      46 |   } catch (error) {
+      47 |     console.error("Failed to connect to test database:", error);
+      48 |     throw error;
+
+      at node_modules/pg-pool/index.js:45:11
+      at Object.<anonymous> (src/tests/setup.ts:45:5)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+Test Suites: 5 failed, 5 total
+Tests:       35 failed, 35 total
+Snapshots:   0 total
+Time:        3.178 s, estimated 4 s
+Ran all test suites.

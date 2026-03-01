@@ -1,0 +1,662 @@
+
+> opensilicio-backend@1.0.0 test
+> jest
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+FAIL src/tests/integration/auth.test.ts
+  Auth API
+    POST /api/auth/login
+      × should login with valid credentials (4 ms)
+      × should reject invalid credentials (1 ms)
+      × should reject missing credentials
+    GET /api/auth/verify
+      × should verify valid token
+      × should reject request without token
+      × should reject invalid token
+
+  ● Auth API › POST /api/auth/login › should login with valid credentials
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Auth API › POST /api/auth/login › should reject invalid credentials
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Auth API › POST /api/auth/login › should reject missing credentials
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Auth API › GET /api/auth/verify › should verify valid token
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Auth API › GET /api/auth/verify › should reject request without token
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Auth API › GET /api/auth/verify › should reject invalid token
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+FAIL src/tests/integration/settings.test.ts
+  Settings API
+    GET /api/settings
+      × should return site settings (4 ms)
+      × should return default settings if none exist
+    PUT /api/settings
+      × should update settings when authenticated
+      × should reject unauthenticated requests
+
+  ● Settings API › GET /api/settings › should return site settings
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Settings API › GET /api/settings › should return default settings if none exist
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Settings API › PUT /api/settings › should update settings when authenticated
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Settings API › PUT /api/settings › should reject unauthenticated requests
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+  console.log
+    ✅ Database connected successfully
+
+      at testConnection (src/config/database.ts:33:15)
+
+FAIL src/tests/integration/blog.test.ts
+  Blog API
+    GET /api/blog
+      × should return blog posts with pagination (3 ms)
+      × should filter by published status
+    GET /api/blog/:slug
+      × should return blog post by slug
+      × should return 404 for non-existent slug
+    GET /api/blog/categories/list
+      × should return list of categories
+    POST /api/blog
+      × should create a new blog post when authenticated
+      × should reject unauthenticated requests
+    PUT /api/blog/:id
+      × should update blog post when authenticated
+      × should reject unauthenticated requests
+
+  ● Blog API › GET /api/blog › should return blog posts with pagination
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › GET /api/blog › should filter by published status
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › GET /api/blog/:slug › should return blog post by slug
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › GET /api/blog/:slug › should return 404 for non-existent slug
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › GET /api/blog/categories/list › should return list of categories
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › POST /api/blog › should create a new blog post when authenticated
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › POST /api/blog › should reject unauthenticated requests
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › PUT /api/blog/:id › should update blog post when authenticated
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Blog API › PUT /api/blog/:id › should reject unauthenticated requests
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+FAIL src/tests/integration/wiki.test.ts
+  Wiki API
+    GET /api/wiki
+      × should return wiki entries with pagination (6 ms)
+      × should filter by published status
+    GET /api/wiki/:slug
+      × should return wiki entry by slug
+      × should return 404 for non-existent slug
+    POST /api/wiki
+      × should create a new wiki entry when authenticated
+      × should reject unauthenticated requests
+    PUT /api/wiki/:id
+      × should update wiki entry when authenticated
+      × should reject unauthenticated requests
+
+  ● Wiki API › GET /api/wiki › should return wiki entries with pagination
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Wiki API › GET /api/wiki › should filter by published status
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Wiki API › GET /api/wiki/:slug › should return wiki entry by slug
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Wiki API › GET /api/wiki/:slug › should return 404 for non-existent slug
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Wiki API › POST /api/wiki › should create a new wiki entry when authenticated
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Wiki API › POST /api/wiki › should reject unauthenticated requests
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Wiki API › PUT /api/wiki/:id › should update wiki entry when authenticated
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Wiki API › PUT /api/wiki/:id › should reject unauthenticated requests
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+FAIL src/tests/integration/education.test.ts
+  Education API
+    GET /api/education
+      × should return education resources with pagination (5 ms)
+      × should filter by published status
+    GET /api/education/:id
+      × should return education resource by ID
+      × should return 404 for non-existent ID
+    POST /api/education
+      × should create a new education resource when authenticated
+      × should reject unauthenticated requests
+    PUT /api/education/:id
+      × should update education resource when authenticated
+      × should reject unauthenticated requests
+
+  ● Education API › GET /api/education › should return education resources with pagination
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Education API › GET /api/education › should filter by published status
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Education API › GET /api/education/:id › should return education resource by ID
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Education API › GET /api/education/:id › should return 404 for non-existent ID
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Education API › POST /api/education › should create a new education resource when authenticated
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Education API › POST /api/education › should reject unauthenticated requests
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Education API › PUT /api/education/:id › should update education resource when authenticated
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+  ● Education API › PUT /api/education/:id › should reject unauthenticated requests
+
+    error: relation "users" does not exist
+
+      30 |
+      31 |   // Insert or update test admin user
+    > 32 |   await testPool.query(
+         |   ^
+      33 |     `INSERT INTO users (username, password_hash)
+      34 |      VALUES ('AdmOpen', $1)
+      35 |      ON CONFLICT (username)
+
+      at node_modules/pg-pool/index.js:45:11
+      at createTestAdmin (src/tests/setup.ts:32:3)
+      at Object.<anonymous> (src/tests/setup.ts:52:3)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+Test Suites: 5 failed, 5 total
+Tests:       35 failed, 35 total
+Snapshots:   0 total
+Time:        3.384 s
+Ran all test suites.
