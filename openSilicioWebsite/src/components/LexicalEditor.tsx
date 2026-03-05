@@ -21,16 +21,18 @@ import EquationPlugin from './lexical/plugins/EquationPlugin';
 import WikiLinkPlugin, { INSERT_WIKI_LINK_COMMAND } from './lexical/plugins/WikiLinkPlugin';
 import YouTubePlugin from './lexical/plugins/YouTubePlugin';
 import ToolbarPlugin from './lexical/plugins/ToolbarPlugin';
+import ImagePlugin from './lexical/plugins/ImagePlugin';
 import { EquationNode } from './lexical/nodes/EquationNode';
 import { WikiLinkNode } from './lexical/nodes/WikiLinkNode';
 import { YouTubeNode } from './lexical/nodes/YouTubeNode';
+import { ImageNode } from './lexical/nodes/ImageNode';
 
 interface LexicalEditorProps {
   content: string;
   onContentChange: (content: string) => void;
   placeholder?: string;
   contentType?: 'blog' | 'education';
-  contentId?: string;
+  contentId?: string | undefined;
   onBeforeWikiLink?: () => Promise<any>;
 }
 
@@ -282,6 +284,7 @@ function LexicalEditorInner({
             <EquationPlugin />
             <WikiLinkPlugin />
             <YouTubePlugin />
+            <ImagePlugin />
           </div>
         </div>
       </Paper>
@@ -338,6 +341,7 @@ export default function LexicalEditor(props: LexicalEditorProps) {
       EquationNode,
       WikiLinkNode,
       YouTubeNode,
+      ImageNode,
     ],
   };
 

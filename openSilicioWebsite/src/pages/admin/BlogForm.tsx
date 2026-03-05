@@ -57,7 +57,7 @@ export default function BlogForm() {
     if (id) {
       loadPost();
     }
-    
+
     // Cleanup auto-save timeout on unmount
     return () => {
       if (autoSaveTimeoutRef.current) {
@@ -166,10 +166,10 @@ export default function BlogForm() {
     } catch (error: any) {
       console.error('Erro ao salvar post:', error);
       if (showNotification) {
-        setSnackbar({ 
-          open: true, 
-          message: error.response?.data?.error || 'Erro ao salvar post', 
-          severity: 'error' 
+        setSnackbar({
+          open: true,
+          message: error.response?.data?.error || 'Erro ao salvar post',
+          severity: 'error'
         });
       }
       throw error;
@@ -183,17 +183,17 @@ export default function BlogForm() {
       const savedPost = await blogApi.update(post.id!, updatedPost);
       setPost(savedPost);
       setLastSaved(new Date());
-      setSnackbar({ 
-        open: true, 
-        message: savedPost.published ? 'Post publicado com sucesso!' : 'Post despublicado com sucesso!', 
-        severity: 'success' 
+      setSnackbar({
+        open: true,
+        message: savedPost.published ? 'Post publicado com sucesso!' : 'Post despublicado com sucesso!',
+        severity: 'success'
       });
     } catch (error: any) {
       console.error('Erro ao publicar post:', error);
-      setSnackbar({ 
-        open: true, 
-        message: error.response?.data?.error || 'Erro ao publicar post', 
-        severity: 'error' 
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Erro ao publicar post',
+        severity: 'error'
       });
     } finally {
       setLoading(false);
@@ -308,7 +308,7 @@ export default function BlogForm() {
                 onInputChange={(_, newInputValue) => setPost({ ...post, category: newInputValue })}
                 renderInput={(params) => (
                   <TextField
-                    {...params}
+                    {...(params as any)}
                     label="Categoria"
                     required
                     helperText="Selecione uma categoria existente ou digite uma nova"
@@ -349,8 +349,8 @@ export default function BlogForm() {
                   {uploadingImage
                     ? `Enviando... ${uploadProgress}%`
                     : post.image_url
-                    ? 'Trocar Imagem'
-                    : 'Enviar Imagem'}
+                      ? 'Trocar Imagem'
+                      : 'Enviar Imagem'}
                   <input
                     type="file"
                     hidden

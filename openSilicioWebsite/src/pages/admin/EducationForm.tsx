@@ -52,7 +52,7 @@ export default function EducationForm() {
     if (id) {
       loadResource();
     }
-    
+
     // Cleanup auto-save timeout on unmount
     return () => {
       if (autoSaveTimeoutRef.current) {
@@ -129,10 +129,10 @@ export default function EducationForm() {
     } catch (error: any) {
       console.error('Erro ao salvar recurso:', error);
       if (showNotification) {
-        setSnackbar({ 
-          open: true, 
-          message: error.response?.data?.error || 'Erro ao salvar recurso', 
-          severity: 'error' 
+        setSnackbar({
+          open: true,
+          message: error.response?.data?.error || 'Erro ao salvar recurso',
+          severity: 'error'
         });
       }
       throw error;
@@ -165,17 +165,17 @@ export default function EducationForm() {
       const savedResource = await educationApi.update(resource.id!, updatedResource);
       setResource(savedResource);
       setLastSaved(new Date());
-      setSnackbar({ 
-        open: true, 
-        message: savedResource.published ? 'Recurso publicado com sucesso!' : 'Recurso despublicado com sucesso!', 
-        severity: 'success' 
+      setSnackbar({
+        open: true,
+        message: savedResource.published ? 'Recurso publicado com sucesso!' : 'Recurso despublicado com sucesso!',
+        severity: 'success'
       });
     } catch (error: any) {
       console.error('Erro ao publicar recurso:', error);
-      setSnackbar({ 
-        open: true, 
-        message: error.response?.data?.error || 'Erro ao publicar recurso', 
-        severity: 'error' 
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Erro ao publicar recurso',
+        severity: 'error'
       });
     } finally {
       setLoading(false);
@@ -359,7 +359,7 @@ export default function EducationForm() {
                 <>
                   <Box>
                     <Tabs value={previewTab} onChange={(_, v) => setPreviewTab(v)} variant="scrollable" allowScrollButtonsMobile>
-                      {(['Visão geral','Conteúdo','Recursos'] as const).map((t) => (
+                      {(['Visão geral', 'Conteúdo', 'Recursos'] as const).map((t) => (
                         <Tab key={t} value={t} label={t} />
                       ))}
                     </Tabs>
@@ -399,7 +399,7 @@ export default function EducationForm() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </form>
+    </form >
   );
 }
 

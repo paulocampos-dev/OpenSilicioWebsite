@@ -11,6 +11,7 @@ import { LinkNode } from '@lexical/link';
 import { EquationNode } from './lexical/nodes/EquationNode';
 import { WikiLinkNode } from './lexical/nodes/WikiLinkNode';
 import { YouTubeNode } from './lexical/nodes/YouTubeNode';
+import { ImageNode } from './lexical/nodes/ImageNode';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 interface LexicalContentProps {
@@ -93,6 +94,7 @@ export default function LexicalContent({ content }: LexicalContentProps) {
       EquationNode,
       WikiLinkNode,
       YouTubeNode,
+      ImageNode,
     ],
     editable: false,
     editorState: content,

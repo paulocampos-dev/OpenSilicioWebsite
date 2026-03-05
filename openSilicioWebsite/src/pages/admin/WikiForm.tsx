@@ -194,7 +194,7 @@ export default function WikiForm() {
                 }
                 renderInput={(params) => (
                   <TextField
-                    {...params}
+                    {...(params as any)}
                     label="Aliases (Também conhecido como)"
                     placeholder="Digite e pressione Enter para adicionar"
                     helperText="Formas alternativas de se referir a este termo"
@@ -215,7 +215,7 @@ export default function WikiForm() {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={entry.published}
+                    checked={entry.published || false}
                     onChange={(e) => setEntry({ ...entry, published: e.target.checked })}
                   />
                 }

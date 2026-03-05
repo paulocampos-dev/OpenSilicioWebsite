@@ -15,7 +15,7 @@ export default function WikiLinkRenderer({ children, href, target }: WikiLinkRen
 
   // Check if this is a wiki link
   const isWikiLink = href?.startsWith('/wiki/');
-  const slug = isWikiLink ? href.replace('/wiki/', '') : '';
+  const slug = isWikiLink && href ? href.replace('/wiki/', '') : '';
 
   useEffect(() => {
     if (isWikiLink && slug) {
@@ -77,7 +77,7 @@ export default function WikiLinkRenderer({ children, href, target }: WikiLinkRen
         <Tooltip title="Ver definição na Wiki" arrow placement="top">
           <MUILink
             component={RouterLink}
-            to={href}
+            to={href as string}
             sx={{
               color: 'primary.main',
               textDecoration: 'underline',

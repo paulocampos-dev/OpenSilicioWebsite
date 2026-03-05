@@ -23,7 +23,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import UploadIcon from '@mui/icons-material/Upload';
-import { settingsApi, educationApi, blogApi, uploadApi } from '../../services/api';
+import { settingsApi, educationApi, blogApi, uploadApi, authApi } from '../../services/api';
 import type { SiteSettings, EducationResource, BlogPost, TeamMember } from '../../types';
 import LexicalEditor from '../../components/LexicalEditor';
 
@@ -44,7 +44,7 @@ export default function Settings() {
   const [aboutTab, setAboutTab] = useState<'main' | 'mission' | 'vision' | 'history' | 'team'>('main');
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  
+
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -121,9 +121,9 @@ export default function Settings() {
     const hasSpecialChar = /[@$!%*?&]/.test(newPassword);
 
     if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
-      setPasswordMessage({ 
-        type: 'error', 
-        text: 'A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais (@$!%*?&)' 
+      setPasswordMessage({
+        type: 'error',
+        text: 'A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais (@$!%*?&)'
       });
       setChangingPassword(false);
       return;
@@ -132,7 +132,7 @@ export default function Settings() {
     try {
       await authApi.changePassword(currentPassword, newPassword);
       setPasswordMessage({ type: 'success', text: 'Senha alterada com sucesso!' });
-      
+
       // Limpar campos
       setCurrentPassword('');
       setNewPassword('');
@@ -157,7 +157,7 @@ export default function Settings() {
 
       // Update the team member's photo URL
       const newMembers = [...(settings.about_team_members || [])];
-      newMembers[index].photo_url = result.url;
+      newMembers[index]!.photo_url = result.url;
       setSettings({ ...settings, about_team_members: newMembers });
 
       setMessage({
@@ -497,7 +497,7 @@ export default function Settings() {
                         value={member.name}
                         onChange={(e) => {
                           const newMembers = [...(settings.about_team_members || [])];
-                          newMembers[index].name = e.target.value;
+                          newMembers[index]!.name = e.target.value;
                           setSettings({ ...settings, about_team_members: newMembers });
                         }}
                         fullWidth
@@ -507,7 +507,7 @@ export default function Settings() {
                         value={member.role}
                         onChange={(e) => {
                           const newMembers = [...(settings.about_team_members || [])];
-                          newMembers[index].role = e.target.value;
+                          newMembers[index]!.role = e.target.value;
                           setSettings({ ...settings, about_team_members: newMembers });
                         }}
                         fullWidth
@@ -546,8 +546,8 @@ export default function Settings() {
                           {uploadingIndex === index
                             ? `Enviando... ${uploadProgress}%`
                             : member.photo_url
-                            ? 'Trocar Foto'
-                            : 'Enviar Foto'}
+                              ? 'Trocar Foto'
+                              : 'Enviar Foto'}
                           <input
                             type="file"
                             hidden
@@ -581,7 +581,7 @@ export default function Settings() {
                             color="error"
                             onClick={() => {
                               const newMembers = [...(settings.about_team_members || [])];
-                              newMembers[index].photo_url = '';
+                              newMembers[index]!.photo_url = '';
                               setSettings({ ...settings, about_team_members: newMembers });
                             }}
                             sx={{ mt: 1 }}

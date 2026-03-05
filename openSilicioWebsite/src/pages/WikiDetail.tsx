@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
-import { Box, Breadcrumbs, Link as MUILink, Paper, Stack, Typography, Divider, Chip, Button, Grid, Card, CardContent, CardActionArea } from '@mui/material';
+import { Box, Breadcrumbs, Link as MUILink, Paper, Stack, Typography, Divider, Chip, Button, Grid, Card, CardContent, CardActionArea, Alert } from '@mui/material';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import { wikiApi } from '../services/api'
@@ -87,7 +87,7 @@ export default function WikiDetail() {
           <Typography variant="h3" fontWeight={700} gutterBottom>
             {pendingTerm}
           </Typography>
-          
+
           <Alert severity="info" icon={<InfoOutlinedIcon />} sx={{ mt: 3 }}>
             <Typography variant="body1" gutterBottom>
               Esta entrada ainda não foi criada. Estamos trabalhando para adicionar mais conteúdo à nossa wiki.
@@ -105,11 +105,11 @@ export default function WikiDetail() {
             <AutoStoriesIcon />
             Explore outros tópicos
           </Typography>
-          
+
           {otherEntries.length > 0 ? (
             <Grid container spacing={2} sx={{ mt: 1 }}>
               {otherEntries.map((otherEntry) => (
-                <Grid item xs={12} sm={6} md={4} key={otherEntry.id}>
+                <Grid {...({ item: true, xs: 12, sm: 6, md: 4 } as any)} key={otherEntry.id}>
                   <Card variant="outlined">
                     <CardActionArea component={RouterLink} to={`/wiki/${otherEntry.slug}`}>
                       <CardContent>

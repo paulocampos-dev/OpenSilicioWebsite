@@ -84,7 +84,7 @@ export default function Post() {
         title={post.title}
         author={post.author}
         url={`/blog/${post.slug}`}
-        imageUrl={post.image_url}
+        imageUrl={post.image_url || ''}
         publishedDate={post.created_at}
       />
     </Stack>

@@ -18,7 +18,7 @@ api.interceptors.request.use((config) => {
   // Log request in development
   if (isDev) {
     const method = config.method?.toUpperCase();
-    const url = config.baseURL + config.url;
+    const url = (config.baseURL || '') + (config.url || '');
     const params = config.params ? `?${new URLSearchParams(config.params).toString()}` : '';
 
     console.group(`🌐 API Request: ${method} ${url}${params}`);
