@@ -2,7 +2,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import {
     $getSelection,
     $isRangeSelection,
-    COMMAND_PRIORITY_EDITOR,
+    COMMAND_PRIORITY_HIGH,
     PASTE_COMMAND,
 } from 'lexical';
 import { useEffect } from 'react';
@@ -15,7 +15,8 @@ export default function ImagePlugin(): null {
     useEffect(() => {
         return editor.registerCommand(
             PASTE_COMMAND,
-            (event: ClipboardEvent) => {
+            (event: ClipboardEvent | InputEvent | KeyboardEvent) => {
+                if (!(event instanceof ClipboardEvent)) return false;
                 const { clipboardData } = event;
                 if (!clipboardData) return false;
 
@@ -69,7 +70,7 @@ export default function ImagePlugin(): null {
                 }
                 return false; // Let lexical handle normal text paste
             },
-            COMMAND_PRIORITY_EDITOR
+            COMMAND_PRIORITY_HIGH
         );
     }, [editor]);
 
