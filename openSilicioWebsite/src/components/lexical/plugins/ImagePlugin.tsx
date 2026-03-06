@@ -7,7 +7,7 @@ import {
 } from 'lexical';
 import { useEffect } from 'react';
 import { $createImageNode } from '../nodes/ImageNode';
-import axios from 'axios';
+import { uploadApi } from '../../../services/api';
 
 export default function ImagePlugin(): null {
     const [editor] = useLexicalComposerContext();
@@ -78,24 +78,13 @@ export default function ImagePlugin(): null {
 }
 
 async function uploadImage(file: File): Promise<string | null> {
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-        const apiBaseUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
-        const response = await axios.post(`${apiBaseUrl}/upload`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                // Note: we assume auth token is handled globally by axios interceptors
-                // established else where in the app, or this endpoint is public/cookie-based
-            },
-            withCredentials: true,
-        });
-
-        // Support either response.data.url or response.data.file.url depending on backend
-        return response.data.url || (response.data.file && response.data.file.url) || null;
+        const response = await uploadApi.uploadFile(file);
+        // Note: adjusting to the unified backend response type if necessary. 
+        // Our centralized uploadApi explicitly returns an object with url.
+        return response.url || null;
     } catch (error) {
-        console.error('Error uploading image:', error);
+        console.error('Error uploading image through API service:', error);
         return null;
     }
 }
