@@ -45,6 +45,8 @@ export default function ImagePlugin(): null {
                                     altText: file.name,
                                     src: temporaryUrl,
                                     loading: true,
+                                    width: '100%',
+                                    height: 'auto',
                                 });
                                 selection.insertNodes([imageNode]);
 
@@ -61,7 +63,11 @@ export default function ImagePlugin(): null {
                                             alert(`Falha ao fazer upload da imagem ${file.name}`);
                                         });
                                     }
-                                    URL.revokeObjectURL(temporaryUrl);
+                                    // Delay revocation slightly to allow Lexical/React to render the new remote URL image
+                                    // and prevent the temporary ObjectUrl from breaking before the switch.
+                                    setTimeout(() => {
+                                        URL.revokeObjectURL(temporaryUrl);
+                                    }, 1000);
                                 });
                             }
                         });
