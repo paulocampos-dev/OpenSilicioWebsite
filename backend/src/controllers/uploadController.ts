@@ -8,7 +8,7 @@ export const uploadFile = asyncHandler(async (req: AuthRequest, res: Response) =
     throw new BadRequestError('Nenhum arquivo enviado');
   }
 
-  const fileUrl = `${process.env.API_URL || 'http://localhost:3001'}/uploads/${req.file.filename}`;
+  const fileUrl = `/uploads/${req.file.filename}`;
 
   res.json({
     filename: req.file.filename,

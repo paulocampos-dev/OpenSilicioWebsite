@@ -36,7 +36,7 @@ export const uploadTeamMemberImage = asyncHandler(async (req: AuthRequest, res: 
     await fs.unlink(tempFilePath);
 
     // Generate URL for the compressed image
-    const imageUrl = `${process.env.API_URL || 'http://localhost:3001'}/uploads/team-members/${uniqueFilename}`;
+    const imageUrl = `/uploads/team-members/${uniqueFilename}`;
 
     // Get file stats for the compressed image
     const stats = await fs.stat(outputPath);
@@ -52,7 +52,7 @@ export const uploadTeamMemberImage = asyncHandler(async (req: AuthRequest, res: 
     // Clean up temporary file if processing failed
     try {
       await fs.unlink(tempFilePath);
-    } catch {}
+    } catch { }
 
     console.error('Error processing image:', error);
     throw new BadRequestError('Erro ao processar imagem');
