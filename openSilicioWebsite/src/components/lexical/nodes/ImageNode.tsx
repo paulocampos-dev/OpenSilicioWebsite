@@ -183,6 +183,7 @@ const ImageComponent = ({
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
+  const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
   const activeEditorRef = useRef<null | LexicalEditor>(editor);
   const [selection, setSelection] = useState<any>(null);
@@ -225,7 +226,21 @@ const ImageComponent = ({
         DRAGSTART_COMMAND,
         (event) => {
           if (event.target === imageRef.current) {
-            event.preventDefault(); // Disable drag to prevent confusion with drag resizing if selected
+            // event.preventDefault(); // Remove preventDefault to allow dragging
+            const dataTransfer = event.dataTransfer;
+            if (dataTransfer) {
+              dataTransfer.setData(
+                'application/x-lexical-drag',
+                JSON.stringify({
+                  data: {
+                    altText,
+                    src,
+                    key: nodeKey,
+                  },
+                  type: 'image',
+                }),
+              );
+            }
             return true;
           }
           return false;

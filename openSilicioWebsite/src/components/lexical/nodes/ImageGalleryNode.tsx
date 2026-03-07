@@ -9,11 +9,13 @@ import {
     Spread,
 } from 'lexical';
 import * as React from 'react';
-import { Suspense, ReactElement, useState } from 'react';
+import { Suspense, ReactElement, useState, useRef } from 'react';
 import { Box, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import CloseIcon from '@mui/icons-material/Close';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { $getNodeByKey } from 'lexical';
@@ -52,6 +54,17 @@ const ImageGalleryComponent = ({
     // Lightbox state (read mode)
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+    // Carousel State
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    const scrollCarousel = (direction: 'left' | 'right') => {
+        if (scrollContainerRef.current) {
+            const container = scrollContainerRef.current;
+            const scrollAmount = direction === 'left' ? -container.clientWidth * 0.8 : container.clientWidth * 0.8;
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+    };
 
     // Drag-to-reorder state (edit mode)
     const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -265,32 +278,69 @@ const ImageGalleryComponent = ({
                         )}
                     </Box>
                 ) : (
-                    /* Carousel layout */
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            overflowX: 'auto',
-                            scrollSnapType: 'x mandatory',
-                            gap: 2,
-                            pb: 1,
-                            width: '100%',
-                            '&::-webkit-scrollbar': { height: 8 },
-                            '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 4 },
-                        }}
-                    >
-                        {images.map((src, idx) =>
-                            renderCell(src, idx,
-                                {
-                                    scrollSnapAlign: 'center',
-                                    flexShrink: 0,
-                                    width: '80%',
-                                    maxWidth: '400px',
-                                    borderRadius: '8px',
-                                    overflow: 'hidden',
-                                },
-                                { width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }
-                            )
-                        )}
+                    <Box sx={{ position: 'relative', width: '100%' }}>
+                        <IconButton
+                            onClick={(e) => { e.stopPropagation(); scrollCarousel('left'); }}
+                            sx={{
+                                position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)',
+                                zIndex: 5, backgroundColor: 'rgba(255,255,255,0.7)',
+                                '&:hover': { backgroundColor: 'rgba(255,255,255,0.9)' },
+                                display: images.length > 1 ? 'inline-flex' : 'none'
+                            }}
+                        >
+                            <ChevronLeftIcon />
+                        </IconButton>
+
+                        <Box
+                            ref={scrollContainerRef}
+                            sx={{
+                                display: 'flex',
+                                overflowX: 'auto',
+                                scrollSnapType: 'x mandatory',
+                                gap: 2,
+                                pb: 1,
+                                width: '100%',
+                                scrollBehavior: 'smooth',
+                                '&::-webkit-scrollbar': { height: 8 },
+                                '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 4 },
+                            }}
+                        >
+                            {images.map((src, idx) => (
+                                <Box
+                                    key={idx}
+                                    onClick={() => openLightbox(idx)}
+                                    sx={{
+                                        scrollSnapAlign: 'center',
+                                        flexShrink: 0,
+                                        width: '80%',
+                                        maxWidth: '400px',
+                                        borderRadius: 2,
+                                        overflow: 'hidden',
+                                        cursor: !isEditable ? 'zoom-in' : 'default',
+                                        '& img': {
+                                            width: '100%',
+                                            height: 'auto',
+                                            display: 'block',
+                                            objectFit: 'contain',
+                                        }
+                                    }}
+                                >
+                                    <img src={src} alt={`Gallery Image ${idx + 1}`} loading="lazy" />
+                                </Box>
+                            ))}
+                        </Box>
+
+                        <IconButton
+                            onClick={(e) => { e.stopPropagation(); scrollCarousel('right'); }}
+                            sx={{
+                                position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)',
+                                zIndex: 5, backgroundColor: 'rgba(255,255,255,0.7)',
+                                '&:hover': { backgroundColor: 'rgba(255,255,255,0.9)' },
+                                display: images.length > 1 ? 'inline-flex' : 'none'
+                            }}
+                        >
+                            <ChevronRightIcon />
+                        </IconButton>
                     </Box>
                 )}
             </Box>

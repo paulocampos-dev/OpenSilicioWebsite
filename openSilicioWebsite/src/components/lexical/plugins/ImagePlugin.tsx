@@ -5,6 +5,9 @@ import {
     $isRangeSelection,
     COMMAND_PRIORITY_HIGH,
     PASTE_COMMAND,
+    DROP_COMMAND,
+    $getNodeByKey,
+    $getNearestNodeFromDOMNode,
 } from 'lexical';
 import { useEffect } from 'react';
 import { $createImageNode, $isImageNode } from '../nodes/ImageNode';
@@ -139,7 +142,70 @@ export default function ImagePlugin(): null {
                 return false; // Let lexical handle normal text paste
             },
             COMMAND_PRIORITY_HIGH
-        );
+        ),
+            editor.registerCommand(
+                DROP_COMMAND,
+                (event: DragEvent) => {
+                    const dataTransfer = event.dataTransfer;
+                    if (!dataTransfer) return false;
+
+                    const lexicalDragData = dataTransfer.getData('application/x-lexical-drag');
+                    if (!lexicalDragData) return false;
+
+                    try {
+                        const parsedData = JSON.parse(lexicalDragData);
+                        if (parsedData.type !== 'image') return false;
+
+                        event.preventDefault();
+
+                        editor.update(() => {
+                            // Find the drop target
+                            const targetDOMNode = document.elementFromPoint(event.clientX, event.clientY);
+                            if (!targetDOMNode) return;
+
+                            const targetLexicalNode = $getNearestNodeFromDOMNode(targetDOMNode);
+                            if (!targetLexicalNode) return;
+
+                            const draggedKey = parsedData.data.key;
+                            const draggedNode = $getNodeByKey(draggedKey);
+                            if (!draggedNode) return;
+
+                            // Check if we dropped on another ImageNode
+                            if (targetLexicalNode.__type === 'image' && targetLexicalNode.getKey() !== draggedKey) {
+                                const targetImageNode = targetLexicalNode as any;
+
+                                // Create a gallery from the two images
+                                const galleryNode = $createImageGalleryNode({
+                                    images: [targetImageNode.getSrc(), (draggedNode as any).getSrc()],
+                                    layout: 'grid'
+                                });
+
+                                targetImageNode.replace(galleryNode);
+                                draggedNode.remove();
+                            }
+                            // Check if we dropped on an existing ImageGalleryNode
+                            else if (targetLexicalNode.__type === 'image-gallery' && targetLexicalNode.getKey() !== draggedKey) {
+                                const galleryNode = targetLexicalNode as any;
+                                const currentImages = galleryNode.getImages();
+
+                                const newGalleryNode = $createImageGalleryNode({
+                                    images: [...currentImages, (draggedNode as any).getSrc()],
+                                    layout: galleryNode.__layout || 'grid'
+                                });
+
+                                galleryNode.replace(newGalleryNode);
+                                draggedNode.remove();
+                            }
+                        });
+
+                        return true;
+                    } catch (e) {
+                        console.error('Error parsing dragged lexical data', e);
+                        return false;
+                    }
+                },
+                COMMAND_PRIORITY_HIGH
+            );
     }, [editor]);
 
     return null;
