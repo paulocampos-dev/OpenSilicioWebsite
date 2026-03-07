@@ -86,7 +86,7 @@ export const blogPostSchema = z.object({
       required_error: 'Conteúdo é obrigatório',
     })
     .min(1, 'Conteúdo não pode ser vazio')
-    .max(100000, 'Conteúdo deve ter no máximo 100000 caracteres'),
+    .max(50000000, 'Conteúdo deve ter no máximo 50000000 caracteres'),
   author: z
     .string()
     .max(255, 'Nome do autor deve ter no máximo 255 caracteres')
@@ -131,7 +131,7 @@ export const educationResourceSchema = z.object({
       required_error: 'Conteúdo é obrigatório',
     })
     .min(1, 'Conteúdo não pode ser vazio')
-    .max(100000, 'Conteúdo deve ter no máximo 100000 caracteres'),
+    .max(50000000, 'Conteúdo deve ter no máximo 50000000 caracteres'),
   category: z
     .string()
     .max(100, 'Categoria deve ter no máximo 100 caracteres')
@@ -144,11 +144,11 @@ export const educationResourceSchema = z.object({
     .nullish(),
   overview: z
     .string()
-    .max(100000, 'Visão geral deve ter no máximo 100000 caracteres')
+    .max(50000000, 'Visão geral deve ter no máximo 50000000 caracteres')
     .nullish(),
   resources: z
     .string()
-    .max(100000, 'Recursos deve ter no máximo 100000 caracteres')
+    .max(50000000, 'Recursos deve ter no máximo 50000000 caracteres')
     .nullish(),
   published: z.boolean().optional(),
 });
@@ -182,7 +182,7 @@ export const wikiEntrySchema = z.object({
     .trim(),
   content: z
     .string()
-    .max(100000, 'Conteúdo deve ter no máximo 100000 caracteres')
+    .max(50000000, 'Conteúdo deve ter no máximo 50000000 caracteres')
     .optional(),
   published: z.boolean().optional(),
 });
