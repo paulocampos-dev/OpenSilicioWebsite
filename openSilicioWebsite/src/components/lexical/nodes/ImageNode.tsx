@@ -11,7 +11,8 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { Suspense, ReactElement, CSSProperties, useRef, useState, useEffect, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { Box, Dialog, IconButton, Zoom } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
@@ -181,9 +182,11 @@ const ImageComponent = ({
   const buttonRef = useRef<null | HTMLButtonElement>(null);
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
   const [isResizing, setIsResizing] = useState<boolean>(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [editor] = useLexicalComposerContext();
   const activeEditorRef = useRef<null | LexicalEditor>(editor);
   const [selection, setSelection] = useState<any>(null);
+  const isEditable = editor.isEditable();
 
   useEffect(() => {
     return mergeRegister(
@@ -205,8 +208,12 @@ const ImageComponent = ({
           if (isResizing) return true;
 
           if (event.target === imageRef.current) {
-            clearSelection();
-            setSelected(true);
+            if (isEditable) {
+              clearSelection();
+              setSelected(true);
+            } else {
+              setIsLightboxOpen(true);
+            }
             return true;
           }
 
@@ -248,31 +255,83 @@ const ImageComponent = ({
   };
 
   return (
-    <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
-      <Box sx={{ position: 'relative' }}>
-        <img
-          src={src}
-          alt={altText}
-          ref={imageRef}
-          style={{
-            width,
-            height,
-            maxWidth: '100%',
-            borderRadius: '8px',
-            border: isSelected ? '2px solid #0070f3' : '2px solid transparent',
-            display: 'block',
-          }}
-        />
-        {isSelected && !loading && (
-          <ImageResizer
-            onResizeStart={onResizeStart}
-            onResizeEnd={onResizeEnd}
-            buttonRef={buttonRef}
-            imageRef={imageRef}
+    <>
+      <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
+        <Box sx={{ position: 'relative' }}>
+          <img
+            src={src}
+            alt={altText}
+            ref={imageRef}
+            onClick={() => !isEditable && setIsLightboxOpen(true)}
+            style={{
+              width,
+              height,
+              maxWidth: '100%',
+              borderRadius: '8px',
+              border: isSelected ? '2px solid #0070f3' : '2px solid transparent',
+              display: 'block',
+              cursor: !isEditable ? 'zoom-in' : 'default',
+            }}
           />
-        )}
+          {isSelected && !loading && isEditable && (
+            <ImageResizer
+              onResizeStart={onResizeStart}
+              onResizeEnd={onResizeEnd}
+              buttonRef={buttonRef}
+              imageRef={imageRef}
+            />
+          )}
+        </Box>
       </Box>
-    </Box>
+
+      {/* Lightbox Modal for Reading Mode */}
+      <Dialog
+        open={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        maxWidth="xl"
+        TransitionComponent={Zoom}
+        PaperProps={{
+          sx: {
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            overflow: 'hidden',
+          }
+        }}
+        sx={{
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1, height: '100vh' }}>
+          <IconButton
+            onClick={() => setIsLightboxOpen(false)}
+            sx={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              color: 'white',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
+              zIndex: 1,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <img
+            src={src}
+            alt={altText}
+            style={{
+              maxHeight: '90vh',
+              maxWidth: '90vw',
+              objectFit: 'contain',
+              borderRadius: '8px',
+            }}
+            onClick={() => setIsLightboxOpen(false)} // Tap to close anywhere on the image
+          />
+        </Box>
+      </Dialog>
+    </>
   );
 };
 
