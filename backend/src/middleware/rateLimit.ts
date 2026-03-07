@@ -40,10 +40,11 @@ export const createLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// File upload rate limiter - 10 uploads per hour
+// File upload rate limiter
+// Increased to support Image Gallery bulk insertions and heavy posts
 export const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit each IP to 10 uploads per windowMs
+  max: isProduction ? 50 : 200, // Production: 50, Development: 200
   message: {
     error: 'Muitos uploads de arquivos. Por favor, tente novamente após 1 hora',
   },

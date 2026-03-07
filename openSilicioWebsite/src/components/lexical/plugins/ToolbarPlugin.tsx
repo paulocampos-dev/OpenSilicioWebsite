@@ -52,8 +52,10 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import YouTubeIcon from '@mui/icons-material/YouTube';
+import CollectionsIcon from '@mui/icons-material/Collections';
 import { INSERT_EQUATION_COMMAND } from './EquationPlugin';
 import { INSERT_YOUTUBE_COMMAND, extractYouTubeVideoID } from './YouTubePlugin';
+import { INSERT_IMAGE_GALLERY_COMMAND } from './ImageGalleryPlugin';
 
 const LowPriority = 1;
 
@@ -482,6 +484,16 @@ export default function ToolbarPlugin() {
         <Tooltip title="Inserir Vídeo do YouTube">
           <IconButton size="small" onClick={insertYouTube}>
             <YouTubeIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Inserir Galeria de Imagens">
+          <IconButton
+            size="small"
+            onClick={() => {
+              editor.dispatchCommand(INSERT_IMAGE_GALLERY_COMMAND, undefined);
+            }}
+          >
+            <CollectionsIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Inserir Equação (inline)">

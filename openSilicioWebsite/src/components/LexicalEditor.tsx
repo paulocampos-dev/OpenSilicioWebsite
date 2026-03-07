@@ -22,10 +22,13 @@ import WikiLinkPlugin, { INSERT_WIKI_LINK_COMMAND } from './lexical/plugins/Wiki
 import YouTubePlugin from './lexical/plugins/YouTubePlugin';
 import ToolbarPlugin from './lexical/plugins/ToolbarPlugin';
 import ImagePlugin from './lexical/plugins/ImagePlugin';
+import ImageGalleryPlugin from './lexical/plugins/ImageGalleryPlugin';
+import ContextMenuPlugin from './lexical/plugins/ContextMenuPlugin';
 import { EquationNode } from './lexical/nodes/EquationNode';
 import { WikiLinkNode } from './lexical/nodes/WikiLinkNode';
 import { YouTubeNode } from './lexical/nodes/YouTubeNode';
 import { ImageNode } from './lexical/nodes/ImageNode';
+import { ImageGalleryNode } from './lexical/nodes/ImageGalleryNode';
 
 interface LexicalEditorProps {
   content: string;
@@ -285,6 +288,8 @@ function LexicalEditorInner({
             <WikiLinkPlugin />
             <YouTubePlugin />
             <ImagePlugin />
+            <ImageGalleryPlugin />
+            <ContextMenuPlugin />
           </div>
         </div>
       </Paper>
@@ -342,6 +347,7 @@ export default function LexicalEditor(props: LexicalEditorProps) {
       WikiLinkNode,
       YouTubeNode,
       ImageNode,
+      ImageGalleryNode,
     ],
   };
 

@@ -7,6 +7,7 @@ import {
 } from 'lexical';
 import { useEffect } from 'react';
 import { $createImageNode } from '../nodes/ImageNode';
+import { $createImageGalleryNode } from '../nodes/ImageGalleryNode';
 import { uploadApi } from '../../../services/api';
 
 export default function ImagePlugin(): null {
@@ -26,52 +27,88 @@ export default function ImagePlugin(): null {
                 if (imageFiles.length > 0) {
                     event.preventDefault();
 
-                    // Process all pasted images
-                    for (const file of imageFiles) {
-                        // Validate file size (max 50MB per the backend max)
-                        if (file.size > 50 * 1024 * 1024) {
-                            alert(`A imagem ${file.name} excede o limite de tamanho (50MB)`);
-                            continue;
-                        }
-
-                        // Create temporary object URL for immediate display
-                        const temporaryUrl = URL.createObjectURL(file);
-
-                        editor.update(() => {
-                            const selection = $getSelection();
-                            if ($isRangeSelection(selection)) {
-                                // Insert node with loading state
-                                const imageNode = $createImageNode({
-                                    altText: file.name,
-                                    src: temporaryUrl,
-                                    loading: true,
-                                    width: '100%',
-                                    height: 'auto',
-                                });
-                                selection.insertNodes([imageNode]);
-
-                                // Upload array asynchronously
-                                uploadImage(file).then((url) => {
-                                    if (url) {
-                                        editor.update(() => {
-                                            // Update the image node with the final URL
-                                            imageNode.setSrc(url);
-                                        });
-                                    } else {
-                                        editor.update(() => {
-                                            imageNode.remove();
-                                            alert(`Falha ao fazer upload da imagem ${file.name}`);
-                                        });
+                    if (imageFiles.length > 1) {
+                        // It's a gallery paste!
+                        const processGalleryPaste = async () => {
+                            const uploadedUrls: string[] = [];
+                            for (const file of imageFiles) {
+                                if (file.size > 50 * 1024 * 1024) continue;
+                                try {
+                                    const response = await uploadApi.uploadFile(file);
+                                    if (response && response.url) {
+                                        uploadedUrls.push(response.url);
                                     }
-                                    // Delay revocation slightly to allow Lexical/React to render the new remote URL image
-                                    // and prevent the temporary ObjectUrl from breaking before the switch.
-                                    setTimeout(() => {
-                                        URL.revokeObjectURL(temporaryUrl);
-                                    }, 1000);
-                                });
+                                } catch (err) {
+                                    console.error(`Error uploading image ${file.name} for gallery paste:`, err);
+                                }
                             }
-                        });
+
+                            if (uploadedUrls.length > 0) {
+                                editor.update(() => {
+                                    const selection = $getSelection();
+                                    if ($isRangeSelection(selection)) {
+                                        const galleryNode = $createImageGalleryNode({
+                                            images: uploadedUrls,
+                                            layout: 'grid',
+                                        });
+                                        selection.insertNodes([galleryNode]);
+                                    }
+                                });
+                            } else {
+                                alert('Falha ao colar imagens para a galeria.');
+                            }
+                        };
+                        processGalleryPaste();
+                        return true;
                     }
+
+                    // Single image paste processing
+                    const file = imageFiles[0];
+                    if (!file) return false;
+
+                    if (file.size > 50 * 1024 * 1024) {
+                        alert(`A imagem ${file.name} excede o limite de tamanho (50MB)`);
+                        return true;
+                    }
+
+                    // Create temporary object URL for immediate display
+                    const temporaryUrl = URL.createObjectURL(file);
+
+                    editor.update(() => {
+                        const selection = $getSelection();
+                        if ($isRangeSelection(selection)) {
+                            // Insert node with loading state
+                            const imageNode = $createImageNode({
+                                altText: file.name,
+                                src: temporaryUrl,
+                                loading: true,
+                                width: '100%',
+                                height: 'auto',
+                            });
+                            selection.insertNodes([imageNode]);
+
+                            // Upload array asynchronously
+                            uploadImage(file).then((url) => {
+                                if (url) {
+                                    editor.update(() => {
+                                        // Update the image node with the final URL
+                                        imageNode.setSrc(url);
+                                    });
+                                } else {
+                                    editor.update(() => {
+                                        imageNode.remove();
+                                        alert(`Falha ao fazer upload da imagem ${file.name}`);
+                                    });
+                                }
+                                // Delay revocation slightly to allow Lexical/React to render the new remote URL image
+                                // and prevent the temporary ObjectUrl from breaking before the switch.
+                                setTimeout(() => {
+                                    URL.revokeObjectURL(temporaryUrl);
+                                }, 1000);
+                            });
+                        }
+                    });
+
                     return true; // Command handled
                 }
                 return false; // Let lexical handle normal text paste
