@@ -1,13 +1,14 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
+    $getNodeByKey,
     $getSelection,
     $isRangeSelection,
     COMMAND_PRIORITY_HIGH,
     PASTE_COMMAND,
 } from 'lexical';
 import { useEffect } from 'react';
-import { $createImageNode } from '../nodes/ImageNode';
-import { $createImageGalleryNode } from '../nodes/ImageGalleryNode';
+import { $createImageNode, $isImageNode } from '../nodes/ImageNode';
+import { $createImageGalleryNode, $isImageGalleryNode } from '../nodes/ImageGalleryNode';
 import { uploadApi } from '../../../services/api';
 
 export default function ImagePlugin(): null {
@@ -87,17 +88,41 @@ export default function ImagePlugin(): null {
                             });
                             selection.insertNodes([imageNode]);
 
-                            // Upload array asynchronously
+                            // Upload asynchronously, then check if we should merge with an adjacent image/gallery
                             uploadImage(file).then((url) => {
                                 if (url) {
                                     editor.update(() => {
-                                        // Update the image node with the final URL
-                                        imageNode.setSrc(url);
+                                        // Re-fetch the node by key so we have its live position in the tree
+                                        const node = $getNodeByKey(imageNode.getKey());
+                                        if (!node || !$isImageNode(node)) return;
+
+                                        const prevSibling = node.getPreviousSibling();
+
+                                        if ($isImageNode(prevSibling) && !prevSibling.isLoading()) {
+                                            // Adjacent ImageNode → merge both into a gallery
+                                            const prevUrl = prevSibling.getSrc();
+                                            const galleryNode = $createImageGalleryNode({
+                                                images: [prevUrl, url],
+                                                layout: 'grid',
+                                            });
+                                            prevSibling.remove();
+                                            node.replace(galleryNode);
+                                        } else if ($isImageGalleryNode(prevSibling)) {
+                                            // Adjacent gallery → append the new image to it
+                                            prevSibling.setImages([...prevSibling.getImages(), url]);
+                                            node.remove();
+                                        } else {
+                                            // No adjacent image — just update the URL normally
+                                            node.setSrc(url);
+                                        }
                                     });
                                 } else {
                                     editor.update(() => {
-                                        imageNode.remove();
-                                        alert(`Falha ao fazer upload da imagem ${file.name}`);
+                                        const node = $getNodeByKey(imageNode.getKey());
+                                        if (node && $isImageNode(node)) {
+                                            node.remove();
+                                            alert(`Falha ao fazer upload da imagem ${file.name}`);
+                                        }
                                     });
                                 }
                                 // Delay revocation slightly to allow Lexical/React to render the new remote URL image

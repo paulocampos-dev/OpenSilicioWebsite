@@ -398,6 +398,10 @@ export class ImageNode extends DecoratorNode<ReactElement> {
     writable.__loading = false;
   }
 
+  isLoading(): boolean {
+    return this.__loading;
+  }
+
   decorate(): ReactElement {
     return (
       <Suspense fallback={null}>
