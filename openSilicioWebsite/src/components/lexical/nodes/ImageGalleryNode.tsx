@@ -271,6 +271,11 @@ export class ImageGalleryNode extends DecoratorNode<ReactElement> {
         return this.__images;
     }
 
+    setImages(images: string[]): void {
+        const writable = this.getWritable();
+        writable.__images = images;
+    }
+
     createDOM(config: any): HTMLElement {
         const div = document.createElement('div');
         const theme = config.theme;
