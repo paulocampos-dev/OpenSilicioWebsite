@@ -10,13 +10,15 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { Suspense, ReactElement, useState } from 'react';
-import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
+import CloseIcon from '@mui/icons-material/Close';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { $getNodeByKey } from 'lexical';
 import { ImageLightbox } from '../ImageLightbox';
+import { $createImageNode } from './ImageNode';
 
 export type GalleryLayout = 'grid' | 'carousel';
 
@@ -47,21 +49,81 @@ const ImageGalleryComponent = ({
     const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
     const isEditable = editor.isEditable();
 
-    // Lightbox State
+    // Lightbox state (read mode)
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-    // Layout mutator for edit mode
-    const handleLayoutChange = (event: React.MouseEvent<HTMLElement>, newLayout: GalleryLayout | null) => {
+    // Drag-to-reorder state (edit mode)
+    const [dragIdx, setDragIdx] = useState<number | null>(null);
+    const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    /** Persist a new images array to the Lexical node. Degrades to ImageNode if 1 image remains. */
+    const updateImages = (newImages: string[]) => {
+        editor.update(() => {
+            const node = $getNodeByKey(nodeKey);
+            if (!$isImageGalleryNode(node)) return;
+            if (newImages.length === 0) {
+                node.remove();
+            } else if (newImages.length === 1) {
+                // Convert the gallery back to a plain ImageNode
+                node.replace($createImageNode({ src: newImages[0], altText: '', width: '100%', height: 'auto' }));
+            } else {
+                node.setImages(newImages);
+            }
+        });
+    };
+
+    // ── Layout toggle ─────────────────────────────────────────────────────
+
+    const handleLayoutChange = (_: React.MouseEvent<HTMLElement>, newLayout: GalleryLayout | null) => {
         if (newLayout !== null && newLayout !== layout) {
             editor.update(() => {
                 const node = $getNodeByKey(nodeKey);
-                if ($isImageGalleryNode(node)) {
-                    node.setLayout(newLayout);
-                }
+                if ($isImageGalleryNode(node)) node.setLayout(newLayout);
             });
         }
     };
+
+    // ── Per-image actions ─────────────────────────────────────────────────
+
+    const handleDeleteImage = (e: React.MouseEvent, idx: number) => {
+        e.stopPropagation();
+        updateImages(images.filter((_, i) => i !== idx));
+    };
+
+    // ── Drag-and-drop reorder ─────────────────────────────────────────────
+
+    const handleDragStart = (e: React.DragEvent, idx: number) => {
+        e.dataTransfer.effectAllowed = 'move';
+        setDragIdx(idx);
+    };
+
+    const handleDragOver = (e: React.DragEvent, idx: number) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (dragOverIdx !== idx) setDragOverIdx(idx);
+    };
+
+    const handleDrop = (e: React.DragEvent, toIdx: number) => {
+        e.preventDefault();
+        const fromIdx = dragIdx;
+        setDragIdx(null);
+        setDragOverIdx(null);
+        if (fromIdx === null || fromIdx === toIdx) return;
+        const next = [...images];
+        const [moved] = next.splice(fromIdx, 1);
+        next.splice(toIdx, 0, moved);
+        updateImages(next);
+    };
+
+    const handleDragEnd = () => {
+        setDragIdx(null);
+        setDragOverIdx(null);
+    };
+
+    // ── Lightbox (read mode) ──────────────────────────────────────────────
 
     const openLightbox = (index: number) => {
         if (!isEditable) {
@@ -77,6 +139,71 @@ const ImageGalleryComponent = ({
         }
     };
 
+    // ── Image cell renderer ───────────────────────────────────────────────
+
+    /**
+     * Renders a single image cell with:
+     * - drag-to-reorder (edit mode)
+     * - delete button overlay (edit mode + selected)
+     * - blue drop-target outline
+     */
+    const renderCell = (src: string, idx: number, cellSx: object, imgSx: React.CSSProperties) => {
+        const isDraggingThis = dragIdx === idx;
+        const isDropTarget = dragOverIdx === idx && dragIdx !== idx;
+
+        return (
+            <Box
+                key={`${src}-${idx}`}
+                onClick={() => openLightbox(idx)}
+                draggable={isEditable}
+                onDragStart={isEditable ? (e) => handleDragStart(e, idx) : undefined}
+                onDragOver={isEditable ? (e) => handleDragOver(e, idx) : undefined}
+                onDrop={isEditable ? (e) => handleDrop(e, idx) : undefined}
+                onDragEnd={isEditable ? handleDragEnd : undefined}
+                sx={{
+                    position: 'relative',
+                    ...cellSx,
+                    cursor: isEditable ? 'grab' : 'zoom-in',
+                    opacity: isDraggingThis ? 0.35 : 1,
+                    outline: isDropTarget ? '3px solid #0070f3' : '3px solid transparent',
+                    outlineOffset: '-3px',
+                    transition: 'opacity 0.15s ease, outline-color 0.1s ease',
+                }}
+            >
+                <img
+                    src={src}
+                    alt={`Gallery Image ${idx + 1}`}
+                    loading="lazy"
+                    // Prevent browser from starting its own image drag (conflicts with DnD)
+                    onDragStart={(e) => e.preventDefault()}
+                    style={imgSx}
+                />
+
+                {/* Delete button — visible when gallery is selected in edit mode */}
+                {isEditable && isSelected && (
+                    <IconButton
+                        size="small"
+                        onClick={(e) => handleDeleteImage(e, idx)}
+                        sx={{
+                            position: 'absolute',
+                            top: 4,
+                            right: 4,
+                            backgroundColor: 'rgba(0,0,0,0.55)',
+                            color: 'white',
+                            width: 26,
+                            height: 26,
+                            '&:hover': { backgroundColor: 'rgba(180,0,0,0.85)' },
+                        }}
+                    >
+                        <CloseIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
+                )}
+            </Box>
+        );
+    };
+
+    // ── Render ────────────────────────────────────────────────────────────
+
     return (
         <>
             <Box
@@ -90,7 +217,7 @@ const ImageGalleryComponent = ({
                     p: isSelected && isEditable ? 1 : 0,
                 }}
             >
-                {/* Editor Controls Overlay */}
+                {/* Toolbar: layout toggle (shown when selected in edit mode) */}
                 {isEditable && isSelected && (
                     <Box
                         sx={{
@@ -120,7 +247,7 @@ const ImageGalleryComponent = ({
                     </Box>
                 )}
 
-                {/* Gallery Visualizer */}
+                {/* Grid layout */}
                 {layout === 'grid' ? (
                     <Box
                         sx={{
@@ -130,27 +257,15 @@ const ImageGalleryComponent = ({
                             width: '100%',
                         }}
                     >
-                        {images.map((src, idx) => (
-                            <Box
-                                key={idx}
-                                onClick={() => openLightbox(idx)}
-                                sx={{
-                                    aspectRatio: '1',
-                                    overflow: 'hidden',
-                                    borderRadius: 2,
-                                    cursor: !isEditable ? 'zoom-in' : 'default',
-                                    '& img': {
-                                        width: '100%',
-                                        height: '100%',
-                                        objectFit: 'cover',
-                                    }
-                                }}
-                            >
-                                <img src={src} alt={`Gallery Image ${idx + 1}`} loading="lazy" />
-                            </Box>
-                        ))}
+                        {images.map((src, idx) =>
+                            renderCell(src, idx,
+                                { aspectRatio: '1', overflow: 'hidden', borderRadius: '8px' },
+                                { width: '100%', height: '100%', objectFit: 'cover', display: 'block' }
+                            )
+                        )}
                     </Box>
                 ) : (
+                    /* Carousel layout */
                     <Box
                         sx={{
                             display: 'flex',
@@ -163,29 +278,19 @@ const ImageGalleryComponent = ({
                             '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 4 },
                         }}
                     >
-                        {images.map((src, idx) => (
-                            <Box
-                                key={idx}
-                                onClick={() => openLightbox(idx)}
-                                sx={{
+                        {images.map((src, idx) =>
+                            renderCell(src, idx,
+                                {
                                     scrollSnapAlign: 'center',
                                     flexShrink: 0,
                                     width: '80%',
                                     maxWidth: '400px',
-                                    borderRadius: 2,
+                                    borderRadius: '8px',
                                     overflow: 'hidden',
-                                    cursor: !isEditable ? 'zoom-in' : 'default',
-                                    '& img': {
-                                        width: '100%',
-                                        height: 'auto',
-                                        display: 'block',
-                                        objectFit: 'contain',
-                                    }
-                                }}
-                            >
-                                <img src={src} alt={`Gallery Image ${idx + 1}`} loading="lazy" />
-                            </Box>
-                        ))}
+                                },
+                                { width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }
+                            )
+                        )}
                     </Box>
                 )}
             </Box>
@@ -217,33 +322,28 @@ export class ImageGalleryNode extends DecoratorNode<ReactElement> {
 
     static importJSON(serializedNode: SerializedImageGalleryNode): ImageGalleryNode {
         const { images, layout } = serializedNode;
-        return $createImageGalleryNode({
-            images,
-            layout,
-        });
+        return $createImageGalleryNode({ images, layout });
     }
 
     exportDOM(): DOMExportOutput {
         const element = document.createElement('div');
         element.className = `gallery-layout-${this.__layout}`;
-
         this.__images.forEach((src) => {
             const img = document.createElement('img');
             img.setAttribute('src', src);
             img.setAttribute('alt', 'Gallery item');
-            if (this.__layout === 'grid') {
-                img.setAttribute('style', 'display: inline-block; width: 33%; object-fit: cover; aspect-ratio: 1; padding: 4px;');
-            } else {
-                img.setAttribute('style', 'display: inline-block; max-height: 400px; padding-right: 16px;');
-            }
+            img.setAttribute(
+                'style',
+                this.__layout === 'grid'
+                    ? 'display: inline-block; width: 33%; object-fit: cover; aspect-ratio: 1; padding: 4px;'
+                    : 'display: inline-block; max-height: 400px; padding-right: 16px;'
+            );
             element.appendChild(img);
         });
-
         return { element };
     }
 
     static importDOM(): DOMConversionMap | null {
-        // Only worry about converting if copying from another lexical instance
         return null;
     }
 
@@ -280,9 +380,7 @@ export class ImageGalleryNode extends DecoratorNode<ReactElement> {
         const div = document.createElement('div');
         const theme = config.theme;
         const className = theme.imageGallery;
-        if (className !== undefined) {
-            div.className = className;
-        }
+        if (className !== undefined) div.className = className;
         div.style.userSelect = 'none';
         return div;
     }
