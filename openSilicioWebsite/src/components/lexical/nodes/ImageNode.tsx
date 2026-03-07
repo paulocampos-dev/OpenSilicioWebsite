@@ -11,9 +11,9 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { Suspense, ReactElement, CSSProperties, useRef, useState, useEffect, useCallback } from 'react';
-import { Box, Dialog, IconButton, Zoom } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { Box } from '@mui/material';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { ImageLightbox } from '../ImageLightbox';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
 import { $getNodeByKey, COMMAND_PRIORITY_LOW, DRAGSTART_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, SELECTION_CHANGE_COMMAND, CLICK_COMMAND } from 'lexical';
@@ -284,53 +284,12 @@ const ImageComponent = ({
         </Box>
       </Box>
 
-      {/* Lightbox Modal for Reading Mode */}
-      <Dialog
+      <ImageLightbox
         open={isLightboxOpen}
         onClose={() => setIsLightboxOpen(false)}
-        maxWidth="xl"
-        TransitionComponent={Zoom}
-        PaperProps={{
-          sx: {
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-            overflow: 'hidden',
-          }
-        }}
-        sx={{
-          '& .MuiBackdrop-root': {
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-          }
-        }}
-      >
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1, height: '100vh' }}>
-          <IconButton
-            onClick={() => setIsLightboxOpen(false)}
-            sx={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              color: 'white',
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
-              zIndex: 1,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-          <img
-            src={src}
-            alt={altText}
-            style={{
-              maxHeight: '90vh',
-              maxWidth: '90vw',
-              objectFit: 'contain',
-              borderRadius: '8px',
-            }}
-            onClick={() => setIsLightboxOpen(false)} // Tap to close anywhere on the image
-          />
-        </Box>
-      </Dialog>
+        src={src}
+        alt={altText}
+      />
     </>
   );
 };

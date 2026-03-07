@@ -3,31 +3,20 @@ import {
     DOMConversionMap,
     DOMConversionOutput,
     DOMExportOutput,
-    LexicalEditor,
     LexicalNode,
     NodeKey,
     SerializedLexicalNode,
     Spread,
 } from 'lexical';
 import * as React from 'react';
-import { Suspense, ReactElement, useState, useEffect, useCallback, useRef } from 'react';
-import { Box, IconButton, ToggleButton, ToggleButtonGroup, Dialog, Zoom } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { Suspense, ReactElement, useState } from 'react';
+import { Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
-import { TransitionProps } from '@mui/material/transitions';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { $getNodeByKey } from 'lexical';
-
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<unknown, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Zoom ref={ref} {...props as any} />;
-});
+import { ImageLightbox } from '../ImageLightbox';
 
 export type GalleryLayout = 'grid' | 'carousel';
 
@@ -201,53 +190,15 @@ const ImageGalleryComponent = ({
                 )}
             </Box>
 
-            {/* Lightbox Dialog (Reading Mode only) */}
-            <Dialog
+            <ImageLightbox
                 open={lightboxOpen}
                 onClose={() => setLightboxOpen(false)}
-                maxWidth="xl"
-                PaperProps={{
-                    sx: {
-                        backgroundColor: 'transparent',
-                        boxShadow: 'none',
-                        overflow: 'hidden',
-                    }
-                }}
-                sx={{
-                    '& .MuiBackdrop-root': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                    }
-                }}
-            >
-                <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 1, height: '100vh', width: '100vw' }}>
-                    <IconButton
-                        onClick={() => setLightboxOpen(false)}
-                        sx={{
-                            position: 'absolute',
-                            top: 16,
-                            right: 16,
-                            color: 'white',
-                            backgroundColor: 'rgba(0,0,0,0.5)',
-                            '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' },
-                            zIndex: 1,
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-
-                    <img
-                        src={images[activeImageIndex]}
-                        alt={`Lightboxed item`}
-                        style={{
-                            maxHeight: '90vh',
-                            maxWidth: '90vw',
-                            objectFit: 'contain',
-                            borderRadius: '8px',
-                        }}
-                        onClick={() => setLightboxOpen(false)}
-                    />
-                </Box>
-            </Dialog>
+                src={images[activeImageIndex]}
+                alt={`Gallery image ${activeImageIndex + 1}`}
+                images={images}
+                currentIndex={activeImageIndex}
+                onNavigate={setActiveImageIndex}
+            />
         </>
     );
 };
