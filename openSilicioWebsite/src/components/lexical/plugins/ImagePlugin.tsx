@@ -6,7 +6,6 @@ import {
     COMMAND_PRIORITY_HIGH,
     PASTE_COMMAND,
     DROP_COMMAND,
-    $getNodeByKey,
     $getNearestNodeFromDOMNode,
 } from 'lexical';
 import { useEffect } from 'react';

@@ -43,6 +43,7 @@ export default function BlogForm() {
     slug: '',
     title: '',
     excerpt: '',
+    cover_letter: '',
     content: '',
     author: '',
     image_url: '',
@@ -290,6 +291,17 @@ export default function BlogForm() {
                 fullWidth
                 multiline
                 rows={3}
+                helperText="Texto curto exibido na listagem do blog e nos resultados de busca"
+              />
+
+              <TextField
+                label="Carta de apresentação"
+                value={post.cover_letter || ''}
+                onChange={(e) => setPost({ ...post, cover_letter: e.target.value })}
+                fullWidth
+                multiline
+                rows={4}
+                helperText="Introdução opcional exibida no topo do artigo, abaixo da imagem de capa"
               />
 
               <TextField
@@ -441,6 +453,16 @@ export default function BlogForm() {
                   backgroundPosition: 'center',
                 }}
               />
+            )}
+
+            {post.cover_letter && (
+              <Typography
+                variant="h6"
+                color="text.secondary"
+                sx={{ fontWeight: 400, lineHeight: 1.7, fontStyle: 'italic' }}
+              >
+                {post.cover_letter}
+              </Typography>
             )}
 
             <Stack spacing={2} sx={{ maxWidth: '100%' }}>

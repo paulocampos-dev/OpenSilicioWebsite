@@ -76,6 +76,16 @@ export default function Post() {
         />
       )}
 
+      {post.cover_letter && (
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{ fontWeight: 400, lineHeight: 1.7, fontStyle: 'italic' }}
+        >
+          {post.cover_letter}
+        </Typography>
+      )}
+
       <Stack spacing={2} sx={{ maxWidth: '100%' }}>
         <LexicalContent content={post.content} />
       </Stack>

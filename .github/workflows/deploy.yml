@@ -19,12 +19,44 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
             cd /opt/opensilicio
+
+            echo "[1/5] Creating database backup..."
+            mkdir -p backups
+            BACKUP_FILE="backups/backup_$(date +%Y%m%d_%H%M%S).sql"
+            PG_USER="${POSTGRES_USER:-opensilicio}"
+            PG_DB="${POSTGRES_DB:-opensilicio_prod}"
+
+            if [ -f .env ]; then
+              set -a
+              source .env
+              set +a
+              PG_USER="${POSTGRES_USER:-opensilicio}"
+              PG_DB="${POSTGRES_DB:-opensilicio_prod}"
+            fi
+
+            docker compose --env-file .env -f docker/docker-compose.prod.yml exec -T postgres \
+              pg_dump -U "$PG_USER" "$PG_DB" > "$BACKUP_FILE"
+
+            if [ ! -s "$BACKUP_FILE" ]; then
+              echo "[ERROR] Backup failed or is empty. Aborting deployment."
+              exit 1
+            fi
+            echo "  Backup saved: $BACKUP_FILE"
+
+            echo "[2/5] Pulling latest code..."
             git checkout main
             git pull origin main
-            
-            # Restart docker containers with the new code
+
+            echo "[3/5] Rebuilding and restarting containers..."
             docker compose --env-file .env -f docker/docker-compose.prod.yml up -d --build
-            
-            # Limpeza de imagens antigas do docker para economizar espaço
+
+            echo "[4/5] Running database migrations..."
+            sleep 10
+            docker compose --env-file .env -f docker/docker-compose.prod.yml exec -T backend npm run migrate
+
+            echo "[5/5] Pruning old Docker images..."
             docker image prune -af
+
+            echo "Deployment complete. Backup: $BACKUP_FILE"

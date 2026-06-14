@@ -81,6 +81,12 @@ export const blogPostSchema = z.object({
     .min(1, 'Resumo não pode ser vazio')
     .max(1000, 'Resumo deve ter no máximo 1000 caracteres')
     .trim(),
+  cover_letter: z
+    .string()
+    .max(2000, 'Carta de apresentação deve ter no máximo 2000 caracteres')
+    .trim()
+    .optional()
+    .or(z.literal('')),
   content: z
     .string({
       required_error: 'Conteúdo é obrigatório',

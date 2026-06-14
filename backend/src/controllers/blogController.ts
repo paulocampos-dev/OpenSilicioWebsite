@@ -35,7 +35,7 @@ export const getPostBySlug = asyncHandler(async (req: AuthRequest, res: Response
 });
 
 export const createPost = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { slug, title, excerpt, content, author, image_url, category, published } = req.body;
+  const { slug, title, excerpt, cover_letter, content, author, image_url, category, published } = req.body;
 
   if (!slug || !title || !excerpt || !content) {
     throw new BadRequestError('Campos obrigatórios faltando');
@@ -45,6 +45,7 @@ export const createPost = asyncHandler(async (req: AuthRequest, res: Response) =
     slug,
     title,
     excerpt,
+    cover_letter,
     content,
     author,
     image_url,
@@ -60,13 +61,14 @@ export const createPost = asyncHandler(async (req: AuthRequest, res: Response) =
 
 export const updatePost = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { slug, title, excerpt, content, author, image_url, category, published } = req.body;
+  const { slug, title, excerpt, cover_letter, content, author, image_url, category, published } = req.body;
 
   // Filter out undefined values to support partial updates
   const updateData = filterUndefined({
     slug,
     title,
     excerpt,
+    cover_letter,
     content,
     author,
     image_url,

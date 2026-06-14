@@ -8,6 +8,7 @@ export interface BlogPost {
   slug: string;
   title: string;
   excerpt: string;
+  cover_letter?: string;
   content: string;
   author?: string;
   image_url?: string;
@@ -76,6 +77,7 @@ export class BlogService extends BaseService<BlogPost> {
       'slug',
       'title',
       'excerpt',
+      'cover_letter',
       'content',
       'author',
       'image_url',
