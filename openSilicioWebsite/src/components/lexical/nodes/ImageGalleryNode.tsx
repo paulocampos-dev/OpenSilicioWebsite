@@ -305,29 +305,19 @@ const ImageGalleryComponent = ({
                                 '&::-webkit-scrollbar-thumb': { backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 4 },
                             }}
                         >
-                            {images.map((src, idx) => (
-                                <Box
-                                    key={idx}
-                                    onClick={() => openLightbox(idx)}
-                                    sx={{
+                            {images.map((src, idx) =>
+                                renderCell(src, idx,
+                                    {
                                         scrollSnapAlign: 'center',
                                         flexShrink: 0,
                                         width: '80%',
                                         maxWidth: '400px',
                                         borderRadius: 2,
                                         overflow: 'hidden',
-                                        cursor: !isEditable ? 'zoom-in' : 'default',
-                                        '& img': {
-                                            width: '100%',
-                                            height: 'auto',
-                                            display: 'block',
-                                            objectFit: 'contain',
-                                        }
-                                    }}
-                                >
-                                    <img src={src} alt={`Gallery Image ${idx + 1}`} loading="lazy" />
-                                </Box>
-                            ))}
+                                    },
+                                    { width: '100%', height: 'auto', display: 'block', objectFit: 'contain' }
+                                )
+                            )}
                         </Box>
 
                         <IconButton

@@ -38,7 +38,7 @@ export const getEntryBySlug = asyncHandler(async (req: AuthRequest, res: Respons
 });
 
 export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { term, slug, definition, content, aliases, published } = req.body;
+  const { term, slug, definition, cover_letter, content, aliases, published } = req.body;
 
   if (!term || !slug || !definition) {
     throw new BadRequestError('Campos obrigatórios faltando');
@@ -48,6 +48,7 @@ export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) 
     term,
     slug,
     definition,
+    cover_letter,
     content,
     aliases,
     published,
@@ -69,13 +70,14 @@ export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) 
 
 export const updateEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { term, slug, definition, content, aliases, published } = req.body;
+  const { term, slug, definition, cover_letter, content, aliases, published } = req.body;
 
   // Filter out undefined values to support partial updates
   const updateData = filterUndefined({
     term,
     slug,
     definition,
+    cover_letter,
     content,
     aliases,
     published,

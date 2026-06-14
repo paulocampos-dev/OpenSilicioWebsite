@@ -6,6 +6,7 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import { wikiApi } from '../services/api'
 import type { WikiEntry } from '../types';
 import LexicalContent from '../components/LexicalContent';
+import CoverLetterDisplay from '../components/CoverLetterDisplay';
 
 export default function WikiDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -183,6 +184,8 @@ export default function WikiDetail() {
         <Typography variant="h6" color="text.secondary" gutterBottom>
           {entry.definition}
         </Typography>
+
+        <CoverLetterDisplay text={entry.cover_letter} />
 
         {entry.aliases && entry.aliases.length > 0 && (
           <Box sx={{ mt: 2 }}>

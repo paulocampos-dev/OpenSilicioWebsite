@@ -53,9 +53,12 @@ import RedoIcon from '@mui/icons-material/Redo';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import CollectionsIcon from '@mui/icons-material/Collections';
+import ImageIcon from '@mui/icons-material/Image';
+import ViewCarouselIcon from '@mui/icons-material/ViewCarousel';
 import { INSERT_EQUATION_COMMAND } from './EquationPlugin';
 import { INSERT_YOUTUBE_COMMAND, extractYouTubeVideoID } from './YouTubePlugin';
 import { INSERT_IMAGE_GALLERY_COMMAND } from './ImageGalleryPlugin';
+import { INSERT_IMAGE_COMMAND } from './ImagePlugin';
 
 const LowPriority = 1;
 
@@ -486,14 +489,34 @@ export default function ToolbarPlugin() {
             <YouTubeIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Inserir Galeria de Imagens">
+        <Tooltip title="Inserir Imagem">
           <IconButton
             size="small"
             onClick={() => {
-              editor.dispatchCommand(INSERT_IMAGE_GALLERY_COMMAND, undefined);
+              editor.dispatchCommand(INSERT_IMAGE_COMMAND, undefined);
+            }}
+          >
+            <ImageIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Inserir Galeria (grade)">
+          <IconButton
+            size="small"
+            onClick={() => {
+              editor.dispatchCommand(INSERT_IMAGE_GALLERY_COMMAND, { layout: 'grid' });
             }}
           >
             <CollectionsIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Inserir Galeria (carrossel)">
+          <IconButton
+            size="small"
+            onClick={() => {
+              editor.dispatchCommand(INSERT_IMAGE_GALLERY_COMMAND, { layout: 'carousel' });
+            }}
+          >
+            <ViewCarouselIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Inserir Equação (inline)">

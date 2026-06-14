@@ -8,6 +8,7 @@ export interface WikiEntry {
   term: string;
   slug: string;
   definition: string;
+  cover_letter?: string;
   content?: string;
   aliases?: string[];
   published: boolean;
@@ -70,6 +71,7 @@ export class WikiService extends BaseService<WikiEntry> {
       'term',
       'slug',
       'definition',
+      'cover_letter',
       'content',
       'aliases',
       'published',

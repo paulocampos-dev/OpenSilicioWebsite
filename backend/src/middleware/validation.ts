@@ -132,6 +132,19 @@ export const educationResourceSchema = z.object({
     .min(1, 'Descrição não pode ser vazia')
     .max(2000, 'Descrição deve ter no máximo 2000 caracteres')
     .trim(),
+  cover_letter: z
+    .string()
+    .max(2000, 'Carta de apresentação deve ter no máximo 2000 caracteres')
+    .trim()
+    .optional()
+    .or(z.literal('')),
+  image_url: z
+    .string()
+    .max(2048, 'URL da imagem deve ter no máximo 2048 caracteres')
+    .refine((val) => !val || val === '' || /^https?:\/\/.+/.test(val), {
+      message: 'URL da imagem inválida',
+    })
+    .optional(),
   content: z
     .string({
       required_error: 'Conteúdo é obrigatório',
@@ -186,6 +199,12 @@ export const wikiEntrySchema = z.object({
     .min(1, 'Definição não pode ser vazia')
     .max(2000, 'Definição deve ter no máximo 2000 caracteres')
     .trim(),
+  cover_letter: z
+    .string()
+    .max(2000, 'Carta de apresentação deve ter no máximo 2000 caracteres')
+    .trim()
+    .optional()
+    .or(z.literal('')),
   content: z
     .string()
     .max(50000000, 'Conteúdo deve ter no máximo 50000000 caracteres')

@@ -21,16 +21,20 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import PublishIcon from '@mui/icons-material/Publish';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
-import { educationApi } from '../../services/api'
+import { educationApi, uploadApi } from '../../services/api'
 import type { EducationResource } from '../../types';
 import LexicalEditor from '../../components/LexicalEditor';
 import LexicalContent from '../../components/LexicalContent';
+import CoverLetterDisplay from '../../components/CoverLetterDisplay';
+import ThumbnailUploadField from '../../components/admin/ThumbnailUploadField';
 
 export default function EducationForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [previewTab, setPreviewTab] = useState<'Visão geral' | 'Conteúdo' | 'Recursos'>('Visão geral');
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
     open: false,
@@ -40,6 +44,8 @@ export default function EducationForm() {
   const [resource, setResource] = useState<Partial<EducationResource>>({
     title: '',
     description: '',
+    cover_letter: '',
+    image_url: '',
     content: '',
     category: '',
     difficulty: '',
@@ -186,6 +192,32 @@ export default function EducationForm() {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  const handleThumbnailUpload = async (file: File) => {
+    setUploadingImage(true);
+    setUploadProgress(0);
+
+    try {
+      const result = await uploadApi.uploadTeamMemberImage(file, (progress) => {
+        setUploadProgress(progress);
+      });
+      setResource({ ...resource, image_url: result.url });
+      setSnackbar({
+        open: true,
+        message: `Miniatura enviada (${(result.size / 1024).toFixed(1)}KB)`,
+        severity: 'success',
+      });
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || 'Erro ao enviar imagem',
+        severity: 'error',
+      });
+    } finally {
+      setUploadingImage(false);
+      setUploadProgress(0);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <Stack spacing={3}>
@@ -249,6 +281,17 @@ export default function EducationForm() {
                 fullWidth
                 multiline
                 rows={3}
+                helperText="Texto curto exibido na listagem e nos cartões de busca"
+              />
+
+              <TextField
+                label="Carta de apresentação"
+                value={resource.cover_letter || ''}
+                onChange={(e) => setResource({ ...resource, cover_letter: e.target.value })}
+                fullWidth
+                multiline
+                rows={4}
+                helperText="Introdução opcional exibida no topo da página do recurso"
               />
 
               <TextField
@@ -277,6 +320,16 @@ export default function EducationForm() {
                 <MenuItem value="Intermediário">Intermediário</MenuItem>
                 <MenuItem value="Avançado">Avançado</MenuItem>
               </TextField>
+
+              <ThumbnailUploadField
+                label="Imagem de capa (miniatura)"
+                helperText="Exibida na listagem de Educação e no topo da página do recurso. JPEG, PNG ou WebP, máx. 5MB."
+                imageUrl={resource.image_url}
+                uploading={uploadingImage}
+                uploadProgress={uploadProgress}
+                onUpload={handleThumbnailUpload}
+                onRemove={() => setResource({ ...resource, image_url: '' })}
+              />
 
               {resource.category === 'Projetos' && (
                 <>
@@ -353,7 +406,21 @@ export default function EducationForm() {
                 <Typography color="text.secondary" sx={{ maxWidth: 900 }}>
                   {resource.description || 'Descrição do recurso aparecerá aqui.'}
                 </Typography>
+                <CoverLetterDisplay text={resource.cover_letter} />
               </Stack>
+
+              {resource.image_url && (
+                <Box
+                  sx={{
+                    width: '100%',
+                    aspectRatio: '16 / 9',
+                    borderRadius: 2,
+                    backgroundImage: `url(${resource.image_url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                />
+              )}
 
               {resource.category === 'Projetos' ? (
                 <>

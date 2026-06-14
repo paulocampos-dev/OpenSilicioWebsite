@@ -22,6 +22,8 @@ export interface EducationResource {
   id: string;
   title: string;
   description: string;
+  cover_letter?: string;
+  image_url?: string;
   content: string;
   category: string;
   difficulty?: string;
@@ -37,6 +39,7 @@ export interface WikiEntry {
   term: string;
   slug: string;
   definition: string;
+  cover_letter?: string;
   content: string;
   aliases?: string[];
   published: boolean;

@@ -6,6 +6,8 @@ export interface EducationResource {
   id: string;
   title: string;
   description: string;
+  cover_letter?: string;
+  image_url?: string;
   content: string;
   category?: string;
   difficulty?: string;
@@ -55,6 +57,8 @@ export class EducationService extends BaseService<EducationResource> {
       'id',
       'title',
       'description',
+      'cover_letter',
+      'image_url',
       'content',
       'category',
       'difficulty',

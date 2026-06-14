@@ -161,8 +161,8 @@ function LexicalEditorInner({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <InfoOutlinedIcon sx={{ fontSize: 18, color: 'info.main' }} />
           <Typography variant="caption" color="text.secondary">
-            Use a barra de ferramentas para formatar o texto • Insira vídeos do YouTube, equações
-            LaTeX e muito mais
+            Formate o texto na barra de ferramentas • Clique em uma imagem para redimensionar ou excluir
+            • Arraste imagens para o editor • Cole ou solte várias imagens para criar galerias
           </Typography>
         </Box>
         <WikiLinkButton onOpenWikiLink={handleOpenWikiLink} {...(contentType ? { contentType } : {})} />
@@ -186,6 +186,11 @@ function LexicalEditorInner({
             fontSize: '1rem',
             lineHeight: 1.7,
             outline: 'none',
+            transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+            '&:focus-within': {
+              backgroundColor:
+                theme.palette.mode === 'dark' ? 'rgba(144, 202, 249, 0.04)' : 'rgba(25, 118, 210, 0.03)',
+            },
             '& h1': {
               fontSize: '2em',
               fontWeight: 700,

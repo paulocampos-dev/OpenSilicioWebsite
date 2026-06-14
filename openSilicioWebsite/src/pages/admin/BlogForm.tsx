@@ -25,6 +25,7 @@ import { blogApi, uploadApi } from '../../services/api'
 import type { BlogPost } from '../../types';
 import LexicalEditor from '../../components/LexicalEditor';
 import LexicalContent from '../../components/LexicalContent';
+import CoverLetterDisplay from '../../components/CoverLetterDisplay';
 
 export default function BlogForm() {
   const { id } = useParams<{ id: string }>();
@@ -456,13 +457,7 @@ export default function BlogForm() {
             )}
 
             {post.cover_letter && (
-              <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{ fontWeight: 400, lineHeight: 1.7, fontStyle: 'italic' }}
-              >
-                {post.cover_letter}
-              </Typography>
+              <CoverLetterDisplay text={post.cover_letter} />
             )}
 
             <Stack spacing={2} sx={{ maxWidth: '100%' }}>

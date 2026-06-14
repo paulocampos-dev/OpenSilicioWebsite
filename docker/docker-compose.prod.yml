@@ -67,6 +67,7 @@ services:
       dockerfile: docker/Dockerfile.frontend.prod
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+        CACHEBUST: ${CACHEBUST:-latest}
     container_name: opensilicio-frontend-prod
     restart: unless-stopped
     ports:

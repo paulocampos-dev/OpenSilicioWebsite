@@ -5,6 +5,7 @@ import { educationApi } from '../services/api'
 import type { EducationResource } from '../types'
 import LexicalContent from '../components/LexicalContent'
 import ShareAndCite from '../components/ShareAndCite'
+import CoverLetterDisplay from '../components/CoverLetterDisplay'
 
 export default function Recurso() {
   const { id } = useParams<{ id: string }>()
@@ -58,7 +59,21 @@ export default function Recurso() {
       <Stack spacing={1}>
         <Typography sx={{ typography: { xs: 'h4', md: 'h3' } }} fontWeight={900}>{resource.title}</Typography>
         <Typography color="text.secondary" sx={{ maxWidth: 900 }}>{resource.description}</Typography>
+        <CoverLetterDisplay text={resource.cover_letter} />
       </Stack>
+
+      {resource.image_url && (
+        <Box
+          sx={{
+            width: '100%',
+            aspectRatio: '16 / 9',
+            borderRadius: 2,
+            backgroundImage: `url(${resource.image_url})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+      )}
 
       {resource.category === 'Projetos' ? (
         <>
@@ -90,6 +105,7 @@ export default function Recurso() {
         title={resource.title}
         author="OpenSilício Team"
         url={`/educacao/${resource.id}`}
+        imageUrl={resource.image_url || ''}
         publishedDate={resource.created_at}
       />
     </Stack>

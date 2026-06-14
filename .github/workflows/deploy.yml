@@ -76,6 +76,7 @@ jobs:
             git pull origin main
 
             echo "[3/5] Rebuilding and restarting containers..."
+            export CACHEBUST="$(git rev-parse HEAD)"
             docker compose --env-file .env -f docker/docker-compose.prod.yml up -d --build
 
             echo "[4/5] Running database migrations..."

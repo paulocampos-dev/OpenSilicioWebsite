@@ -5,6 +5,7 @@ import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
 import LexicalContent from '../components/LexicalContent'
 import ShareAndCite from '../components/ShareAndCite'
+import CoverLetterDisplay from '../components/CoverLetterDisplay'
 
 export default function Post() {
   const { slug } = useParams<{ slug: string }>()
@@ -77,13 +78,7 @@ export default function Post() {
       )}
 
       {post.cover_letter && (
-        <Typography
-          variant="h6"
-          color="text.secondary"
-          sx={{ fontWeight: 400, lineHeight: 1.7, fontStyle: 'italic' }}
-        >
-          {post.cover_letter}
-        </Typography>
+        <CoverLetterDisplay text={post.cover_letter} />
       )}
 
       <Stack spacing={2} sx={{ maxWidth: '100%' }}>

@@ -24,6 +24,7 @@ import { wikiApi } from '../../services/api'
 import type { WikiEntry } from '../../types';
 import LexicalEditor from '../../components/LexicalEditor';
 import LexicalContent from '../../components/LexicalContent';
+import CoverLetterDisplay from '../../components/CoverLetterDisplay';
 
 export default function WikiForm() {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +36,7 @@ export default function WikiForm() {
     term: '',
     slug: '',
     definition: '',
+    cover_letter: '',
     content: '',
     aliases: [],
     published: false,
@@ -53,6 +55,7 @@ export default function WikiForm() {
           term,
           slug,
           definition: '',
+          cover_letter: '',
           content: '',
           aliases: [],
           published: false,
@@ -171,7 +174,17 @@ export default function WikiForm() {
                 fullWidth
                 multiline
                 rows={2}
-                helperText="Uma definição breve que será exibida em tooltips"
+                helperText="Definição breve exibida na listagem da wiki"
+              />
+
+              <TextField
+                label="Carta de apresentação"
+                value={entry.cover_letter || ''}
+                onChange={(e) => setEntry({ ...entry, cover_letter: e.target.value })}
+                fullWidth
+                multiline
+                rows={4}
+                helperText="Introdução opcional exibida no topo da página do termo"
               />
 
               <Autocomplete
@@ -239,6 +252,8 @@ export default function WikiForm() {
               <Typography variant="h6" color="text.secondary" gutterBottom>
                 {entry.definition || 'Definição curta aparecerá aqui.'}
               </Typography>
+
+              <CoverLetterDisplay text={entry.cover_letter} />
 
               {entry.aliases && entry.aliases.length > 0 && (
                 <Box sx={{ mt: 2 }}>

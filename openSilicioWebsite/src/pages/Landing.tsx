@@ -822,7 +822,9 @@ export default function Landing() {
                         left: 0,
                         width: '100%',
                         height: '100%',
-                        backgroundImage: `url(/chip_closeup_stock.jpg)`,
+                        backgroundImage: resource.image_url
+                          ? `url(${resource.image_url})`
+                          : `url(/chip_closeup_stock.jpg)`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         transition: 'transform 0.6s ease',

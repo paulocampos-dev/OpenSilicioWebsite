@@ -11,12 +11,13 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { Suspense, ReactElement, CSSProperties, useRef, useState, useEffect, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { Box, IconButton, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ImageLightbox } from '../ImageLightbox';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
-import { $getNodeByKey, COMMAND_PRIORITY_LOW, DRAGSTART_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, SELECTION_CHANGE_COMMAND, CLICK_COMMAND } from 'lexical';
+import { $getNodeByKey, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, DRAGSTART_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, SELECTION_CHANGE_COMMAND, CLICK_COMMAND } from 'lexical';
 
 export interface ImagePayload {
   altText: string;
@@ -140,9 +141,9 @@ function ImageResizer({
     document.removeEventListener('pointerup', handlePointerUp);
   };
 
-  // 1 = West, 2 = East
+  // 1 = West, 2 = East, 4 = South-East corner
   return (
-    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
       <div
         className="image-resizer image-resizer-e"
         style={{
@@ -156,6 +157,25 @@ function ImageResizer({
           transform: 'translateY(-50%)',
           cursor: 'ew-resize',
           zIndex: 100,
+          pointerEvents: 'auto',
+          boxShadow: '0 0 0 2px #fff',
+        }}
+        onPointerDown={(event) => handlePointerDown(event, 2)}
+      />
+      <div
+        className="image-resizer image-resizer-se"
+        style={{
+          position: 'absolute',
+          right: -8,
+          bottom: -8,
+          width: 16,
+          height: 16,
+          borderRadius: 4,
+          backgroundColor: '#0070f3',
+          cursor: 'nwse-resize',
+          zIndex: 100,
+          pointerEvents: 'auto',
+          boxShadow: '0 0 0 2px #fff',
         }}
         onPointerDown={(event) => handlePointerDown(event, 2)}
       />
@@ -269,10 +289,107 @@ const ImageComponent = ({
     setIsResizing(true);
   };
 
+  const handleDelete = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isImageNode(node)) {
+        node.remove();
+      }
+    });
+  };
+
+  const handleWidthPreset = (_: React.MouseEvent<HTMLElement>, value: string | null) => {
+    if (!value) return;
+    editor.update(() => {
+      const node = $getNodeByKey(nodeKey);
+      if ($isImageNode(node)) {
+        node.setWidthAndHeight(value, 'auto');
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (!isSelected || !isEditable || loading) return;
+
+    return mergeRegister(
+      editor.registerCommand(
+        KEY_DELETE_COMMAND,
+        () => {
+          editor.update(() => {
+            const node = $getNodeByKey(nodeKey);
+            if ($isImageNode(node)) node.remove();
+          });
+          return true;
+        },
+        COMMAND_PRIORITY_HIGH,
+      ),
+      editor.registerCommand(
+        KEY_BACKSPACE_COMMAND,
+        () => {
+          editor.update(() => {
+            const node = $getNodeByKey(nodeKey);
+            if ($isImageNode(node)) node.remove();
+          });
+          return true;
+        },
+        COMMAND_PRIORITY_HIGH,
+      ),
+    );
+  }, [editor, isEditable, isSelected, loading, nodeKey]);
+
+  const currentWidthPreset =
+    width === '25%' || width === '50%' || width === '75%' || width === '100%' ? String(width) : 'custom';
+
   return (
     <>
-      <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', opacity: loading ? 0.5 : 1 }}>
-        <Box sx={{ position: 'relative' }}>
+      <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', opacity: loading ? 0.5 : 1, my: 2 }}>
+        {isSelected && !loading && isEditable && (
+          <Stack
+            direction="row"
+            spacing={0.5}
+            alignItems="center"
+            onClick={(e) => e.stopPropagation()}
+            sx={{
+              position: 'absolute',
+              top: -44,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 20,
+              px: 1,
+              py: 0.5,
+              borderRadius: 1,
+              bgcolor: 'background.paper',
+              boxShadow: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              flexWrap: 'wrap',
+              maxWidth: '100%',
+            }}
+          >
+            <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5, alignSelf: 'center' }}>
+              Largura:
+            </Typography>
+            <ToggleButtonGroup
+              size="small"
+              exclusive
+              value={currentWidthPreset === 'custom' ? null : currentWidthPreset}
+              onChange={handleWidthPreset}
+            >
+              {['25%', '50%', '75%', '100%'].map((preset) => (
+                <ToggleButton key={preset} value={preset} sx={{ px: 1, py: 0.25, fontSize: '0.7rem' }}>
+                  {preset}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+            <Tooltip title="Excluir imagem">
+              <IconButton size="small" color="error" onClick={handleDelete}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        )}
+        <Box sx={{ position: 'relative', maxWidth: '100%' }}>
           <img
             src={src}
             alt={altText}
@@ -285,8 +402,9 @@ const ImageComponent = ({
               borderRadius: '8px',
               border: isSelected ? '2px solid #0070f3' : '2px solid transparent',
               display: 'block',
-              cursor: !isEditable ? 'zoom-in' : 'default',
+              cursor: !isEditable ? 'zoom-in' : loading ? 'default' : isSelected ? 'grab' : 'pointer',
             }}
+            draggable={isEditable && !loading}
           />
           {isSelected && !loading && isEditable && (
             <ImageResizer
@@ -296,6 +414,11 @@ const ImageComponent = ({
               imageRef={imageRef}
             />
           )}
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 0.5 }}>
+            {isSelected && isEditable && !loading
+              ? 'Arraste a alça azul para redimensionar • Delete para remover'
+              : null}
+          </Typography>
         </Box>
       </Box>
 

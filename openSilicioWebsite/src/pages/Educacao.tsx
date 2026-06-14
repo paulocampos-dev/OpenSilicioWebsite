@@ -108,7 +108,17 @@ export default function Educacao() {
           pageItems.map((r) => (
             <Grid key={r.id} size={{ xs: 12, md: 6, lg: 4 }}>
               <Card variant="outlined" sx={{ height: '100%' }}>
-                <CardActionArea component={RouterLink} to={`/educacao/${r.id}`}>
+                <CardActionArea component={RouterLink} to={`/educacao/${r.id}`} sx={{ height: '100%' }}>
+                  {r.image_url && (
+                    <Box
+                      sx={{
+                        height: 160,
+                        backgroundImage: `url(${r.image_url})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
+                    />
+                  )}
                   <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                     <Typography variant="caption" color="primary.main">{r.category}</Typography>
                     <Typography variant="subtitle1" fontWeight={700}>{r.title}</Typography>

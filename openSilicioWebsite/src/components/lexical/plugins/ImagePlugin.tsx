@@ -1,223 +1,204 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
-    $getNodeByKey,
-    $getSelection,
-    $isRangeSelection,
-    COMMAND_PRIORITY_HIGH,
-    PASTE_COMMAND,
-    DROP_COMMAND,
-    $getNearestNodeFromDOMNode,
+  $getNodeByKey,
+  $getNearestNodeFromDOMNode,
+  $getSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_EDITOR,
+  COMMAND_PRIORITY_HIGH,
+  createCommand,
+  DROP_COMMAND,
+  LexicalCommand,
+  LexicalEditor,
+  PASTE_COMMAND,
 } from 'lexical';
 import { useEffect } from 'react';
 import { $createImageNode, $isImageNode } from '../nodes/ImageNode';
 import { $createImageGalleryNode, $isImageGalleryNode } from '../nodes/ImageGalleryNode';
-import { uploadApi } from '../../../services/api';
+import { insertUploadedImages, pickImageFiles, uploadImageFiles } from '../utils/imageUploadUtils';
 
-export default function ImagePlugin(): null {
-    const [editor] = useLexicalComposerContext();
-
-    useEffect(() => {
-        return editor.registerCommand(
-            PASTE_COMMAND,
-            (event: ClipboardEvent | InputEvent | KeyboardEvent) => {
-                if (!(event instanceof ClipboardEvent)) return false;
-                const { clipboardData } = event;
-                if (!clipboardData) return false;
-
-                const files = Array.from(clipboardData.files);
-                const imageFiles = files.filter((file) => file.type.startsWith('image/'));
-
-                if (imageFiles.length > 0) {
-                    event.preventDefault();
-
-                    if (imageFiles.length > 1) {
-                        // It's a gallery paste!
-                        const processGalleryPaste = async () => {
-                            const uploadedUrls: string[] = [];
-                            for (const file of imageFiles) {
-                                if (file.size > 50 * 1024 * 1024) continue;
-                                try {
-                                    const response = await uploadApi.uploadFile(file);
-                                    if (response && response.url) {
-                                        uploadedUrls.push(response.url);
-                                    }
-                                } catch (err) {
-                                    console.error(`Error uploading image ${file.name} for gallery paste:`, err);
-                                }
-                            }
-
-                            if (uploadedUrls.length > 0) {
-                                editor.update(() => {
-                                    const selection = $getSelection();
-                                    if ($isRangeSelection(selection)) {
-                                        const galleryNode = $createImageGalleryNode({
-                                            images: uploadedUrls,
-                                            layout: 'grid',
-                                        });
-                                        selection.insertNodes([galleryNode]);
-                                    }
-                                });
-                            } else {
-                                alert('Falha ao colar imagens para a galeria.');
-                            }
-                        };
-                        processGalleryPaste();
-                        return true;
-                    }
-
-                    // Single image paste processing
-                    const file = imageFiles[0];
-                    if (!file) return false;
-
-                    if (file.size > 50 * 1024 * 1024) {
-                        alert(`A imagem ${file.name} excede o limite de tamanho (50MB)`);
-                        return true;
-                    }
-
-                    // Create temporary object URL for immediate display
-                    const temporaryUrl = URL.createObjectURL(file);
-
-                    editor.update(() => {
-                        const selection = $getSelection();
-                        if ($isRangeSelection(selection)) {
-                            // Insert node with loading state
-                            const imageNode = $createImageNode({
-                                altText: file.name,
-                                src: temporaryUrl,
-                                loading: true,
-                                width: '100%',
-                                height: 'auto',
-                            });
-                            selection.insertNodes([imageNode]);
-
-                            // Upload asynchronously, then check if we should merge with an adjacent image/gallery
-                            uploadImage(file).then((url) => {
-                                if (url) {
-                                    editor.update(() => {
-                                        // Re-fetch the node by key so we have its live position in the tree
-                                        const node = $getNodeByKey(imageNode.getKey());
-                                        if (!node || !$isImageNode(node)) return;
-
-                                        const prevSibling = node.getPreviousSibling();
-
-                                        if ($isImageNode(prevSibling) && !prevSibling.isLoading()) {
-                                            // Adjacent ImageNode → merge both into a gallery
-                                            const prevUrl = prevSibling.getSrc();
-                                            const galleryNode = $createImageGalleryNode({
-                                                images: [prevUrl, url],
-                                                layout: 'grid',
-                                            });
-                                            prevSibling.remove();
-                                            node.replace(galleryNode);
-                                        } else if ($isImageGalleryNode(prevSibling)) {
-                                            // Adjacent gallery → append the new image to it
-                                            prevSibling.setImages([...prevSibling.getImages(), url]);
-                                            node.remove();
-                                        } else {
-                                            // No adjacent image — just update the URL normally
-                                            node.setSrc(url);
-                                        }
-                                    });
-                                } else {
-                                    editor.update(() => {
-                                        const node = $getNodeByKey(imageNode.getKey());
-                                        if (node && $isImageNode(node)) {
-                                            node.remove();
-                                            alert(`Falha ao fazer upload da imagem ${file.name}`);
-                                        }
-                                    });
-                                }
-                                // Delay revocation slightly to allow Lexical/React to render the new remote URL image
-                                // and prevent the temporary ObjectUrl from breaking before the switch.
-                                setTimeout(() => {
-                                    URL.revokeObjectURL(temporaryUrl);
-                                }, 1000);
-                            });
-                        }
-                    });
-
-                    return true; // Command handled
-                }
-                return false; // Let lexical handle normal text paste
-            },
-            COMMAND_PRIORITY_HIGH
-        ),
-            editor.registerCommand(
-                DROP_COMMAND,
-                (event: DragEvent) => {
-                    const dataTransfer = event.dataTransfer;
-                    if (!dataTransfer) return false;
-
-                    const lexicalDragData = dataTransfer.getData('application/x-lexical-drag');
-                    if (!lexicalDragData) return false;
-
-                    try {
-                        const parsedData = JSON.parse(lexicalDragData);
-                        if (parsedData.type !== 'image') return false;
-
-                        event.preventDefault();
-
-                        editor.update(() => {
-                            // Find the drop target
-                            const targetDOMNode = document.elementFromPoint(event.clientX, event.clientY);
-                            if (!targetDOMNode) return;
-
-                            const targetLexicalNode = $getNearestNodeFromDOMNode(targetDOMNode);
-                            if (!targetLexicalNode) return;
-
-                            const draggedKey = parsedData.data.key;
-                            const draggedNode = $getNodeByKey(draggedKey);
-                            if (!draggedNode) return;
-
-                            // Check if we dropped on another ImageNode
-                            if (targetLexicalNode.__type === 'image' && targetLexicalNode.getKey() !== draggedKey) {
-                                const targetImageNode = targetLexicalNode as any;
-
-                                // Create a gallery from the two images
-                                const galleryNode = $createImageGalleryNode({
-                                    images: [targetImageNode.getSrc(), (draggedNode as any).getSrc()],
-                                    layout: 'grid'
-                                });
-
-                                targetImageNode.replace(galleryNode);
-                                draggedNode.remove();
-                            }
-                            // Check if we dropped on an existing ImageGalleryNode
-                            else if (targetLexicalNode.__type === 'image-gallery' && targetLexicalNode.getKey() !== draggedKey) {
-                                const galleryNode = targetLexicalNode as any;
-                                const currentImages = galleryNode.getImages();
-
-                                const newGalleryNode = $createImageGalleryNode({
-                                    images: [...currentImages, (draggedNode as any).getSrc()],
-                                    layout: galleryNode.__layout || 'grid'
-                                });
-
-                                galleryNode.replace(newGalleryNode);
-                                draggedNode.remove();
-                            }
-                        });
-
-                        return true;
-                    } catch (e) {
-                        console.error('Error parsing dragged lexical data', e);
-                        return false;
-                    }
-                },
-                COMMAND_PRIORITY_HIGH
-            );
-    }, [editor]);
-
-    return null;
-}
+export const INSERT_IMAGE_COMMAND: LexicalCommand<void> = createCommand('INSERT_IMAGE_COMMAND');
 
 async function uploadImage(file: File): Promise<string | null> {
-    try {
-        const response = await uploadApi.uploadFile(file);
-        // Note: adjusting to the unified backend response type if necessary. 
-        // Our centralized uploadApi explicitly returns an object with url.
-        return response.url || null;
-    } catch (error) {
-        console.error('Error uploading image through API service:', error);
-        return null;
-    }
+  const urls = await uploadImageFiles([file]);
+  return urls[0] ?? null;
+}
+
+function insertImageWithUpload(editor: LexicalEditor, file: File) {
+  if (file.size > 50 * 1024 * 1024) {
+    alert(`A imagem ${file.name} excede o limite de tamanho (50MB)`);
+    return;
+  }
+
+  const temporaryUrl = URL.createObjectURL(file);
+
+  editor.update(() => {
+    const selection = $getSelection();
+    if (!$isRangeSelection(selection)) return;
+
+    const imageNode = $createImageNode({
+      altText: file.name,
+      src: temporaryUrl,
+      loading: true,
+      width: '100%',
+      height: 'auto',
+    });
+    selection.insertNodes([imageNode]);
+
+    void uploadImage(file).then((url) => {
+      if (url) {
+        editor.update(() => {
+          const node = $getNodeByKey(imageNode.getKey());
+          if (!node || !$isImageNode(node)) return;
+
+          const prevSibling = node.getPreviousSibling();
+
+          if ($isImageNode(prevSibling) && !prevSibling.isLoading()) {
+            const galleryNode = $createImageGalleryNode({
+              images: [prevSibling.getSrc(), url],
+              layout: 'grid',
+            });
+            prevSibling.remove();
+            node.replace(galleryNode);
+          } else if ($isImageGalleryNode(prevSibling)) {
+            prevSibling.setImages([...prevSibling.getImages(), url]);
+            node.remove();
+          } else {
+            node.setSrc(url);
+          }
+        });
+      } else {
+        editor.update(() => {
+          const node = $getNodeByKey(imageNode.getKey());
+          if (node && $isImageNode(node)) {
+            node.remove();
+            alert(`Falha ao fazer upload da imagem ${file.name}`);
+          }
+        });
+      }
+
+      setTimeout(() => URL.revokeObjectURL(temporaryUrl), 1000);
+    });
+  });
+}
+
+function handleImageFiles(editor: LexicalEditor, files: File[], layout: 'grid' | 'carousel' = 'grid') {
+  const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+  if (imageFiles.length === 0) return false;
+
+  if (imageFiles.length > 1) {
+    void (async () => {
+      const uploadedUrls = await uploadImageFiles(imageFiles);
+      if (uploadedUrls.length === 0) {
+        alert('Falha ao colar imagens para a galeria.');
+        return;
+      }
+      insertUploadedImages(editor, uploadedUrls, layout);
+    })();
+    return true;
+  }
+
+  insertImageWithUpload(editor, imageFiles[0]);
+  return true;
+}
+
+export default function ImagePlugin(): null {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    return mergeImagePluginCommands(editor);
+  }, [editor]);
+
+  return null;
+}
+
+function mergeImagePluginCommands(editor: LexicalEditor) {
+  const unregisterInsert = editor.registerCommand(
+    INSERT_IMAGE_COMMAND,
+    () => {
+      void (async () => {
+        const files = await pickImageFiles(false);
+        if (files.length === 0) return;
+        insertImageWithUpload(editor, files[0]);
+      })();
+      return true;
+    },
+    COMMAND_PRIORITY_EDITOR,
+  );
+
+  const unregisterPaste = editor.registerCommand(
+    PASTE_COMMAND,
+    (event: ClipboardEvent | InputEvent | KeyboardEvent) => {
+      if (!(event instanceof ClipboardEvent)) return false;
+      const { clipboardData } = event;
+      if (!clipboardData) return false;
+
+      const files = Array.from(clipboardData.files);
+      if (files.length === 0) return false;
+
+      event.preventDefault();
+      return handleImageFiles(editor, files);
+    },
+    COMMAND_PRIORITY_HIGH,
+  );
+
+  const unregisterDrop = editor.registerCommand(
+    DROP_COMMAND,
+    (event: DragEvent) => {
+      const dataTransfer = event.dataTransfer;
+      if (!dataTransfer) return false;
+
+      const droppedFiles = Array.from(dataTransfer.files).filter((file) => file.type.startsWith('image/'));
+      if (droppedFiles.length > 0) {
+        event.preventDefault();
+        return handleImageFiles(editor, droppedFiles);
+      }
+
+      const lexicalDragData = dataTransfer.getData('application/x-lexical-drag');
+      if (!lexicalDragData) return false;
+
+      try {
+        const parsedData = JSON.parse(lexicalDragData);
+        if (parsedData.type !== 'image') return false;
+
+        event.preventDefault();
+
+        editor.update(() => {
+          const targetDOMNode = document.elementFromPoint(event.clientX, event.clientY);
+          if (!targetDOMNode) return;
+
+          const targetLexicalNode = $getNearestNodeFromDOMNode(targetDOMNode);
+          if (!targetLexicalNode) return;
+
+          const draggedKey = parsedData.data.key;
+          const draggedNode = $getNodeByKey(draggedKey);
+          if (!draggedNode || !$isImageNode(draggedNode)) return;
+
+          if ($isImageNode(targetLexicalNode) && targetLexicalNode.getKey() !== draggedKey) {
+            const galleryNode = $createImageGalleryNode({
+              images: [targetLexicalNode.getSrc(), draggedNode.getSrc()],
+              layout: 'grid',
+            });
+            targetLexicalNode.replace(galleryNode);
+            draggedNode.remove();
+          } else if ($isImageGalleryNode(targetLexicalNode) && targetLexicalNode.getKey() !== draggedKey) {
+            targetLexicalNode.setImages([...targetLexicalNode.getImages(), draggedNode.getSrc()]);
+            draggedNode.remove();
+          }
+        });
+
+        return true;
+      } catch (error) {
+        console.error('Error parsing dragged lexical data', error);
+        return false;
+      }
+    },
+    COMMAND_PRIORITY_HIGH,
+  );
+
+  return () => {
+    unregisterInsert();
+    unregisterPaste();
+    unregisterDrop();
+  };
 }
