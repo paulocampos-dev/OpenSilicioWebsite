@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -12,12 +13,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify VPS SSH connectivity
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          retry_wait_seconds: 30
+          command: |
+            HOST="${{ secrets.VPS_HOST }}"
+            PORT="${{ secrets.VPS_PORT }}"
+            if [ -z "$PORT" ]; then PORT=22; fi
+            echo "Checking SSH connectivity to ${HOST}:${PORT}..."
+            nc -z -w 15 "$HOST" "$PORT"
+
       - name: Execute deployment script on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          timeout: 120s
+          command_timeout: 30m
           script: |
             set -e
             cd /opt/opensilicio
@@ -30,20 +47,29 @@ jobs:
 
             if [ -f .env ]; then
               set -a
+              # shellcheck disable=SC1091
               source .env
               set +a
               PG_USER="${POSTGRES_USER:-opensilicio}"
               PG_DB="${POSTGRES_DB:-opensilicio_prod}"
             fi
 
-            docker compose --env-file .env -f docker/docker-compose.prod.yml exec -T postgres \
-              pg_dump -U "$PG_USER" "$PG_DB" > "$BACKUP_FILE"
-
-            if [ ! -s "$BACKUP_FILE" ]; then
-              echo "[ERROR] Backup failed or is empty. Aborting deployment."
+            if ! docker compose --env-file .env -f docker/docker-compose.prod.yml ps --status running postgres | grep -q postgres; then
+              echo "[ERROR] PostgreSQL container is not running. Start services before deploying."
               exit 1
             fi
-            echo "  Backup saved: $BACKUP_FILE"
+
+            if ! docker compose --env-file .env -f docker/docker-compose.prod.yml exec -T postgres \
+              pg_dump -U "$PG_USER" "$PG_DB" > "$BACKUP_FILE"; then
+              echo "[ERROR] pg_dump failed. Aborting deployment."
+              exit 1
+            fi
+
+            if [ ! -s "$BACKUP_FILE" ]; then
+              echo "[ERROR] Backup file is empty. Aborting deployment."
+              exit 1
+            fi
+            echo "  Backup saved: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
 
             echo "[2/5] Pulling latest code..."
             git checkout main
