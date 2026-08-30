@@ -1,4 +1,4 @@
-import { $getRoot, type SerializedLexicalNode } from 'lexical';
+import type { SerializedLexicalNode } from 'lexical';
 import { createHeadlessEditor } from '@lexical/headless';
 import { $convertFromMarkdownString } from '@lexical/markdown';
 import { LEXICAL_NODES } from './nodeSet';
@@ -37,17 +37,22 @@ export function isTrivialHtml(html: string): boolean {
  */
 export function markdownToSerializedNodes(markdown: string): SerializedLexicalNode[] {
   const headlessEditor = createHeadlessEditor({ nodes: LEXICAL_NODES, onError: () => {} });
-  let serializedNodes: SerializedLexicalNode[] = [];
 
   headlessEditor.update(
     () => {
       $convertFromMarkdownString(markdown, EDITOR_TRANSFORMERS);
-      serializedNodes = $getRoot()
-        .getChildren()
-        .map((child) => child.exportJSON());
     },
     { discrete: true },
   );
 
-  return serializedNodes;
+  // ElementNode.exportJSON() devolve `children: []` fixo: os descendentes só
+  // são serializados pela travessia do editor state, não por cada node. Chamar
+  // exportJSON() em cada filho da raiz produzia os blocos certos e vazios, e a
+  // colagem perdia todo o texto. Serializar o estado inteiro e ler
+  // root.children traz a árvore completa.
+  const { root } = headlessEditor.getEditorState().toJSON() as {
+    root: { children: SerializedLexicalNode[] };
+  };
+
+  return root.children;
 }

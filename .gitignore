@@ -34,3 +34,6 @@ backend/test_output*.txt
 
 backend_logs.txt
 logs.txt
+
+# Rascunhos de conteudo prontos para colar no admin
+conteudo/

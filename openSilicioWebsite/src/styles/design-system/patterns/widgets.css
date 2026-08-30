@@ -1,0 +1,125 @@
+/* OpenSilício — widgets interativos dos tutoriais.
+
+   Três blocos autorais entram no conteúdo pelo editor: diagramas de onda
+   (WaveDrom), incorporações de ferramentas externas (Wokwi, SiliWiz) e o
+   decodificador de 7 segmentos. As regras vivem aqui, e não inline nos
+   componentes, porque precisam reagir a [data-color-mode] como o resto do
+   sistema.
+
+   Nada aqui anima em repouso. Toda transição é disparada por interação. */
+
+/* — moldura comum — */
+.os-widget {
+  border: 1px solid var(--color-line);
+  background: var(--color-bg-alt);
+  margin: 24px 0;
+}
+
+.os-widget__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-line);
+  font-family: var(--font-heading, inherit);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.os-widget__corpo { padding: 16px; }
+
+.os-widget__erro {
+  padding: 12px 16px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: #b3261e;
+  background: color-mix(in srgb, #b3261e 8%, transparent);
+}
+
+:root[data-color-mode="dark"] .os-widget__erro { color: #f2b8b5; }
+
+/* — WaveDrom —
+   O WaveDrom só gera skin clara (traço escuro sobre fundo claro). Em vez de
+   manter um skin próprio, que teríamos de reescrever a cada atualização da
+   biblioteca, o diagrama fica sempre sobre papel branco e é invertido no modo
+   escuro. O hue-rotate devolve os matizes que a inversão troca. É um filtro
+   estático: compõe uma vez e não repinta. */
+.os-wavedrom { background: #fff; overflow-x: auto; }
+.os-wavedrom svg { display: block; max-width: none; }
+
+:root[data-color-mode="dark"] .os-wavedrom {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* — incorporação de ferramenta externa — */
+.os-embed__quadro {
+  position: relative;
+  width: 100%;
+  border: 0;
+  background: var(--color-bg);
+  display: block;
+}
+
+.os-embed__aviso {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--color-text-faint);
+  border-top: 1px solid var(--color-line);
+}
+
+/* — decodificador de 7 segmentos — */
+.os-7seg__painel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 28px;
+}
+
+.os-7seg__bits { display: flex; gap: 8px; }
+
+.os-7seg__bit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.os-7seg__chave {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-line-strong);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.os-7seg__chave[aria-pressed="true"] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.os-7seg__saida {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--color-text-muted);
+}
+
+.os-7seg__saida b {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .os-7seg__chave { transition: none; }
+}

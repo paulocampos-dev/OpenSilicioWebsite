@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings, PendingWikiLink, PendingWikiLinkGrouped } from '../types';
+import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings, PendingWikiLink, PendingWikiLinkGrouped, SeriesNavigation } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -154,6 +154,11 @@ export const educationApi = {
     const response = await api.get<EducationResource>(`/education/${id}`);
     return response.data;
   },
+  getSeriesNavigation: async (id: string) => {
+    const response = await api.get<SeriesNavigation>(`/education/${id}/navigation`);
+    return response.data;
+  },
+
   create: async (data: Partial<EducationResource>) => {
     const response = await api.post<EducationResource>('/education', data);
     return response.data;

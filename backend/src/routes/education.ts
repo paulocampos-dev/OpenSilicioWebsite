@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getAllResources,
   getResourceById,
+  getSeriesNavigation,
   createResource,
   updateResource,
   deleteResource,
@@ -16,6 +17,7 @@ const router = Router();
 // Rotas públicas (with caching - 2 minutes)
 router.get('/', cacheMiddleware({ ttl: 120 }), getAllResources);
 router.get('/:id', cacheMiddleware({ ttl: 120 }), getResourceById);
+router.get('/:id/navigation', cacheMiddleware({ ttl: 120 }), getSeriesNavigation);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)
 router.post('/', authMiddleware, createLimiter, validate(educationResourceSchema), createResource);

@@ -1,0 +1,22 @@
+/* OpenSilício — realce de sintaxe nos blocos de código.
+
+   As classes vêm do mapa em src/components/lexical/theme.ts, que o editor e o
+   leitor compartilham: cada span é um CodeHighlightNode salvo no conteúdo, e
+   aqui ele vira cor. As cores em si são tokens, e moram em tokens/colors.css
+   com o resto da paleta. */
+
+.os-tok-comment { color: var(--code-comment); font-style: italic; }
+.os-tok-keyword { color: var(--code-keyword); }
+.os-tok-string { color: var(--code-string); }
+.os-tok-number,
+.os-tok-const { color: var(--code-number); }
+.os-tok-function,
+.os-tok-builtin { color: var(--code-function); }
+.os-tok-class { color: var(--code-class); }
+.os-tok-operator,
+.os-tok-attr { color: var(--code-operator); }
+.os-tok-variable { color: var(--code-variable); }
+.os-tok-punct { color: var(--code-punct); }
+
+.os-tok-inserted { color: var(--code-string); }
+.os-tok-deleted { color: var(--code-variable); }

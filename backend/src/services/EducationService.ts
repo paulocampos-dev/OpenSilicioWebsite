@@ -13,6 +13,9 @@ export interface EducationResource {
   difficulty?: string;
   overview?: string;
   resources?: string;
+  toc_items?: string[];
+  series?: string | null;
+  series_order?: number;
   published: boolean;
   created_at: Date;
   updated_at: Date;
@@ -64,10 +67,61 @@ export class EducationService extends BaseService<EducationResource> {
       'difficulty',
       'overview',
       'resources',
+      'toc_items',
+      'series',
+      'series_order',
       'published',
     ];
 
     return this.create(resourceData, fields);
+  }
+
+  /**
+   * Previous and next published resource within the same series.
+   *
+   * Kept as its own query, and selecting only what the links need, because the
+   * alternative is shipping the full content of neighbouring resources just to
+   * render two titles.
+   */
+  async getSeriesNavigation(id: string): Promise<{
+    series: string | null;
+    position: number | null;
+    total: number;
+    previous: { id: string; title: string } | null;
+    next: { id: string; title: string } | null;
+  }> {
+    const current = await this.pool.query(
+      'SELECT series, series_order FROM education_resources WHERE id = $1',
+      [id],
+    );
+
+    const row = current.rows[0];
+    if (!row || !row.series || row.series_order === null) {
+      return { series: null, position: null, total: 0, previous: null, next: null };
+    }
+
+    const siblings = await this.pool.query(
+      `SELECT id, title, series_order
+         FROM education_resources
+        WHERE series = $1 AND published = true AND series_order IS NOT NULL
+        ORDER BY series_order ASC`,
+      [row.series],
+    );
+
+    const ordered = siblings.rows as Array<{ id: string; title: string; series_order: number }>;
+    const index = ordered.findIndex((r) => r.id === id);
+    const neighbour = (i: number) =>
+      i >= 0 && i < ordered.length ? { id: ordered[i]!.id, title: ordered[i]!.title } : null;
+
+    return {
+      series: row.series,
+      // An unpublished resource is absent from the ordered list; report a null
+      // position rather than pretending it is the first.
+      position: index >= 0 ? index + 1 : null,
+      total: ordered.length,
+      previous: index > 0 ? neighbour(index - 1) : null,
+      next: index >= 0 ? neighbour(index + 1) : null,
+    };
   }
 
   /**

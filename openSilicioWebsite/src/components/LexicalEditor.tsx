@@ -24,6 +24,9 @@ import ContextMenuPlugin from './lexical/plugins/ContextMenuPlugin';
 import MarkdownPastePlugin from './lexical/plugins/MarkdownPastePlugin';
 import { LEXICAL_NODES } from './lexical/nodeSet';
 import { EDITOR_TRANSFORMERS } from './lexical/transformers';
+import { OsWidgetPlugins } from './lexical/widgets';
+import { LEXICAL_THEME } from './lexical/theme';
+import CodeHighlightPlugin from './lexical/plugins/CodeHighlightPlugin';
 
 interface LexicalEditorProps {
   content: string;
@@ -284,6 +287,7 @@ function LexicalEditorInner({
             <HistoryPlugin />
             <LinkPlugin />
             <ListPlugin />
+            <CodeHighlightPlugin />
             <MarkdownShortcutPlugin transformers={EDITOR_TRANSFORMERS} />
             <MarkdownPastePlugin />
             <EquationPlugin />
@@ -292,6 +296,7 @@ function LexicalEditorInner({
             <ImagePlugin />
             <ImageGalleryPlugin />
             <ContextMenuPlugin />
+            <OsWidgetPlugins />
           </div>
         </div>
       </Paper>
@@ -331,9 +336,7 @@ export default function LexicalEditor(props: LexicalEditorProps) {
   // Initial config for the editor
   const initialConfig: any = {
     namespace: 'OpenSilicioEditor',
-    theme: {
-      // Theme styles (can be customized)
-    },
+    theme: LEXICAL_THEME,
     onError: (error: Error) => {
       console.error('Lexical error:', error);
     },

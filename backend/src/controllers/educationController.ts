@@ -7,6 +7,16 @@ import { filterUndefined } from '../utils/filterUndefined';
 import { parsePagination } from '../utils/parsePagination';
 import { parsePublishedFilter } from '../utils/parsePublishedFilter';
 
+/**
+ * O formulário manda string vazia quando o campo Série fica em branco. Sem
+ * normalizar, todo recurso cairia numa mesma série sem nome, porque a consulta
+ * de anterior/próximo filtra por `series IS NOT NULL`. Fica aqui, e não no
+ * schema, porque o middleware validate() descarta o resultado do parse.
+ * `undefined` passa intacto, para não apagar o campo numa atualização parcial.
+ */
+const normalizarSeries = (series: unknown): string | null | undefined =>
+  series === '' ? null : (series as string | null | undefined);
+
 export const getAllResources = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { page: pageNum, limit: limitNum } = parsePagination(req.query, 10);
   const publishedFilter = parsePublishedFilter(req.query);
@@ -22,9 +32,15 @@ export const getResourceById = asyncHandler(async (req: AuthRequest, res: Respon
   res.json(resource);
 });
 
+export const getSeriesNavigation = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const navigation = await educationService.getSeriesNavigation(id);
+  res.json(navigation);
+});
+
 export const createResource = asyncHandler(async (req: AuthRequest, res: Response) => {
   // req.body is already validated by validate(educationResourceSchema) in the route
-  const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, published } = req.body;
+  const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, toc_items, series, series_order, published } = req.body;
 
   const resource = await educationService.createResource({
     title,
@@ -36,6 +52,9 @@ export const createResource = asyncHandler(async (req: AuthRequest, res: Respons
     difficulty,
     overview,
     resources,
+    toc_items,
+    series: normalizarSeries(series),
+    series_order,
     published,
   });
 
@@ -47,7 +66,7 @@ export const createResource = asyncHandler(async (req: AuthRequest, res: Respons
 
 export const updateResource = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, published } = req.body;
+  const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, toc_items, series, series_order, published } = req.body;
 
   // Filter out undefined values to support partial updates
   const updateData = filterUndefined({
@@ -60,6 +79,9 @@ export const updateResource = asyncHandler(async (req: AuthRequest, res: Respons
     difficulty,
     overview,
     resources,
+    toc_items,
+    series: normalizarSeries(series),
+    series_order,
     published,
   });
 
