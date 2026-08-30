@@ -173,6 +173,21 @@ export const educationResourceSchema = z.object({
     .string()
     .max(50000000, 'Recursos deve ter no máximo 50000000 caracteres')
     .nullish(),
+  toc_items: z
+    .array(z.string().max(200, 'Cada item deve ter no máximo 200 caracteres').trim())
+    .max(20, 'No máximo 20 itens')
+    .optional(),
+  series: z
+    .string()
+    .max(120, 'Série deve ter no máximo 120 caracteres')
+    .trim()
+    .nullish()
+    .or(z.literal('')),
+  series_order: z
+    .number()
+    .int('Ordem na série deve ser um número inteiro')
+    .min(0, 'Ordem na série não pode ser negativa')
+    .nullish(),
   published: z.boolean().optional(),
 });
 

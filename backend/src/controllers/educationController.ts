@@ -22,6 +22,12 @@ export const getResourceById = asyncHandler(async (req: AuthRequest, res: Respon
   res.json(resource);
 });
 
+export const getSeriesNavigation = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const navigation = await educationService.getSeriesNavigation(id);
+  res.json(navigation);
+});
+
 export const createResource = asyncHandler(async (req: AuthRequest, res: Response) => {
   // req.body is already validated by validate(educationResourceSchema) in the route
   const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, published } = req.body;

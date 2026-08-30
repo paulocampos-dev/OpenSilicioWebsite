@@ -13,6 +13,9 @@ export interface EducationResource {
   difficulty?: string;
   overview?: string;
   resources?: string;
+  toc_items?: string[];
+  series?: string;
+  series_order?: number;
   published: boolean;
   created_at: Date;
   updated_at: Date;
@@ -64,10 +67,61 @@ export class EducationService extends BaseService<EducationResource> {
       'difficulty',
       'overview',
       'resources',
+      'toc_items',
+      'series',
+      'series_order',
       'published',
     ];
 
     return this.create(resourceData, fields);
+  }
+
+  /**
+   * Previous and next published resource within the same series.
+   *
+   * Kept as its own query, and selecting only what the links need, because the
+   * alternative is shipping the full content of neighbouring resources just to
+   * render two titles.
+   */
+  async getSeriesNavigation(id: string): Promise<{
+    series: string | null;
+    position: number | null;
+    total: number;
+    previous: { id: string; title: string } | null;
+    next: { id: string; title: string } | null;
+  }> {
+    const atual = await this.pool.query(
+      'SELECT series, series_order FROM education_resources WHERE id = $1',
+      [id],
+    );
+
+    const linha = atual.rows[0];
+    if (!linha || !linha.series || linha.series_order === null) {
+      return { series: null, position: null, total: 0, previous: null, next: null };
+    }
+
+    const irmaos = await this.pool.query(
+      `SELECT id, title, series_order
+         FROM education_resources
+        WHERE series = $1 AND published = true AND series_order IS NOT NULL
+        ORDER BY series_order ASC`,
+      [linha.series],
+    );
+
+    const lista = irmaos.rows as Array<{ id: string; title: string; series_order: number }>;
+    const indice = lista.findIndex((r) => r.id === id);
+    const vizinho = (i: number) =>
+      i >= 0 && i < lista.length ? { id: lista[i]!.id, title: lista[i]!.title } : null;
+
+    return {
+      series: linha.series,
+      // Um recurso ainda despublicado não aparece na lista: devolvemos posição
+      // nula em vez de fingir que ele é o primeiro.
+      position: indice >= 0 ? indice + 1 : null,
+      total: lista.length,
+      previous: indice > 0 ? vizinho(indice - 1) : null,
+      next: indice >= 0 ? vizinho(indice + 1) : null,
+    };
   }
 
   /**

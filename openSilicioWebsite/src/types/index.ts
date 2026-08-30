@@ -31,9 +31,21 @@ export interface EducationResource {
   difficulty?: string;
   overview?: string;
   resources?: string;
+  toc_items?: string[];
+  series?: string;
+  series_order?: number;
   published: boolean;
   created_at: string;
   updated_at: string;
+}
+
+/** Vizinhos publicados de um recurso dentro da sua série. */
+export interface SeriesNavigation {
+  series: string | null;
+  position: number | null;
+  total: number;
+  previous: { id: string; title: string } | null;
+  next: { id: string; title: string } | null;
 }
 
 export interface WikiEntry {

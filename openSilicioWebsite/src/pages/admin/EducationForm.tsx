@@ -49,6 +49,8 @@ export default function EducationForm() {
     content: '',
     category: '',
     difficulty: '',
+    toc_items: [],
+    series: '',
     published: false,
   });
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -321,6 +323,80 @@ export default function EducationForm() {
                 <MenuItem value="Intermediário">Intermediário</MenuItem>
                 <MenuItem value="Avançado">Avançado</MenuItem>
               </TextField>
+
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                <TextField
+                  label="Série"
+                  value={resource.series || ''}
+                  onChange={(e) => setResource({ ...resource, series: e.target.value })}
+                  fullWidth
+                  helperText="Agrupa recursos que formam uma trilha. Use o mesmo texto em todos, ex.: Fluxo digital aberto"
+                />
+                <TextField
+                  label="Ordem na série"
+                  type="number"
+                  value={resource.series_order ?? ''}
+                  onChange={(e) => {
+                    // exactOptionalPropertyTypes proíbe atribuir undefined a um
+                    // campo opcional, então limpar significa remover a chave.
+                    const bruto = e.target.value.trim();
+                    const proximo: Partial<EducationResource> = { ...resource };
+                    const n = Number.parseInt(bruto, 10);
+                    if (bruto === '' || !Number.isFinite(n)) {
+                      delete proximo.series_order;
+                    } else {
+                      proximo.series_order = n;
+                    }
+                    setResource(proximo);
+                  }}
+                  sx={{ maxWidth: { sm: 200 } }}
+                  helperText="Posição na trilha"
+                />
+              </Stack>
+
+              <Box>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                  Nesta página (opcional)
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                  Lista curta dos títulos de seção, exibida como sumário ao lado do texto. Preencha na mesma ordem em que as seções aparecem no conteúdo.
+                </Typography>
+                <Stack spacing={1.5}>
+                  {(resource.toc_items || []).map((item, index) => (
+                    <Stack key={index} direction="row" spacing={1} alignItems="center">
+                      <TextField
+                        value={item}
+                        onChange={(e) => {
+                          const toc_items = [...(resource.toc_items || [])];
+                          toc_items[index] = e.target.value;
+                          setResource({ ...resource, toc_items });
+                        }}
+                        placeholder={`Seção ${index + 1}`}
+                        fullWidth
+                        size="small"
+                      />
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          const toc_items = (resource.toc_items || []).filter((_, i) => i !== index);
+                          setResource({ ...resource, toc_items });
+                        }}
+                      >
+                        Remover
+                      </Button>
+                    </Stack>
+                  ))}
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setResource({ ...resource, toc_items: [...(resource.toc_items || []), ''] })}
+                    sx={{ alignSelf: 'flex-start' }}
+                  >
+                    Adicionar seção
+                  </Button>
+                </Stack>
+              </Box>
 
               <ThumbnailUploadField
                 label="Imagem de capa (miniatura)"
