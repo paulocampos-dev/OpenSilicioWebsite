@@ -7,12 +7,9 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { LinkPlugin } from '@lexical/react/LexicalLinkPlugin';
 import { ListPlugin } from '@lexical/react/LexicalListPlugin';
+import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import LexicalErrorBoundary from './lexical/LexicalErrorBoundary';
-import { HeadingNode, QuoteNode } from '@lexical/rich-text';
-import { ListItemNode, ListNode } from '@lexical/list';
-import { CodeHighlightNode, CodeNode } from '@lexical/code';
-import { LinkNode } from '@lexical/link';
 import { EditorState } from 'lexical';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import LinkIcon from '@mui/icons-material/Link';
@@ -24,11 +21,9 @@ import ToolbarPlugin from './lexical/plugins/ToolbarPlugin';
 import ImagePlugin from './lexical/plugins/ImagePlugin';
 import ImageGalleryPlugin from './lexical/plugins/ImageGalleryPlugin';
 import ContextMenuPlugin from './lexical/plugins/ContextMenuPlugin';
-import { EquationNode } from './lexical/nodes/EquationNode';
-import { WikiLinkNode } from './lexical/nodes/WikiLinkNode';
-import { YouTubeNode } from './lexical/nodes/YouTubeNode';
-import { ImageNode } from './lexical/nodes/ImageNode';
-import { ImageGalleryNode } from './lexical/nodes/ImageGalleryNode';
+import MarkdownPastePlugin from './lexical/plugins/MarkdownPastePlugin';
+import { LEXICAL_NODES } from './lexical/nodeSet';
+import { EDITOR_TRANSFORMERS } from './lexical/transformers';
 
 interface LexicalEditorProps {
   content: string;
@@ -289,6 +284,8 @@ function LexicalEditorInner({
             <HistoryPlugin />
             <LinkPlugin />
             <ListPlugin />
+            <MarkdownShortcutPlugin transformers={EDITOR_TRANSFORMERS} />
+            <MarkdownPastePlugin />
             <EquationPlugin />
             <WikiLinkPlugin />
             <YouTubePlugin />
@@ -340,20 +337,7 @@ export default function LexicalEditor(props: LexicalEditorProps) {
     onError: (error: Error) => {
       console.error('Lexical error:', error);
     },
-    nodes: [
-      HeadingNode,
-      QuoteNode,
-      ListNode,
-      ListItemNode,
-      CodeNode,
-      CodeHighlightNode,
-      LinkNode,
-      EquationNode,
-      WikiLinkNode,
-      YouTubeNode,
-      ImageNode,
-      ImageGalleryNode,
-    ],
+    nodes: LEXICAL_NODES,
   };
 
   if (initialEditorState !== undefined) {
