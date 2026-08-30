@@ -5,6 +5,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import LexicalErrorBoundary from './lexical/LexicalErrorBoundary';
 import { LEXICAL_NODES } from './lexical/nodeSet';
+import { LEXICAL_THEME } from './lexical/theme';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 interface LexicalContentProps {
@@ -72,7 +73,7 @@ export default function LexicalContent({ content }: LexicalContentProps) {
   // Initial config for the read-only editor
   const initialConfig = {
     namespace: 'OpenSilicioContentViewer',
-    theme: {},
+    theme: LEXICAL_THEME,
     onError: (error: Error) => {
       console.error('Lexical content error:', error);
     },
