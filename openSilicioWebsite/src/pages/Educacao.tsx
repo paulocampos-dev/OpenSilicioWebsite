@@ -1,7 +1,7 @@
 import { Box, Grid, Stack, Typography } from '@mui/material'
 import { useMemo, useState, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { educationApi } from '../services/api'
 import type { EducationResource } from '../types'
 import DuotonePhoto from '../components/design/DuotonePhoto'
@@ -17,6 +17,7 @@ const kinds: Kind[] = ['Todos', 'Projetos', 'Guias', 'Tutoriais', 'Teóricos']
 const levels: Level[] = ['Todos', 'Iniciante', 'Intermediário', 'Avançado']
 
 export default function Educacao() {
+  const reduce = useReducedMotion()
   const [tab, setTab] = useState<Kind>('Todos')
   const [level, setLevel] = useState<Level>('Todos')
   const [query, setQuery] = useState<string>('')
@@ -139,9 +140,9 @@ export default function Educacao() {
                 <MotionGridItem
                   key={r.id}
                   size={{ xs: 12, md: 6, lg: 4 }}
-                  initial={{ opacity: 0, scale: 0.985 }}
+                  initial={{ opacity: 0, scale: reduce ? 1 : 0.985 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.985 }}
+                  exit={{ opacity: 0, scale: reduce ? 1 : 0.985 }}
                   transition={{ duration: 0.22, ease: 'easeOut' }}
                 >
                   <RouterLink to={`/educacao/${r.id}`} className="card blueprint" style={{ padding: 0, textDecoration: 'none', color: 'inherit', gap: 0, display: 'flex', flexDirection: 'column' }}>

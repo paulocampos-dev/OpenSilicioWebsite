@@ -1,7 +1,7 @@
 import { Box, Grid, Stack, Typography } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import { useMemo, useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
 import DuotonePhoto from '../components/design/DuotonePhoto'
@@ -11,6 +11,7 @@ import RevealOnLoad from '../components/design/RevealOnLoad'
 const MotionGridItem = motion.create(Grid)
 
 export default function Blog() {
+  const reduce = useReducedMotion()
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
   const [currentPage, setCurrentPage] = useState<number>(1)
@@ -115,9 +116,9 @@ export default function Blog() {
                 <MotionGridItem
                   key={post.id}
                   size={{ xs: 12, sm: 6, lg: 4 }}
-                  initial={{ opacity: 0, scale: 0.985 }}
+                  initial={{ opacity: 0, scale: reduce ? 1 : 0.985 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.985 }}
+                  exit={{ opacity: 0, scale: reduce ? 1 : 0.985 }}
                   transition={{ duration: 0.22, ease: 'easeOut' }}
                 >
                   <RouterLink to={`/blog/${post.slug}`} className="card blueprint" style={{ padding: 0, textDecoration: 'none', color: 'inherit', gap: 0, display: 'flex', flexDirection: 'column' }}>
