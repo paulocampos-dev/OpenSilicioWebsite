@@ -14,7 +14,7 @@ export interface EducationResource {
   overview?: string;
   resources?: string;
   toc_items?: string[];
-  series?: string;
+  series?: string | null;
   series_order?: number;
   published: boolean;
   created_at: Date;
@@ -90,37 +90,37 @@ export class EducationService extends BaseService<EducationResource> {
     previous: { id: string; title: string } | null;
     next: { id: string; title: string } | null;
   }> {
-    const atual = await this.pool.query(
+    const current = await this.pool.query(
       'SELECT series, series_order FROM education_resources WHERE id = $1',
       [id],
     );
 
-    const linha = atual.rows[0];
-    if (!linha || !linha.series || linha.series_order === null) {
+    const row = current.rows[0];
+    if (!row || !row.series || row.series_order === null) {
       return { series: null, position: null, total: 0, previous: null, next: null };
     }
 
-    const irmaos = await this.pool.query(
+    const siblings = await this.pool.query(
       `SELECT id, title, series_order
          FROM education_resources
         WHERE series = $1 AND published = true AND series_order IS NOT NULL
         ORDER BY series_order ASC`,
-      [linha.series],
+      [row.series],
     );
 
-    const lista = irmaos.rows as Array<{ id: string; title: string; series_order: number }>;
-    const indice = lista.findIndex((r) => r.id === id);
-    const vizinho = (i: number) =>
-      i >= 0 && i < lista.length ? { id: lista[i]!.id, title: lista[i]!.title } : null;
+    const ordered = siblings.rows as Array<{ id: string; title: string; series_order: number }>;
+    const index = ordered.findIndex((r) => r.id === id);
+    const neighbour = (i: number) =>
+      i >= 0 && i < ordered.length ? { id: ordered[i]!.id, title: ordered[i]!.title } : null;
 
     return {
-      series: linha.series,
-      // Um recurso ainda despublicado não aparece na lista: devolvemos posição
-      // nula em vez de fingir que ele é o primeiro.
-      position: indice >= 0 ? indice + 1 : null,
-      total: lista.length,
-      previous: indice > 0 ? vizinho(indice - 1) : null,
-      next: indice >= 0 ? vizinho(indice + 1) : null,
+      series: row.series,
+      // An unpublished resource is absent from the ordered list; report a null
+      // position rather than pretending it is the first.
+      position: index >= 0 ? index + 1 : null,
+      total: ordered.length,
+      previous: index > 0 ? neighbour(index - 1) : null,
+      next: index >= 0 ? neighbour(index + 1) : null,
     };
   }
 

@@ -32,8 +32,8 @@ export interface EducationResource {
   overview?: string;
   resources?: string;
   toc_items?: string[];
-  series?: string;
-  series_order?: number;
+  series?: string | null;
+  series_order?: number | null;
   published: boolean;
   created_at: string;
   updated_at: string;

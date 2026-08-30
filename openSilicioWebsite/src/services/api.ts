@@ -155,7 +155,7 @@ export const educationApi = {
     return response.data;
   },
   getSeriesNavigation: async (id: string) => {
-    const response = await api.get<SeriesNavigation>(`/education/${id}/navegacao`);
+    const response = await api.get<SeriesNavigation>(`/education/${id}/navigation`);
     return response.data;
   },
 

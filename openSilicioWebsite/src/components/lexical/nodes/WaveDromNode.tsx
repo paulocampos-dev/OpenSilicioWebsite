@@ -68,14 +68,13 @@ function WaveDromComponent({
   fonte: string;
 }) {
   const [editor] = useLexicalComposerContext();
-  const indiceRef = React.useRef<number | null>(null);
-  if (indiceRef.current === null) indiceRef.current = proximoIndice++;
+  const indiceRef = React.useRef<number>(proximoIndice++);
 
   const [resultado, setResultado] = React.useState<ResultadoRender | null>(null);
 
   React.useEffect(() => {
     let vivo = true;
-    void renderizar(fonte, indiceRef.current as number).then((r) => {
+    void renderizar(fonte, indiceRef.current).then((r) => {
       if (vivo) setResultado(r);
     });
     return () => {

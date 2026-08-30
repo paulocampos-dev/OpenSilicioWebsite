@@ -177,12 +177,14 @@ export const educationResourceSchema = z.object({
     .array(z.string().max(200, 'Cada item deve ter no máximo 200 caracteres').trim())
     .max(20, 'No máximo 20 itens')
     .optional(),
+  // A normalização de string vazia acontece no controller, não aqui: o
+  // middleware validate() descarta o resultado do parse, então qualquer
+  // .transform() neste arquivo nunca chega ao req.body.
   series: z
     .string()
     .max(120, 'Série deve ter no máximo 120 caracteres')
     .trim()
-    .nullish()
-    .or(z.literal('')),
+    .nullish(),
   series_order: z
     .number()
     .int('Ordem na série deve ser um número inteiro')

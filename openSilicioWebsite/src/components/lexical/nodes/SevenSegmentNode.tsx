@@ -27,19 +27,19 @@ const TABELA = [
 ] as const;
 
 const HEX = '0123456789ABCDEF';
-const MEIA = 7;
+const MEIA_ESPESSURA = 7;
 
 function horizontal(cy: number, x1: number, x2: number): string {
   return [
-    [x1, cy], [x1 + MEIA, cy - MEIA], [x2 - MEIA, cy - MEIA],
-    [x2, cy], [x2 - MEIA, cy + MEIA], [x1 + MEIA, cy + MEIA],
+    [x1, cy], [x1 + MEIA_ESPESSURA, cy - MEIA_ESPESSURA], [x2 - MEIA_ESPESSURA, cy - MEIA_ESPESSURA],
+    [x2, cy], [x2 - MEIA_ESPESSURA, cy + MEIA_ESPESSURA], [x1 + MEIA_ESPESSURA, cy + MEIA_ESPESSURA],
   ].map((p) => p.join(',')).join(' ');
 }
 
 function vertical(cx: number, y1: number, y2: number): string {
   return [
-    [cx, y1], [cx + MEIA, y1 + MEIA], [cx + MEIA, y2 - MEIA],
-    [cx, y2], [cx - MEIA, y2 - MEIA], [cx - MEIA, y1 + MEIA],
+    [cx, y1], [cx + MEIA_ESPESSURA, y1 + MEIA_ESPESSURA], [cx + MEIA_ESPESSURA, y2 - MEIA_ESPESSURA],
+    [cx, y2], [cx - MEIA_ESPESSURA, y2 - MEIA_ESPESSURA], [cx - MEIA_ESPESSURA, y1 + MEIA_ESPESSURA],
   ].map((p) => p.join(',')).join(' ');
 }
 
