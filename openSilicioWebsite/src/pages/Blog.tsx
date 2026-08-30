@@ -7,18 +7,18 @@ import { useMemo, useState, useEffect } from 'react'
 import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
 
-const categories = ['Todos', 'Eletrônica', 'Circuitos Integrados', 'Projeto'] as const
-
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [selectedCategory, setSelectedCategory] = useState<(typeof categories)[number]>('Todos')
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [posts, setPosts] = useState<BlogPost[]>([])
+  const [categories, setCategories] = useState<string[]>(['Todos'])
   const [loading, setLoading] = useState(true)
   const pageSize = 6
 
   useEffect(() => {
     loadPosts()
+    loadCategories()
   }, [])
 
   const loadPosts = async () => {
@@ -35,9 +35,20 @@ export default function Blog() {
     }
   }
 
+  const loadCategories = async () => {
+    try {
+      const data = await blogApi.getCategories()
+      setCategories(['Todos', ...data])
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Erro ao carregar categorias:', error)
+      }
+    }
+  }
+
   const filteredPosts: BlogPost[] = useMemo(() => {
     const matchesCategory = (post: BlogPost) =>
-      selectedCategory === 'Todos' || post.category === (selectedCategory as any)
+      selectedCategory === 'Todos' || post.category === selectedCategory
     const matchesQuery = (post: BlogPost) => {
       if (!searchQuery.trim()) return true
       const q = searchQuery.toLowerCase()
@@ -51,8 +62,6 @@ export default function Blog() {
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize))
   const pageStartIndex = (currentPage - 1) * pageSize
   const postsOnPage = filteredPosts.slice(pageStartIndex, pageStartIndex + pageSize)
-
-  const categoryList = categories
 
   const handleChangePage = (newPage: number) => {
     const clampedPage = Math.min(Math.max(1, newPage), totalPages)
@@ -90,7 +99,7 @@ export default function Blog() {
           }}
         />
         <Stack direction="row" flexWrap="wrap" gap={1}>
-          {categoryList.map((category) => (
+          {categories.map((category) => (
             <Chip
               key={category}
               label={category}

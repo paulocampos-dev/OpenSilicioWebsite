@@ -30,6 +30,7 @@ build/
 # Test data snapshots and reports
 test-data-snapshot.json
 test-integrity-report.json
+backend/test_output*.txt
 
 backend_logs.txt
 logs.txt
