@@ -1,0 +1,128 @@
+/* Interface pieces — square, hairline, themed states. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 20px; min-height: 40px;
+  font-family: var(--font-body); font-size: 15px; font-weight: 500;
+  border: 1px solid transparent; border-radius: 0;
+  background: transparent; color: var(--color-text);
+  cursor: pointer; text-decoration: none;
+}
+.btn-primary { background: var(--color-accent); color: var(--brand-paper); border-color: var(--color-accent); }
+.btn-primary:hover { background: var(--color-steel-600); border-color: var(--color-steel-600); color: var(--brand-paper); }
+.btn-primary:active { background: var(--color-steel-700); border-color: var(--color-steel-700); color: var(--brand-paper); }
+.btn-secondary { border-color: var(--color-line); }
+.btn-secondary:hover { background: color-mix(in srgb, var(--color-neutral-900) 7%, transparent); }
+.btn-secondary:active { background: color-mix(in srgb, var(--color-neutral-900) 14%, transparent); }
+.btn-ghost { color: var(--color-accent-ink); padding-inline: 4px; }
+.btn-ghost:hover { background: var(--color-steel-100); }
+.btn-icon { width: 40px; height: 40px; padding: 0; }
+.field .btn-secondary, .field-deep .btn-secondary { border-color: var(--color-line-on-field); color: var(--color-on-field); }
+.field .btn-secondary:hover { background: color-mix(in srgb, var(--brand-paper) 12%, transparent); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* .btn/.tag are also used on native <button> elements (filters, tabs);
+   reset user-agent button chrome so only these rules apply. */
+button.btn, button.tag {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: inherit;
+}
+
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+  border-radius: 0; border: 1px solid transparent; background: transparent; color: var(--color-text);
+}
+.tag-accent { background: var(--color-steel-100); color: var(--color-steel-800); }
+.tag-steel { background: var(--color-steel-100); color: var(--color-steel-800); }
+.tag-neutral { background: var(--color-neutral-400); color: var(--color-neutral-900); }
+.tag-outline { border-color: var(--color-line-strong); color: var(--color-text); }
+.tag-solid { background: var(--color-accent); color: var(--brand-paper); }
+.field .tag-outline, .field-deep .tag-outline { border-color: var(--color-line-on-field); color: var(--color-on-field); }
+
+.input {
+  width: 100%; min-height: 40px; padding: 8px 12px;
+  font: inherit; font-size: 15px;
+  color: var(--color-text); background: transparent;
+  border: 1px solid var(--color-line); border-radius: 0;
+  caret-color: var(--color-accent);
+}
+.input:hover { border-color: var(--color-line-strong); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+
+.card {
+  display: flex; flex-direction: column; gap: var(--half);
+  padding: var(--space-5); background: transparent;
+  border: 1px solid var(--color-line); border-radius: 0;
+  color: inherit;
+}
+.card-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: var(--type-h3); line-height: var(--type-h3-lh);
+  letter-spacing: var(--tracking-heading); text-transform: uppercase; margin: 0; }
+.card-body { margin: 0; font-size: var(--type-small); line-height: var(--type-small-lh); color: var(--color-text-muted); }
+.card-meta { font-size: 13px; color: var(--color-text-faint); }
+a.card { transition: transform .16s ease, border-color .16s ease; }
+a.card:hover { border-color: var(--color-line-strong); transform: translateY(-3px); }
+
+/* Lift affordance for a link that wraps a whole .blueprint panel (not the
+   panel class itself — non-interactive .blueprint panels never lift). */
+a.blueprint-link { display: block; text-decoration: none; transition: transform .16s ease; }
+a.blueprint-link:hover { transform: translateY(-3px); }
+a.blueprint-link:hover > .blueprint { border-color: var(--color-line-strong); }
+
+/* Active-state pills/tabs (filter chips, resource tabs) ease their
+   background/color/border swap instead of snapping. */
+.filter-pill { transition: background-color .18s ease, color .18s ease, border-color .18s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  a.card, a.card:hover, a.blueprint-link, a.blueprint-link:hover { transform: none; }
+}
+
+/* Sticky header: pins on scroll and condenses past a small threshold.
+   .field already supplies an opaque background in dark mode; this adds
+   one for light mode too, since a static header never needed it before. */
+header.nav-sticky { position: sticky; top: 0; background: var(--color-bg); transition: box-shadow .25s ease; }
+header.nav-sticky.field { background: var(--color-field); }
+header.nav-sticky.nav-condensed { box-shadow: var(--shadow-sm); }
+
+.nav { display: flex; align-items: center; gap: var(--space-4); padding: 14px var(--edge); flex-wrap: wrap; transition: padding-block .25s ease; }
+.nav-condensed .nav { padding-block: 8px; }
+/* The mark (icon) and the name are independent assets, sized separately —
+   the name carries the brand at this scale, the mark is a small anchor. */
+.nav-brand { display: flex; align-items: center; gap: 14px; margin-right: auto; }
+.nav-brand__mark { height: 38px; width: auto; display: block; flex: none; }
+.nav-brand__name {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 30px; line-height: 1; letter-spacing: 0.02em; text-transform: uppercase;
+  white-space: nowrap;
+  transition: font-size .25s ease;
+}
+.nav-condensed .nav-brand__name { font-size: 24px; }
+@media (max-width: 480px) {
+  .nav-brand__mark { height: 30px; }
+  .nav-brand__name { font-size: 22px; }
+  .nav-condensed .nav-brand__name { font-size: 19px; }
+}
+.nav a { color: inherit; font-size: 15px; }
+.nav a:hover, .nav a[aria-current="page"] { color: var(--color-steel-700); }
+.field .nav a:hover, .field .nav a[aria-current="page"] { color: var(--color-steel-300); }
+
+.table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th { text-align: left; font-size: 12px; letter-spacing: var(--tracking-kicker);
+  text-transform: uppercase; color: var(--color-text-muted);
+  padding: var(--half) var(--leading); border-bottom: 1px solid var(--color-line); }
+.table td { padding: var(--half) var(--leading);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-neutral-900) 8%, transparent); }
+.table tbody tr:last-child td { border-bottom: 0; }
+
+/* Add alongside `.table` (e.g. `className="table table-stack"`) on any
+   table where columns would otherwise get squeezed illegible on narrow
+   screens — below the breakpoint each row becomes a stacked block instead
+   of a row of compressed cells. */
+@media (max-width: 700px) {
+  .table-stack thead { display: none; }
+  .table-stack, .table-stack tbody, .table-stack tr, .table-stack td { display: block; width: 100% !important; }
+  .table-stack tr { padding: var(--space-4) var(--leading); border-bottom: 1px solid var(--color-line); }
+  .table-stack tr:last-child { border-bottom: 0; }
+  .table-stack td { padding: 2px 0 !important; border-bottom: none !important; }
+}

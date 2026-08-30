@@ -13,6 +13,8 @@ import {
 import { settingsApi } from '../services/api';
 import type { SiteSettings } from '../types';
 import LexicalContent from '../components/LexicalContent';
+import AboutPageSkeleton from '../components/design/AboutPageSkeleton';
+import RevealOnLoad from '../components/design/RevealOnLoad';
 
 export default function About() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -36,11 +38,7 @@ export default function About() {
   };
 
   if (loading) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography>Carregando...</Typography>
-      </Box>
-    );
+    return <AboutPageSkeleton />;
   }
 
   if (!settings) {
@@ -57,6 +55,7 @@ export default function About() {
   };
 
   return (
+    <RevealOnLoad>
     <Stack spacing={8}>
       {/* Hero Section */}
       <Stack spacing={2} textAlign="center" alignItems="center">
@@ -157,5 +156,6 @@ export default function About() {
         </Box>
       )}
     </Stack>
+    </RevealOnLoad>
   );
 }

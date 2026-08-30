@@ -1,0 +1,31 @@
+/* Type — Barlow Condensed over Barlow.
+   Headings are condensed, uppercase and tight; body is Barlow at a 24px
+   leading unit. Nothing else. The old site referenced Inter and never
+   loaded it; that reference is retired. */
+:root {
+  --font-heading: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Barlow", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --font-heading-weight: 600;
+  --font-heading-weight-light: 500;
+  --font-body-weight: 400;
+  --font-body-weight-strong: 600;
+
+  /* display sizes assume the 24px leading unit; line-heights are ratio
+     governed at ~1.04 for uppercase condensed, which carries no descenders */
+  --type-display: 96px;   --type-display-lh: 100px;
+  --type-title: 60px;     --type-title-lh: 62px;
+  --type-h1: 44px;        --type-h1-lh: 46px;
+  --type-h2: 32px;        --type-h2-lh: 36px;
+  --type-h3: 24px;        --type-h3-lh: 26px;
+  --type-lead: 18px;      --type-lead-lh: 30px;
+  --type-body: 16px;      --type-body-lh: 24px;
+  --type-small: 15px;     --type-small-lh: 24px;
+  --type-kicker: 13px;    --type-kicker-lh: 12px;
+
+  --tracking-display: 0.01em;
+  --tracking-heading: 0.02em;
+  --tracking-kicker: 0.08em;
+  --optical-left: -0.052em; /* condensed caps leading a line hang this far left */
+}

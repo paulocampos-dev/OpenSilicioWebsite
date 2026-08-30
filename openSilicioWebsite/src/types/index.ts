@@ -13,6 +13,8 @@ export interface BlogPost {
   author: string;
   image_url?: string;
   category: string;
+  /** Author-provided section titles shown in the post's "Nesta página" box, in display order. */
+  toc_items?: string[];
   published: boolean;
   created_at: string;
   updated_at: string;
@@ -55,6 +57,7 @@ export interface WikiLink {
   link_text: string;
   term?: string;
   slug?: string;
+  definition?: string;
   created_at: string;
 }
 

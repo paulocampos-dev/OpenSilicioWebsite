@@ -1,0 +1,67 @@
+/* The blueprint frame — the one structural motif. Any card, figure,
+   plate or panel is a hairline rectangle with four registration crosses
+   hanging just outside its corners. Never round it, never fill it.
+   Usage: <div class="blueprint"><i class="corner tl"></i>… x4 </div> */
+.blueprint {
+  position: relative;
+  border: var(--border-hairline) solid var(--color-line);
+  background: transparent;
+}
+.blueprint > .corner {
+  position: absolute;
+  width: var(--corner-size); height: var(--corner-size);
+  color: color-mix(in srgb, var(--color-neutral-900) 55%, transparent);
+  pointer-events: none;
+}
+.blueprint > .corner::before,
+.blueprint > .corner::after { content: ""; position: absolute; background: currentColor; }
+.blueprint > .corner::before { left: 7px; top: 0; width: 1px; height: 100%; }
+.blueprint > .corner::after { top: 7px; left: 0; width: 100%; height: 1px; }
+.blueprint > .corner.tl { top: var(--corner-offset); left: var(--corner-offset); }
+.blueprint > .corner.tr { top: var(--corner-offset); right: var(--corner-offset); }
+.blueprint > .corner.bl { bottom: var(--corner-offset); left: var(--corner-offset); }
+.blueprint > .corner.br { bottom: var(--corner-offset); right: var(--corner-offset); }
+
+.field .blueprint, .field-deep .blueprint { border-color: var(--color-line-on-field); }
+.field .blueprint > .corner,
+.field-deep .blueprint > .corner { color: color-mix(in srgb, var(--brand-paper) 70%, transparent); }
+
+/* the title block — a drawing's naming furniture, used on plates and
+   on every template artboard */
+.title-block {
+  display: flex; flex-wrap: wrap; align-items: stretch;
+  border-bottom: 1px solid var(--color-line);
+  font-size: var(--type-kicker); line-height: var(--leading);
+  letter-spacing: var(--tracking-kicker); text-transform: uppercase;
+  font-weight: var(--font-body-weight-strong);
+}
+.title-block > span { padding: var(--half) var(--leading); }
+.tb-title { flex: 1; min-width: 16ch; }
+.tb-cell { border-left: 1px solid var(--color-line); white-space: nowrap; color: var(--color-text-muted); }
+.field .title-block, .field-deep .title-block { border-color: var(--color-line-on-field); }
+.field .tb-cell, .field-deep .tb-cell { border-color: var(--color-line-on-field); color: var(--color-on-field-muted); }
+
+/* photographs: hairline-framed, marked, and washed into the steel accent
+   like a screen print. Wrap the <img> in .duotone inside a .blueprint. */
+.duotone { position: relative; overflow: hidden; }
+.duotone > img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05); }
+.duotone::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: var(--color-steel-700); mix-blend-mode: color;
+}
+.blueprint.duotone { overflow: visible; }
+.blueprint.duotone > img { position: relative; z-index: 0; }
+
+/* the honest placeholder: this system never fakes a photograph */
+.photo-slot {
+  display: grid; place-items: center; text-align: center; padding: var(--leading);
+  background: var(--hatch);
+  border: 1px dashed var(--color-neutral-400);
+  font-size: var(--type-kicker); line-height: 22px;
+  letter-spacing: var(--tracking-kicker); text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.field .photo-slot, .field-deep .photo-slot {
+  background: var(--hatch-on-field); border-color: var(--color-line-on-field);
+  color: var(--color-on-field-muted);
+}

@@ -15,6 +15,7 @@ import {
   getAllPendingLinks,
   getPendingLinksByTerm,
   getPendingLinksCount,
+  getPendingLinksGroupedPublic,
   createPendingLink,
   deletePendingLink,
 } from '../controllers/wikiController';
@@ -35,6 +36,9 @@ router.use((req, res, next) => {
 router.get('/', cacheMiddleware({ ttl: 120 }), getAllEntries);
 router.get('/search/:term', cacheMiddleware({ ttl: 120 }), searchByTerm);
 router.get('/links/:contentType/:contentId', cacheMiddleware({ ttl: 120 }), getWikiLinksForContent);
+// Term + count only (no linking content ids/titles) — safe to expose publicly,
+// used by the empty-wiki "blank sheet" state.
+router.get('/pending/grouped', cacheMiddleware({ ttl: 120 }), getPendingLinksGroupedPublic);
 
 // Pending links routes (admin only)
 router.get('/pending/all', authMiddleware, getAllPendingLinks);

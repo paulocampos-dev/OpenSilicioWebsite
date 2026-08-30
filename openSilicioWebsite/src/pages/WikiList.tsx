@@ -1,130 +1,107 @@
-import { useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import {
-  Box,
-  Card,
-  CardActionArea,
-  CardContent,
-  Grid,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import { wikiApi } from '../services/api';
-import type { WikiEntry } from '../types';
+import { useEffect, useState } from 'react'
+import { Link as RouterLink } from 'react-router-dom'
+import { Grid, Stack, Typography } from '@mui/material'
+import { wikiApi } from '../services/api'
+import type { WikiEntry, PendingWikiLinkGrouped } from '../types'
+import BlankSheet from '../components/design/BlankSheet'
+import CardGridSkeleton from '../components/design/CardGridSkeleton'
+import RevealOnLoad from '../components/design/RevealOnLoad'
 
 export default function WikiList() {
-  const [entries, setEntries] = useState<WikiEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [entries, setEntries] = useState<WikiEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [pendingGrouped, setPendingGrouped] = useState<PendingWikiLinkGrouped[]>([])
 
   useEffect(() => {
-    loadEntries();
-  }, []);
+    loadEntries()
+  }, [])
 
   const loadEntries = async () => {
     try {
-      // Load all published entries with high limit for client-side filtering
-      const response = await wikiApi.getAll(true, 1, 100);
-
-      // Development logging
-      if (import.meta.env.DEV) {
-        console.log('📚 Wiki entries loaded:', response.data.length);
-        console.log('📚 Sample entry:', response.data[0]);
-
-        // Check for empty definitions
-        const emptyDefs = response.data.filter((e: WikiEntry) => !e.definition || !e.definition.trim());
-        if (emptyDefs.length > 0) {
-          console.warn(`⚠️ Found ${emptyDefs.length} wiki entries with empty definitions:`, emptyDefs.map((e: WikiEntry) => e.term));
-        }
+      const response = await wikiApi.getAll(true, 1, 100)
+      setEntries(response.data)
+      if (response.data.length === 0) {
+        wikiApi.getPendingGrouped().then(setPendingGrouped).catch(() => {})
       }
-
-      setEntries(response.data);
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.error('Erro ao carregar entradas da wiki:', error);
+        console.error('Erro ao carregar entradas da wiki:', error)
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const filteredEntries = entries.filter((entry) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      entry.term.toLowerCase().includes(query) ||
-      entry.definition.toLowerCase().includes(query)
-    );
-  });
+    if (!searchQuery.trim()) return true
+    const query = searchQuery.toLowerCase()
+    return entry.term.toLowerCase().includes(query) || entry.definition.toLowerCase().includes(query)
+  })
 
   return (
-    <Stack spacing={6}>
-      {/* Hero */}
-      <Stack spacing={1} alignItems="center" textAlign="center">
-        <Typography sx={{ typography: { xs: 'h4', sm: 'h3' } }} fontWeight={800}>
+    <Stack spacing={4}>
+      <Stack spacing={1.5}>
+        <Typography component="h2" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: { xs: '34px', md: '44px' }, lineHeight: { xs: '36px', md: '46px' }, letterSpacing: '.01em', textTransform: 'uppercase', marginLeft: 'var(--optical-left)' }}>
           Wiki do OpenSilício
         </Typography>
-        <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
+        <Typography sx={{ fontSize: '16px', lineHeight: '24px', maxWidth: '60ch', color: 'var(--color-text-muted)' }}>
           Dicionário de termos técnicos e conceitos relacionados à eletrônica e projeto de circuitos integrados.
         </Typography>
       </Stack>
 
-      {/* Search */}
-      <TextField
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Buscar termos..."
-        sx={{ maxWidth: 600, mx: 'auto', width: '100%' }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon color="action" />
-            </InputAdornment>
-          ),
-        }}
-      />
+      {!loading && entries.length > 0 && (
+        <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+          <input
+            className="input"
+            type="search"
+            placeholder="Buscar um termo"
+            aria-label="Buscar termo"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ maxWidth: 480 }}
+          />
+          <Typography sx={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
+            {entries.length} termos · A–Z
+          </Typography>
+        </Stack>
+      )}
 
-      {/* Entries Grid */}
-      <Grid container spacing={3}>
-        {loading ? (
-          <Grid size={12}>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography>Carregando entradas...</Typography>
-            </Box>
+      {loading ? (
+        <CardGridSkeleton count={6} columns={{ xs: 12, sm: 6 }} withPhoto={false} spacing={3} />
+      ) : entries.length === 0 ? (
+        <BlankSheet
+          title="A wiki começa agora"
+          body="Nenhuma entrada publicada ainda. Enquanto isso, os termos aparecem ligados dentro dos textos do blog e da educação — cada link é um pedido de verbete."
+          tags={pendingGrouped.map((p) => `${p.term} · ${p.count}`)}
+          ctas={[
+            { label: 'Ver a Educação', to: '/educacao' },
+            { label: 'Ler o Blog', to: '/blog', variant: 'secondary' },
+          ]}
+        />
+      ) : filteredEntries.length === 0 ? (
+        <Typography sx={{ textAlign: 'center', py: 4 }}>Nenhuma entrada encontrada para sua busca.</Typography>
+      ) : (
+        <RevealOnLoad>
+          <Grid container spacing={3}>
+            {filteredEntries.map((entry) => (
+              <Grid key={entry.id} size={{ xs: 12, sm: 6 }}>
+                <RouterLink to={`/wiki/${entry.slug}`} className="card blueprint" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                    {entry.term}
+                  </Typography>
+                  <Typography sx={{ fontSize: '15px', lineHeight: '24px', color: 'var(--color-text-muted)' }}>{entry.definition}</Typography>
+                  {entry.aliases && entry.aliases.length > 0 && (
+                    <Typography sx={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-accent-ink)' }}>
+                      Também: {entry.aliases.join(', ')}
+                    </Typography>
+                  )}
+                </RouterLink>
+              </Grid>
+            ))}
           </Grid>
-        ) : filteredEntries.length === 0 ? (
-          <Grid size={12}>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography>
-                {searchQuery ? 'Nenhuma entrada encontrada para sua busca.' : 'Nenhuma entrada da wiki encontrada.'}
-              </Typography>
-            </Box>
-          </Grid>
-        ) : (
-          filteredEntries.map((entry) => (
-            <Grid key={entry.id} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Card variant="outlined" sx={{ height: '100%' }}>
-                <CardActionArea component={RouterLink} to={`/wiki/${entry.slug}`}>
-                  <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Typography variant="h6" fontWeight={700} color="primary">
-                      {entry.term}
-                    </Typography>
-                    <Typography color="text.secondary" variant="body2">
-                      {entry.definition}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                      Clique para ver mais detalhes →
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-          ))
-        )}
-      </Grid>
+        </RevealOnLoad>
+      )}
     </Stack>
-  );
+  )
 }

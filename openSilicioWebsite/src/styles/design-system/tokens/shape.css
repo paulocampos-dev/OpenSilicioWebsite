@@ -1,0 +1,30 @@
+/* Shape — everything is square. Cards, figures and buttons are line
+   drawings with registration marks; the filled accent button is the one
+   solid object. Shadows exist but are almost never used: this system
+   draws edges, it does not float things.
+
+   NOTE: fixed two dangling references from the upstream source file
+   (which still pointed at an earlier "forest green" palette instead of
+   this steel one): --color-forest-900 -> --color-neutral-900 in the
+   shadow tokens, and --brand-cream -> --brand-paper in the on-field
+   hatch. Both were undefined here, which would have made the color-mix()
+   calls invalid. */
+:root {
+  --radius-none: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+
+  --border-hairline: 1px;
+  --border-heavy: 2px;
+
+  --corner-size: 15px;   /* registration cross arm length */
+  --corner-offset: -8px; /* how far the cross hangs outside the frame */
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--color-neutral-900) 12%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, var(--color-neutral-900) 14%, transparent);
+
+  --hatch: repeating-linear-gradient(45deg, transparent 0 10px,
+    color-mix(in srgb, var(--color-neutral-900) 5%, transparent) 10px 11px);
+  --hatch-on-field: repeating-linear-gradient(45deg, transparent 0 10px,
+    color-mix(in srgb, var(--brand-paper) 10%, transparent) 10px 11px);
+}

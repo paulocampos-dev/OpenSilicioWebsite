@@ -13,6 +13,7 @@ export interface BlogPost {
   author?: string;
   image_url?: string;
   category?: string;
+  toc_items?: string[];
   published: boolean;
   created_at: Date;
   updated_at: Date;
@@ -82,6 +83,7 @@ export class BlogService extends BaseService<BlogPost> {
       'author',
       'image_url',
       'category',
+      'toc_items',
       'published',
     ];
 

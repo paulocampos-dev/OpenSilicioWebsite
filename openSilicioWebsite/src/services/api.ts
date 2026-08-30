@@ -249,6 +249,11 @@ export const wikiApi = {
       return response.data;
     }
   },
+  // Public: term + count only, for the empty-wiki state (no auth required).
+  getPendingGrouped: async () => {
+    const response = await api.get<PendingWikiLinkGrouped[]>('/wiki/pending/grouped');
+    return response.data;
+  },
   getPendingByTerm: async (term: string) => {
     const response = await api.get<PendingWikiLink[]>(`/wiki/pending/term/${encodeURIComponent(term)}`);
     return response.data;

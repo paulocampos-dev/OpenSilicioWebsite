@@ -1,1114 +1,251 @@
 import { useState, useEffect } from 'react'
-import { Box, Button, Container, Grid, Paper, Stack, Typography, Card, CardContent, Avatar } from '@mui/material'
+import { Box, Container, Grid, Stack, Typography } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
-import SchoolIcon from '@mui/icons-material/School'
-import ArticleIcon from '@mui/icons-material/Article'
-import MenuBookIcon from '@mui/icons-material/MenuBook'
-import CodeIcon from '@mui/icons-material/Code'
-import GroupsIcon from '@mui/icons-material/Groups'
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 import { settingsApi } from '../services/api'
 import type { SiteSettings } from '../types'
+import BlueprintFrame from '../components/design/BlueprintFrame'
+import DuotonePhoto from '../components/design/DuotonePhoto'
+import TitleBlockBar from '../components/design/TitleBlockBar'
+
+const quickStart = [
+  { n: '01', title: 'Trilha de aprendizado', desc: 'Siga um caminho guiado e comece pela base certa.', to: '/educacao', label: 'Educação' },
+  { n: '02', title: 'Explorar wiki', desc: 'Busque termos e conceitos essenciais rapidamente.', to: '/wiki', label: 'Wiki' },
+  { n: '03', title: 'Ler o blog', desc: 'Tutoriais e novidades do ecossistema de microeletrônica.', to: '/blog', label: 'Blog' },
+]
+
+const offerings = [
+  { title: 'Educação estruturada', desc: 'Guias, tutoriais, teóricos e projetos organizados do iniciante ao avançado.' },
+  { title: 'Blog técnico', desc: 'Registros de bancada, decisões de projeto e novidades do ecossistema aberto.' },
+  { title: 'Wiki técnica', desc: 'Dicionário de termos em português, ligado de dentro dos textos do site.' },
+  { title: 'Projetos open source', desc: 'Cada projeto com visão geral, conteúdo e recursos.' },
+  { title: 'Comunidade ativa', desc: 'Estudantes, pesquisadores e engenheiros trabalhando no mesmo repositório.' },
+  { title: 'Eventos e workshops', desc: 'Calendário próprio: oficinas de layout, semanas temáticas e mutirões de tape-out.' },
+]
 
 export default function Landing() {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const data = await settingsApi.getAll()
-        setSettings(data)
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error('Failed to fetch settings:', error)
-        }
-      }
-    }
-    fetchSettings()
+    settingsApi.getAll().then(setSettings).catch(() => {})
   }, [])
 
   return (
     <Stack sx={{ m: 0, p: 0 }}>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          position: 'relative',
-          minHeight: { xs: '85vh', md: '90vh' },
-          display: 'flex',
-          alignItems: 'center',
-          overflow: 'visible',
-          width: '100vw',
-          left: '50%',
-          right: '50%',
-          marginLeft: '-50vw',
-          marginRight: '-50vw',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100%',
-            backgroundImage: 'url(/chip_closeup_stock.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: 0.15,
-            zIndex: 1,
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100%',
-            background: 'radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%)',
-            zIndex: 2,
-          },
-        }}
-      >
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 3 }}>
-          <Stack spacing={6} alignItems="center" textAlign="center" sx={{ py: { xs: 4, md: 8 } }}>
-            <Box
-              sx={{
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                backdropFilter: 'blur(10px)',
-                borderRadius: 4,
-                px: 3,
-                py: 1,
-                border: '1px solid rgba(255,255,255,0.2)',
-              }}
-            >
-              <Typography
-                variant="overline"
-                sx={{
-                  color: 'white',
-                  letterSpacing: 2,
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
-                }}
-              >
-                Grupo de Pesquisa e Extensão - Poli USP
-              </Typography>
-            </Box>
-
-            <Typography
-              sx={{
-                typography: { xs: 'h3', sm: 'h2', md: 'h1' },
-                color: 'common.white',
-                fontWeight: 800,
-                maxWidth: 1000,
-                lineHeight: 1.5,
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                textShadow: '0 4px 24px rgba(0,0,0,0.3)',
-                background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 50%, #e8ecff 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                pb: 1,
-              }}
-            >
-              Democratizando o Design de Chips
-            </Typography>
-
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'rgba(255,255,255,0.9)',
-                maxWidth: 700,
-                fontWeight: 400,
-                lineHeight: 1.7,
-                fontSize: { xs: '1.1rem', md: '1.25rem' },
-              }}
-            >
-              Formamos a próxima geração de projetistas de circuitos integrados através de educação aberta, projetos práticos e colaboração.
-            </Typography>
-
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ mt: 4 }}>
-              <Button
-                component={RouterLink}
-                to="/educacao"
-                variant="contained"
-                size="large"
-                startIcon={<RocketLaunchIcon />}
-                sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.125rem',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
-                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                  },
-                }}
-                aria-label="Ir para Educação"
-              >
-                Começar a Aprender
-              </Button>
-              <Button
-                component={RouterLink}
-                to="/wiki"
-                variant="outlined"
-                size="large"
-                startIcon={<MenuBookIcon />}
-                sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.125rem',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  color: 'white',
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  backdropFilter: 'blur(10px)',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    borderColor: 'white',
-                    backgroundColor: 'rgba(255,255,255,0.15)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 32px rgba(255,255,255,0.1)',
-                  },
-                }}
-                aria-label="Explorar Wiki"
-              >
-                Explorar Wiki
-              </Button>
-            </Stack>
-          </Stack>
-        </Container>
-      </Box>
-
-      {/* --- Spacer before Quick Start Section --- */}
-      <Box sx={{ py: { xs: 2, md: 3 } }} />
-
-      {/* Quick Start Section */}
-      <Box
-        sx={{
-          mt: { xs: 0, md: 0 }, // Remove negative margin for more natural flow
-          mb: { xs: 0, md: 0 }, // Remove tight bottom margin
-          py: { xs: 4, md: 6 },
-          background: (theme) => theme.palette.background.default,
-        }}
-      >
+      {/* Hero — the steel field */}
+      <Box className="field" sx={{ py: { xs: 6, md: 9 } }}>
         <Container maxWidth="lg">
-          <Stack spacing={4} alignItems="center" textAlign="center" sx={{ mb: 5 }}>
-            <Typography
-              variant="overline"
-              sx={{
-                color: 'primary.main',
-                fontWeight: 700,
-                letterSpacing: 2,
-                fontSize: '0.9rem',
-                textTransform: 'uppercase',
-              }}
-            >
-              Acesso Rápido
-            </Typography>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 800,
-                maxWidth: 650,
-                fontSize: { xs: '1.6rem', md: '2.1rem' },
-                lineHeight: 1.2,
-              }}
-            >
-              Comece sua jornada em microeletrônica em poucos cliques
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: 'text.secondary',
-                maxWidth: 540,
-                fontSize: '1.08rem',
-                lineHeight: 1.65,
-                fontWeight: 400,
-              }}
-            >
-              Veja como você pode iniciar seu aprendizado, pesquisar informações ou se atualizar rapidamente:
-            </Typography>
-          </Stack>
-          <Grid container spacing={5} justifyContent="center">
-            {[
-              {
-                icon: <SchoolIcon sx={{ fontSize: 32 }} />,
-                title: 'Trilha de Aprendizado',
-                description: 'Siga um caminho guiado e comece pela base certa.',
-                link: '/educacao',
-                aria: 'Abrir trilhas de educação',
-                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              },
-              {
-                icon: <MenuBookIcon sx={{ fontSize: 32 }} />,
-                title: 'Explorar Wiki',
-                description: 'Busque termos e conceitos essenciais rapidamente.',
-                link: '/wiki',
-                aria: 'Explorar a Wiki técnica',
-                gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-              },
-              {
-                icon: <ArticleIcon sx={{ fontSize: 32 }} />,
-                title: 'Ler o Blog',
-                description: 'Tutoriais e novidades do ecossistema de microeletrônica.',
-                link: '/blog',
-                aria: 'Ir para o blog',
-                gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              },
-            ].map((action, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Card
-                  component={RouterLink}
-                  to={action.link}
-                  aria-label={action.aria}
-                  sx={{
-                    width: 260,
-                    height: '100%',
-                    textDecoration: 'none',
-                    background: (theme) => theme.palette.background.paper,
-                    border: (theme) => `1px solid ${theme.palette.divider}`,
-                    backdropFilter: 'blur(18px)',
-                    borderRadius: 4,
-                    boxShadow: (theme) => theme.palette.mode === 'dark'
-                      ? '0 8px 32px rgba(0,0,0,0.3)'
-                      : '0 8px 32px rgba(0,0,0,0.10)',
-                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: '4px',
-                      background: action.gradient,
-                      opacity: 0.86,
-                      transition: 'opacity 0.3s',
-                    },
-                    '&:hover': {
-                      transform: 'translateY(-10px) scale(1.03)',
-                      boxShadow: (theme) => theme.palette.mode === 'dark'
-                        ? '0 20px 60px rgba(0,0,0,0.4)'
-                        : '0 20px 60px rgba(0,0,0,0.18)',
-                      '&::before': {
-                        opacity: 1,
-                      },
-                    },
-                  }}
+          <Grid container spacing={6} alignItems="center">
+            <Grid size={{ xs: 12, md: 7 }}>
+              <span
+                className="kicker"
+                style={{
+                  display: 'inline-block',
+                  color: 'var(--color-steel-300)',
+                  border: '1px solid var(--color-line-on-field)',
+                  padding: '8px 12px',
+                }}
+              >
+                Grupo de Pesquisa e Extensão · Poli USP
+              </span>
+              <Typography
+                component="h1"
+                sx={{
+                  fontFamily: 'var(--font-heading)',
+                  fontWeight: 600,
+                  fontSize: { xs: '44px', md: '76px' },
+                  lineHeight: { xs: '46px', md: '78px' },
+                  letterSpacing: '.01em',
+                  textTransform: 'uppercase',
+                  marginLeft: 'var(--optical-left)',
+                  mt: 3,
+                }}
+              >
+                Democratizando o design de chips
+              </Typography>
+              <Typography sx={{ fontSize: '17px', lineHeight: '26px', mt: 3, maxWidth: '56ch', color: 'var(--color-on-field-muted)' }}>
+                Formamos a próxima geração de projetistas de circuitos integrados através de educação aberta, projetos práticos e colaboração.
+              </Typography>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 4 }}>
+                <RouterLink to="/educacao" className="btn btn-primary">Começar a Aprender</RouterLink>
+                <RouterLink
+                  to="/wiki"
+                  className="btn"
+                  style={{ color: 'var(--color-on-field)', border: '1px solid var(--color-line-on-field)' }}
                 >
-                  <CardContent sx={{ p: 5 }}>
-                    <Stack spacing={3} alignItems="flex-start">
-                      <Avatar
-                        sx={{
-                          width: 70,
-                          height: 70,
-                          background: action.gradient,
-                          color: 'common.white',
-                          boxShadow: '0 10px 28px rgba(0,0,0,0.18)',
-                        }}
-                      >
-                        {action.icon}
-                      </Avatar>
-                      <Box>
-                        <Typography
-                          variant="h6"
-                          fontWeight={700}
-                          sx={{
-                            color: 'text.primary',
-                            mb: 1.1,
-                            fontSize: '1.23rem'
-                          }}
-                        >
-                          {action.title}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: 'text.secondary',
-                            lineHeight: 1.7,
-                            fontSize: '0.95rem'
-                          }}
-                        >
-                          {action.description}
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+                  Explorar Wiki
+                </RouterLink>
+              </Stack>
+            </Grid>
+            <Grid size={{ xs: 12, md: 5 }}>
+              <BlueprintFrame frameless>
+                <DuotonePhoto src="/hero-chip-closeup.jpg" alt="Close-up de um chip" label="Foto: close-up de chip" aspectRatio="4 / 3" sweepOnLoad />
+              </BlueprintFrame>
+            </Grid>
           </Grid>
         </Container>
       </Box>
 
-      {/* About Section */}
+      {/* Acesso rápido — a drawn sheet */}
+      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 7 } }}>
+        <BlueprintFrame sx={{ p: 0 }}>
+          <TitleBlockBar title="Acesso rápido — por onde começar" cells={['Folha 01']} />
+          <table className="table table-stack" style={{ tableLayout: 'fixed' }}>
+            <tbody>
+              {quickStart.map((item) => (
+                <tr key={item.n}>
+                  <td style={{ width: 64, fontSize: 13, fontWeight: 600, letterSpacing: '.08em', color: 'var(--color-accent-ink)' }}>{item.n}</td>
+                  <td style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: 22, letterSpacing: '.02em', textTransform: 'uppercase' }}>{item.title}</td>
+                  <td style={{ color: 'var(--color-text-muted)' }}>{item.desc}</td>
+                  <td style={{ width: 160 }}>
+                    <RouterLink to={item.to} className="btn btn-ghost" style={{ fontSize: 14 }}>{item.label} →</RouterLink>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </BlueprintFrame>
+      </Container>
+
+      {/* Sobre */}
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
-        <Grid container spacing={8} alignItems="center">
-          <Grid size={{ xs: 12, md: 6 }} >
-            <Box
-              sx={{
-                width: '100%',
-                height: { xs: 320, md: 480 },
-                borderRadius: 4,
-                overflow: 'hidden',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-                position: 'relative',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
-                  zIndex: 1,
-                },
-                '& img': {
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  transition: 'transform 0.6s ease',
-                },
-                '&:hover img': {
-                  transform: 'scale(1.05)',
-                },
-              }}
-            >
-              <Box component="img"
-              src="/boardPCB_stocl.jpg"
-              alt="Circuit board design"
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-              />
-            </Box>
+        <Grid container spacing={7} alignItems="center">
+          <Grid size={{ xs: 12, md: 5 }}>
+            <BlueprintFrame duotone frameless>
+              <DuotonePhoto src="/sobre-bancada-placa.jpg" alt="Bancada com placa de circuito" label="Foto: bancada / placa" aspectRatio="4 / 3" sweepOnLoad />
+            </BlueprintFrame>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Stack spacing={4}>
-              <Box>
-                <Typography
-                  variant="overline"
-                  sx={{
-                    color: 'primary.main',
-                    fontWeight: 700,
-                    letterSpacing: 2,
-                    fontSize: '0.875rem',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  Sobre o OpenSilício
-                </Typography>
-              </Box>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 800,
-                  fontSize: { xs: '2rem', md: '2.5rem' },
-                  lineHeight: 1.2,
-                  color: 'text.primary',
-                }}
-              >
-                Tornando a Microeletrônica Acessível
-              </Typography>
-              <Stack spacing={3}>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: 'text.secondary',
-                    lineHeight: 1.8,
-                    fontSize: '1.1rem',
-                    fontWeight: 400,
-                  }}
-                >
-                  Somos o OpenSilício, um grupo de pesquisa e extensão da Escola Politécnica da USP.
-                  Nossa missão é democratizar o desenvolvimento de microeletrônica através de educação
-                  aberta e colaboração.
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: 'text.secondary',
-                    lineHeight: 1.8,
-                    fontSize: '1.1rem',
-                    fontWeight: 400,
-                  }}
-                >
-                  Unimos ensino, pesquisa e projetos práticos para formar profissionais capacitados
-                  em design de circuitos integrados, preparando-os para os desafios da indústria moderna.
-                </Typography>
-              </Stack>
-              <Box sx={{ pt: 2 }}>
-                <Button
-                  component={RouterLink}
-                  to="/sobre"
-                  variant="contained"
-                  size="large"
-                  sx={{
-                    px: 6,
-                    py: 2,
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    borderRadius: 3,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)',
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                    },
-                  }}
-                >
-                  Conheça Nossa História
-                </Button>
-              </Box>
-            </Stack>
+          <Grid size={{ xs: 12, md: 7 }}>
+            <span className="kicker">02 · Sobre o OpenSilício</span>
+            <Box className="caption-rule" />
+            <Typography component="h3" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '36px', lineHeight: '38px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+              Microeletrônica aberta, na Poli
+            </Typography>
+            <Typography sx={{ fontSize: '16px', lineHeight: '24px', mt: 2.5, maxWidth: '58ch', color: 'var(--color-text-muted)' }}>
+              Somos um grupo de pesquisa e extensão da Escola Politécnica da USP dedicado a abrir o projeto de circuitos integrados: ferramentas livres, PDKs abertos e material didático em português, produzido por quem está aprendendo junto.
+            </Typography>
+            <Box sx={{ mt: 3 }}>
+              <RouterLink to="/sobre" className="btn btn-secondary">Conheça Nossa História</RouterLink>
+            </Box>
           </Grid>
         </Grid>
       </Container>
 
-      {/* Features Section */}
-      <Box
-        sx={{ py: { xs: 10, md: 16 } }}
-      >
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-          <Stack spacing={8}>
-            <Stack spacing={3} alignItems="center" textAlign="center">
-              <Typography
-                variant="overline"
-                sx={{
-                  color: 'primary.main',
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  fontSize: '0.875rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                O que oferecemos
-              </Typography>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 800,
-                  maxWidth: 700,
-                  fontSize: { xs: '2rem', md: '2.5rem' },
-                  lineHeight: 1.2,
-                  color: 'text.primary',
-                }}
-              >
-                Recursos Completos para Sua Jornada
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: 'text.secondary',
-                  maxWidth: 600,
-                  fontSize: '1.1rem',
-                  lineHeight: 1.6,
-                  fontWeight: 400,
-                }}
-              >
-                Do básico ao avançado, oferecemos todo o suporte necessário para você se tornar
-                um expert em design de chips.
-              </Typography>
-            </Stack>
-
-            <Grid container spacing={4}>
-              {[
-                {
-                  icon: <SchoolIcon sx={{ fontSize: 42 }} />,
-                  title: 'Educação Estruturada',
-                  description: 'Cursos, workshops e trilhas de aprendizado organizadas para todos os níveis, do iniciante ao avançado.',
-                  gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  link: '/educacao',
-                },
-                {
-                  icon: <ArticleIcon sx={{ fontSize: 42 }} />,
-                  title: 'Blog Técnico',
-                  description: 'Tutoriais, análises e insights sobre as últimas tendências em microeletrônica e design de chips.',
-                  gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                  link: '/blog',
-                },
-                {
-                  icon: <MenuBookIcon sx={{ fontSize: 42 }} />,
-                  title: 'Wiki Técnica',
-                  description: 'Dicionário completo com termos, conceitos e definições essenciais da área de microeletrônica.',
-                  gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                  link: '/wiki',
-                },
-                {
-                  icon: <CodeIcon sx={{ fontSize: 42 }} />,
-                  title: 'Projetos Open Source',
-                  description: 'Acesso a projetos reais de circuitos integrados desenvolvidos de forma colaborativa e aberta.',
-                  gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                  link: '/blog',
-                },
-                {
-                  icon: <GroupsIcon sx={{ fontSize: 42 }} />,
-                  title: 'Comunidade Ativa',
-                  description: 'Conecte-se com estudantes, pesquisadores e profissionais da indústria através de nossa rede.',
-                  gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                  link: '/blog',
-                },
-                {
-                  icon: <RocketLaunchIcon sx={{ fontSize: 42 }} />,
-                  title: 'Eventos e Workshops',
-                  description: 'Participe de eventos, palestras e workshops com especialistas da academia e indústria.',
-                  gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-                  link: '/educacao',
-                },
-              ].map((feature, index) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-                  <Card
-                    component={RouterLink}
-                    to={feature.link}
-                    aria-label={`Abrir: ${feature.title}`}
-                    sx={{
-                      height: '100%',
-                      textDecoration: 'none',
-                      background: (theme) => theme.palette.background.paper,
-                      backdropFilter: 'blur(20px)',
-                      border: 'none', // Remove border entirely (prevents vertical line from stacking Card borders)
-                      borderRadius: 4,
-                      boxShadow: (theme) => theme.palette.mode === 'dark'
-                        ? '0 8px 32px rgba(0,0,0,0.3)'
-                        : '0 8px 32px rgba(0,0,0,0.08)',
-                      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      outline: 'none',
-                      '&:focus': {
-                        outline: 'none',
-                      },
-                      '&:focus-visible': {
-                        outline: '2px solid',
-                        outlineColor: 'primary.main',
-                        outlineOffset: '2px',
-                      },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: '4px',
-                        background: feature.gradient,
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease',
-                      },
-                      boxSizing: 'border-box',
-                      // Add a subtle separator only between cards (except on last row): a margin, not a border
-                    }}
-                  >
-                    <CardContent sx={{
-                      p: 5,
-                      border: (theme) => theme.palette.mode === 'dark'
-                        ? '1px solid rgba(255,255,255,0.07)'
-                        : '1px solid #ececec',
-                      borderRadius: 4,
-                      boxSizing: 'border-box',
-                      height: '100%',
-                      background: 'transparent',
-                    }}>
-                      <Stack spacing={3}>
-                        <Avatar
-                          sx={{
-                            width: 80,
-                            height: 80,
-                            background: feature.gradient,
-                            color: 'common.white',
-                            boxShadow: '0 12px 32px rgba(0,0,0,0.2)',
-                          }}
-                        >
-                          {feature.icon}
-                        </Avatar>
-                        <Box>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: '1.25rem',
-                              mb: 2,
-                              color: 'text.primary',
-                            }}
-                          >
-                            {feature.title}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: 'text.secondary',
-                              lineHeight: 1.7,
-                              fontSize: '0.95rem',
-                              fontWeight: 400,
-                            }}
-                          >
-                            {feature.description}
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
+      {/* O que oferecemos */}
+      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
+        <span className="kicker">03 · O que oferecemos</span>
+        <Box className="caption-rule" sx={{ mb: 3 }} />
+        <Grid container spacing={4}>
+          {offerings.map((item) => (
+            <Grid key={item.title} size={{ xs: 12, sm: 6, md: 4 }}>
+              <BlueprintFrame sx={{ p: 3, height: '100%' }}>
+                <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '22px', lineHeight: '24px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                  {item.title}
+                </Typography>
+                <Typography sx={{ fontSize: '15px', lineHeight: '24px', mt: 1.5, color: 'var(--color-text-muted)' }}>{item.desc}</Typography>
+              </BlueprintFrame>
             </Grid>
-          </Stack>
-        </Container>
-      </Box>
-      <Box
-        sx={{
-          borderBottom: '1px solid',
-          borderColor: 'divider',
-          my: { xs: 6, md: 10 },
-          width: '100%',
-        }}
-      />
+          ))}
+        </Grid>
+      </Container>
 
-      {/* Partners / Social Proof */}
-      <Box
-        sx={{
-          py: { xs: 8, md: 12 },
-        }}
-      >
-        <Container maxWidth="lg">
-          <Stack spacing={4} alignItems="center" textAlign="center">
-            <Typography
-              variant="overline"
-              sx={{
-                color: 'text.secondary',
-                letterSpacing: 2,
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                textTransform: 'uppercase',
-              }}
-            >
-              Apoiadores e Parceiros
-            </Typography>
-            <Grid container spacing={6} alignItems="center" justifyContent="center">
-              {[ '/amigos-da-poli-logo-sem-bg.png'  ].map((src, i) => (
-                <Grid key={i}>
-                  <Box
-                    component="img"
-                    src={src}
-                    alt="OpenSilício"
-                    sx={{
-                      height: 100,
-                      opacity: (theme) => theme.palette.mode === 'dark' ? 0.8 : 0.6,
-                      filter: (theme) => theme.palette.mode === 'dark' 
-                        ? 'grayscale(50%) brightness(1.2)' 
-                        : 'grayscale(100%)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        opacity: 1,
-                        filter: 'grayscale(0%) brightness(1)',
-                        transform: 'scale(1.05)',
-                      },
-                    }}
+      {/* Áreas de estudo — featured education */}
+      {settings?.featured_education_resources && settings.featured_education_resources.length > 0 && (
+        <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-end" sx={{ mb: 1.5 }}>
+            <span className="kicker" style={{ margin: 0 }}>04 · Áreas de estudo em destaque</span>
+            <RouterLink to="/educacao" style={{ fontSize: 14 }}>Ver toda a Educação →</RouterLink>
+          </Stack>
+          <Box className="caption-rule" sx={{ mb: 3 }} />
+          <Grid container spacing={4}>
+            {settings.featured_education_resources.map((resource) => (
+              <Grid key={resource.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <RouterLink to={`/educacao/${resource.id}`} className="card blueprint" style={{ padding: 0, textDecoration: 'none', color: 'inherit', gap: 0 }}>
+                  <DuotonePhoto
+                    src={resource.image_url}
+                    alt={resource.title}
+                    label="Miniatura"
+                    variant="category-watermark"
+                    sx={{ borderBottom: '1px solid var(--color-line)' }}
                   />
-                </Grid>
-              ))}
-            </Grid>
-          </Stack>
-        </Container>
-      </Box>
-
-      {/* Topics Section - Education Resources */}
-      {settings && settings.featured_education_resources && settings.featured_education_resources.length > 0 && (
-        <Container maxWidth="lg" sx={{ py: { xs: 10, md: 16 } }}>
-          <Stack spacing={8}>
-            <Stack spacing={3} alignItems="center" textAlign="center">
-              <Typography
-                variant="overline"
-                sx={{
-                  color: 'primary.main',
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  fontSize: '0.875rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                Áreas de Estudo
-              </Typography>
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 800,
-                  maxWidth: 700,
-                  fontSize: { xs: '2rem', md: '2.5rem' },
-                  lineHeight: 1.2,
-                  color: 'text.primary',
-                }}
-              >
-                Aprenda com Nossos Projetos
-              </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: 'text.secondary',
-                maxWidth: 600,
-                fontSize: '1.1rem',
-                lineHeight: 1.6,
-                fontWeight: 400,
-              }}
-            >
-              Explore os principais tópicos e áreas de conhecimento em microeletrônica.
-            </Typography>
-          </Stack>
-
-          <Grid container spacing={4} justifyContent="center">
-            {(settings?.featured_education_resources || []).map((resource, index) => {
-              // Gradient colors for cards
-              const gradients = [
-                'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-              ]
-
-              return (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Card
-                    sx={{
-                      width: 330,
-                      minHeight: 280,
-                      borderRadius: 3,
-                      overflow: 'hidden',
-                      boxShadow: (theme) => theme.palette.mode === 'dark'
-                        ? '0 2px 12px rgba(0,0,0,0.3)'
-                        : '0 2px 12px rgba(0,0,0,0.07)',
-                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      background: (theme) => theme.palette.background.paper,
-                      '&:hover': {
-                        transform: 'translateY(-4px) scale(1.025)',
-                        boxShadow: (theme) => theme.palette.mode === 'dark'
-                          ? '0 8px 24px rgba(0,0,0,0.4)'
-                          : '0 8px 24px rgba(0,0,0,0.12)',
-                      },
-                    }}
-                >
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      width: '100%',
-                      height: 140,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        backgroundImage: resource.image_url
-                          ? `url(${resource.image_url})`
-                          : `url(/chip_closeup_stock.jpg)`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        transition: 'transform 0.6s ease',
-                        '&::before': {
-                          content: '""',
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          background: 'linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 100%)',
-                        },
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 16,
-                        right: 16,
-                        background: gradients[index % gradients.length],
-                        color: 'white',
-                        px: 2.6,
-                        py: 0.75,
-                        borderRadius: 1,
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        boxShadow: (theme) => theme.palette.mode === 'dark'
-                          ? '0 2px 8px rgba(0,0,0,0.3)'
-                          : '0 2px 8px rgba(0,0,0,0.09)',
-                        backdropFilter: 'blur(8px)',
-                      }}
-                    >
-                      {resource.category || 'Educação'}
-                    </Box>
-                  </Box>
-                  <CardContent sx={{ pt: 2.8, pb: 2.8, px: 2.5 }}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: '1.22rem',
-                        color: 'text.primary',
-                        mb: 1,
-                        lineHeight: 1.22,
-                      }}
-                    >
+                  <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                    <span className="tag tag-accent" style={{ alignSelf: 'flex-start' }}>{resource.category}{resource.difficulty ? ` · ${resource.difficulty}` : ''}</span>
+                    <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
                       {resource.title}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: 'text.secondary',
-                        lineHeight: 1.6,
-                        fontSize: '1.05rem',
-                        fontWeight: 400,
-                        minHeight: 55,
-                      }}
-                    >
-                      {resource.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                    <Typography sx={{ fontSize: '15px', lineHeight: '24px', color: 'var(--color-text-muted)' }}>{resource.description}</Typography>
+                  </Box>
+                </RouterLink>
               </Grid>
-            )})}
+            ))}
           </Grid>
-
-            <Box sx={{ textAlign: 'center', pt: 2 }}>
-              <Button
-                component={RouterLink}
-                to="/educacao"
-                variant="outlined"
-                size="large"
-                sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  color: 'text.primary',
-                  borderColor: 'rgba(0,0,0,0.2)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    backgroundColor: 'rgba(102, 126, 234, 0.05)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 24px rgba(102, 126, 234, 0.2)',
-                  },
-                }}
-              >
-                Ver Todos os Recursos
-              </Button>
-            </Box>
-          </Stack>
         </Container>
       )}
 
-      {/* Featured Blog Posts Section */}
-      {settings && settings.featured_blog_posts && settings.featured_blog_posts.length > 0 && (
-        <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
-          <Stack spacing={6} alignItems="center">
-            <Stack spacing={2} alignItems="center" textAlign="center">
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 800,
-                  fontSize: { xs: '2rem', md: '2.5rem' },
-                  lineHeight: 1.2,
-                  color: 'text.primary',
-                }}
-              >
-                Posts em Destaque
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: 'text.secondary',
-                  maxWidth: 600,
-                  fontSize: '1.1rem',
-                  lineHeight: 1.6,
-                  fontWeight: 400,
-                }}
-              >
-                Confira nossos artigos mais recentes sobre microeletrônica e design de chips.
-              </Typography>
-            </Stack>
+      {/* Posts em destaque — featured blog */}
+      {settings?.featured_blog_posts && settings.featured_blog_posts.length > 0 && (
+        <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="flex-end" sx={{ mb: 1.5 }}>
+            <span className="kicker" style={{ margin: 0 }}>05 · Posts em destaque</span>
+            <RouterLink to="/blog" style={{ fontSize: 14 }}>Ver todo o Blog →</RouterLink>
+          </Stack>
+          <Box className="caption-rule" sx={{ mb: 3 }} />
+          <Grid container spacing={4}>
+            {settings.featured_blog_posts.map((post) => (
+              <Grid key={post.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <RouterLink to={`/blog/${post.slug}`} className="card blueprint" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <span className="kicker" style={{ margin: 0 }}>{post.category}</span>
+                  <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                    {post.title}
+                  </Typography>
+                  <Typography sx={{ fontSize: '15px', lineHeight: '24px', color: 'var(--color-text-muted)' }}>{post.excerpt}</Typography>
+                  <Typography sx={{ fontSize: '13px', color: 'var(--color-text-faint)' }}>Por {post.author}</Typography>
+                </RouterLink>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      )}
 
-            <Grid container spacing={4} justifyContent="center">
-              {settings.featured_blog_posts.map((post, index) => {
-                const gradients = [
-                  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                ]
-
-                return (
-                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={post.id} sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <Card
-                      sx={{
-                        width: 330,
-                        minHeight: 280,
-                        borderRadius: 3,
-                        overflow: 'hidden',
-                        boxShadow: (theme) => theme.palette.mode === 'dark'
-                          ? '0 2px 12px rgba(0,0,0,0.3)'
-                          : '0 2px 12px rgba(0,0,0,0.07)',
-                        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        background: (theme) => theme.palette.background.paper,
-                        '&:hover': {
-                          transform: 'translateY(-4px) scale(1.025)',
-                          boxShadow: (theme) => theme.palette.mode === 'dark'
-                            ? '0 8px 24px rgba(0,0,0,0.4)'
-                            : '0 8px 24px rgba(0,0,0,0.12)',
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: 'relative',
-                          width: '100%',
-                          height: 140,
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            backgroundImage: post.image_url ? `url(${post.image_url})` : `url(/chip_closeup_stock.jpg)`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center',
-                            transition: 'transform 0.6s ease',
-                            '&::before': {
-                              content: '""',
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              background: 'linear-gradient(135deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 100%)',
-                            },
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 16,
-                            right: 16,
-                            background: gradients[index % gradients.length],
-                            color: 'white',
-                            px: 2.6,
-                            py: 0.75,
-                            borderRadius: 1,
-                            fontSize: '0.8rem',
-                            fontWeight: 700,
-                            letterSpacing: 0.5,
-                            textTransform: 'uppercase',
-                            boxShadow: (theme) => theme.palette.mode === 'dark'
-                              ? '0 2px 8px rgba(0,0,0,0.3)'
-                              : '0 2px 8px rgba(0,0,0,0.09)',
-                            backdropFilter: 'blur(8px)',
-                          }}
-                        >
-                          {post.category || 'Blog'}
-                        </Box>
-                      </Box>
-                      <CardContent sx={{ pt: 2.8, pb: 2.8, px: 2.5 }}>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: '1.22rem',
-                            color: 'text.primary',
-                            mb: 1,
-                            lineHeight: 1.22,
-                          }}
-                        >
-                          {post.title}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: 'text.secondary',
-                            lineHeight: 1.6,
-                            fontSize: '1.05rem',
-                            fontWeight: 400,
-                            minHeight: 55,
-                          }}
-                        >
-                          {post.excerpt}
-                        </Typography>
-                        {post.author && (
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              color: 'text.secondary',
-                              mt: 1,
-                              display: 'block',
-                              fontStyle: 'italic',
-                            }}
-                          >
-                            Por {post.author}
-                          </Typography>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                )})}
+      {/* Apoiadores e parceiros */}
+      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 9 } }}>
+        <span className="kicker">06 · Apoiadores e parceiros</span>
+        <Box className="caption-rule" sx={{ mb: 3 }} />
+        <Grid container spacing={3}>
+          {[
+            { name: 'Amigos da Poli', href: 'https://www.amigosdapoli.com.br/' },
+            { name: 'TinyTapeout', href: 'https://tinytapeout.com/' },
+          ].map((sponsor) => (
+            <Grid key={sponsor.name} size={{ xs: 6, sm: 3 }}>
+              <Box
+                component="a"
+                href={sponsor.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ textDecoration: 'none', display: 'block' }}
+              >
+                <BlueprintFrame sx={{ display: 'grid', placeItems: 'center', p: 3, minHeight: 96 }}>
+                  <Typography sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '20px', letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--color-accent-ink)' }}>
+                    {sponsor.name}
+                  </Typography>
+                </BlueprintFrame>
+              </Box>
             </Grid>
-
-            <Box sx={{ textAlign: 'center', pt: 2 }}>
-              <Button
-                component={RouterLink}
-                to="/blog"
-                variant="outlined"
-                size="large"
+          ))}
+          {[1, 2].map((slot) => (
+            <Grid key={slot} size={{ xs: 6, sm: 3 }}>
+              <Box
                 sx={{
-                  px: 6,
-                  py: 2,
-                  fontSize: '1.1rem',
-                  fontWeight: 600,
-                  borderRadius: 3,
-                  color: 'text.primary',
-                  borderColor: 'rgba(0,0,0,0.2)',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    borderColor: 'primary.main',
-                    backgroundColor: 'rgba(102, 126, 234, 0.05)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 24px rgba(102, 126, 234, 0.2)',
-                  },
+                  display: 'grid', placeItems: 'center', p: 3, minHeight: 96,
+                  border: '1px dashed var(--color-neutral-400)',
+                  fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-neutral-600)',
                 }}
               >
-                Ver Todos os Posts
-              </Button>
-            </Box>
-          </Stack>
-        </Container>
-      )}
+                Vaga de parceiro
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
     </Stack>
   )
 }

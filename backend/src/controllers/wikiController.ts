@@ -106,7 +106,7 @@ export const getWikiLinksForContent = asyncHandler(async (req: AuthRequest, res:
   const { contentType, contentId } = req.params;
 
   const result = await pool.query(
-    `SELECT wl.*, we.term, we.slug
+    `SELECT wl.*, we.term, we.slug, we.definition
      FROM content_wiki_links wl
      JOIN wiki_entries we ON wl.wiki_entry_id = we.id
      WHERE wl.content_type = $1 AND wl.content_id = $2`,
@@ -195,6 +195,13 @@ export const searchByTerm = asyncHandler(async (req: AuthRequest, res: Response)
   }
 
   res.json(entry);
+});
+
+// Public: term + count only (no linking content ids/titles), used by the
+// empty-wiki "blank sheet" state to show the most-requested missing terms.
+export const getPendingLinksGroupedPublic = asyncHandler(async (_req: AuthRequest, res: Response) => {
+  const result = await pendingWikiLinksService.getPendingGroupedByTerm();
+  res.json(result);
 });
 
 // Pending wiki links management

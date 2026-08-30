@@ -31,6 +31,7 @@
     "@tiptap/starter-kit": "^2.1.13",
     "@types/katex": "^0.16.7",
     "axios": "^1.6.5",
+    "framer-motion": "^13.1.1",
     "katex": "^0.16.25",
     "lexical": "^0.37.0",
     "react": "^19.1.1",

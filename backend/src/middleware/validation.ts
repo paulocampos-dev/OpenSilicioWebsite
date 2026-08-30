@@ -110,6 +110,10 @@ export const blogPostSchema = z.object({
     .max(100, 'Categoria deve ter no máximo 100 caracteres')
     .trim()
     .optional(),
+  toc_items: z
+    .array(z.string().max(200, 'Cada item deve ter no máximo 200 caracteres').trim())
+    .max(20, 'No máximo 20 itens')
+    .optional(),
   published: z.boolean().optional(),
 });
 

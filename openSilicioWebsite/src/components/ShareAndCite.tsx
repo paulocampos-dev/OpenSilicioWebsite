@@ -1,24 +1,6 @@
 import { useState } from 'react'
-import {
-  Stack,
-  Button,
-  Typography,
-  Collapse,
-  Paper,
-  IconButton,
-  Snackbar,
-  Alert,
-  Box,
-  Divider,
-  useTheme,
-} from '@mui/material'
-import XIcon from '@mui/icons-material/X'
-import LinkedInIcon from '@mui/icons-material/LinkedIn'
-import InstagramIcon from '@mui/icons-material/Instagram'
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import { Box, Collapse, Grid, Snackbar, Alert, Typography } from '@mui/material'
+import BlueprintFrame from './design/BlueprintFrame'
 
 interface ShareAndCiteProps {
   title: string
@@ -28,8 +10,32 @@ interface ShareAndCiteProps {
   publishedDate: string
 }
 
+function LinkedInGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="0" />
+      <path d="M8 10v7M8 7v.5M12 17v-4a2 2 0 0 1 4 0v4" />
+    </svg>
+  )
+}
+function XGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4l16 16M20 4 4 20" />
+    </svg>
+  )
+}
+function InstagramGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="0" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r=".5" fill="currentColor" />
+    </svg>
+  )
+}
+
 export default function ShareAndCite({ title, author, url, imageUrl, publishedDate }: ShareAndCiteProps) {
-  const theme = useTheme()
   const [showCitations, setShowCitations] = useState(false)
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false,
@@ -40,232 +46,87 @@ export default function ShareAndCite({ title, author, url, imageUrl, publishedDa
   const fullUrl = `${window.location.origin}${url}`
   const displayAuthor = author || 'OpenSilício Team'
   const year = new Date(publishedDate).getFullYear()
-  const formattedDate = new Date(publishedDate).toLocaleDateString('pt-BR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 
-  // Generate citations
   const standardCitation = `${displayAuthor}. (${year}). ${title}. OpenSilício. Disponível em: ${fullUrl}. Acesso em: ${new Date().toLocaleDateString('pt-BR')}.`
 
   const bibtexCitation = `@misc{opensilicio${year},
   author = {${displayAuthor}},
-  title = {${title}},
-  year = {${year}},
-  note = {OpenSilício},
+  title  = {${title}},
+  year   = {${year}},
+  note   = {OpenSilício},
   howpublished = {\\url{${fullUrl}}},
   urldate = {${new Date().toISOString().split('T')[0]}}
 }`
-
-  const handleLinkedInShare = () => {
-    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(fullUrl)}`
-    window.open(linkedInUrl, '_blank', 'noopener,noreferrer')
-  }
-
-  const handleXShare = () => {
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(fullUrl)}`
-    window.open(twitterUrl, '_blank', 'noopener,noreferrer')
-  }
-
-  const handleInstagramShare = async () => {
-    // Check if we're on mobile and Web Share API is available
-    if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      try {
-        await navigator.share({
-          title: title,
-          text: `${title}\n\nVia OpenSilício`,
-          url: fullUrl,
-        })
-      } catch (error) {
-        // User cancelled or error occurred
-        if ((error as Error).name !== 'AbortError') {
-          copyToClipboard(fullUrl, 'Link copiado! Cole no Instagram.')
-        }
-      }
-    } else {
-      // Desktop: just copy the link
-      copyToClipboard(fullUrl, 'Link copiado! Compartilhe no Instagram.')
-    }
-  }
 
   const copyToClipboard = async (text: string, successMessage: string) => {
     try {
       await navigator.clipboard.writeText(text)
       setSnackbar({ open: true, message: successMessage, severity: 'success' })
-    } catch (error) {
+    } catch {
       setSnackbar({ open: true, message: 'Erro ao copiar para área de transferência', severity: 'error' })
     }
   }
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false })
+  const handleLinkedInShare = () => {
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(fullUrl)}`, '_blank', 'noopener,noreferrer')
   }
+  const handleXShare = () => {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(fullUrl)}`, '_blank', 'noopener,noreferrer')
+  }
+  const handleInstagramShare = async () => {
+    if (navigator.share && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      try {
+        await navigator.share({ title, text: `${title}\n\nVia OpenSilício`, url: fullUrl })
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') copyToClipboard(fullUrl, 'Link copiado! Cole no Instagram.')
+      }
+    } else {
+      copyToClipboard(fullUrl, 'Link copiado! Compartilhe no Instagram.')
+    }
+  }
+
+  void imageUrl // reserved for a future share-card preview; unused for now
 
   return (
     <>
-      <Stack spacing={3} sx={{ mt: 6 }}>
-        <Divider />
+      <BlueprintFrame sx={{ p: 0 }}>
+        <Box
+          sx={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap',
+            px: 3, py: 2, borderBottom: '1px solid var(--color-line)',
+          }}
+        >
+          <span className="kicker" style={{ margin: 0 }}>Compartilhar e citar</span>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-secondary" onClick={handleLinkedInShare}><LinkedInGlyph /> LinkedIn</button>
+            <button type="button" className="btn btn-secondary" onClick={handleXShare}><XGlyph /> X</button>
+            <button type="button" className="btn btn-secondary" onClick={handleInstagramShare}><InstagramGlyph /> Instagram</button>
+            <button type="button" className="btn btn-secondary" onClick={() => copyToClipboard(fullUrl, 'Link copiado!')}>Copiar link</button>
+            <button type="button" className="btn btn-primary" onClick={() => setShowCitations((v) => !v)}>Cite isso!</button>
+          </Box>
+        </Box>
 
-        {/* Share Section */}
-        <Stack spacing={2} alignItems="center">
-          <Typography variant="h6" fontWeight={700}>
-            Compartilhar
-          </Typography>
-          <Stack direction="row" spacing={2} flexWrap="wrap" justifyContent="center">
-            <Button
-              variant="outlined"
-              startIcon={<LinkedInIcon />}
-              onClick={handleLinkedInShare}
-              sx={{
-                borderColor: '#0A66C2',
-                color: '#0A66C2',
-                '&:hover': {
-                  borderColor: '#0A66C2',
-                  backgroundColor: 'rgba(10, 102, 194, 0.04)',
-                },
-              }}
-            >
-              LinkedIn
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<XIcon />}
-              onClick={handleXShare}
-              sx={{
-                borderColor: '#000000',
-                color: '#000000',
-                '&:hover': {
-                  borderColor: '#000000',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                },
-              }}
-            >
-              X
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<InstagramIcon />}
-              onClick={handleInstagramShare}
-              sx={{
-                borderColor: '#E4405F',
-                color: '#E4405F',
-                '&:hover': {
-                  borderColor: '#E4405F',
-                  backgroundColor: 'rgba(228, 64, 95, 0.04)',
-                },
-              }}
-            >
-              Instagram
-            </Button>
-          </Stack>
-        </Stack>
+        <Collapse in={showCitations}>
+          <Grid container spacing={0}>
+            <Grid size={{ xs: 12, sm: 6 }} sx={{ p: 3, borderRight: { sm: '1px solid var(--color-line)' } }}>
+              <Typography sx={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', mb: 1 }}>Citação</Typography>
+              <Box sx={{ p: 2, border: '1px solid var(--color-line)', fontSize: 15, lineHeight: '24px' }}>{standardCitation}</Box>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }} sx={{ p: 3 }}>
+              <Typography sx={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)', mb: 1 }}>BibTeX</Typography>
+              <Box component="pre" sx={{ p: 2, border: '1px solid var(--color-line)', fontFamily: 'var(--font-mono)', fontSize: 13, lineHeight: '22px', overflowX: 'auto', m: 0, whiteSpace: 'pre' }}>{bibtexCitation}</Box>
+            </Grid>
+          </Grid>
+        </Collapse>
+      </BlueprintFrame>
 
-        {/* Citations Section */}
-        <Stack spacing={2} alignItems="center">
-          <Button
-            variant="text"
-            startIcon={<FormatQuoteIcon />}
-            endIcon={showCitations ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            onClick={() => setShowCitations(!showCitations)}
-            sx={{ textTransform: 'none' }}
-          >
-            Citações
-          </Button>
-
-          <Collapse in={showCitations} sx={{ width: '100%' }}>
-            <Stack spacing={3}>
-              {/* Standard Citation */}
-              <Paper variant="outlined" sx={{ p: 3 }}>
-                <Stack spacing={2}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="subtitle2" fontWeight={700} color="primary">
-                      Citação Padrão (ABNT)
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() => copyToClipboard(standardCitation, 'Citação copiada!')}
-                      aria-label="Copiar citação padrão"
-                    >
-                      <ContentCopyIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                  <Box
-                    sx={{
-                      p: 2,
-                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50',
-                      borderRadius: 1,
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem',
-                      overflowX: 'auto',
-                    }}
-                  >
-                    {standardCitation}
-                  </Box>
-                </Stack>
-              </Paper>
-
-              {/* BibTeX Citation */}
-              <Paper variant="outlined" sx={{ p: 3 }}>
-                <Stack spacing={2}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Typography variant="subtitle2" fontWeight={700} color="primary">
-                      BibTeX
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() => copyToClipboard(bibtexCitation, 'BibTeX copiado!')}
-                      aria-label="Copiar BibTeX"
-                    >
-                      <ContentCopyIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                  <Box
-                    sx={{
-                      p: 2,
-                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50',
-                      borderRadius: 1,
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem',
-                      overflowX: 'auto',
-                      whiteSpace: 'pre',
-                    }}
-                  >
-                    {bibtexCitation}
-                  </Box>
-                </Stack>
-              </Paper>
-
-              {/* Metadata */}
-              <Paper variant="outlined" sx={{ p: 2, bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'grey.50' }}>
-                <Stack spacing={0.5}>
-                  <Typography variant="caption" color="text.secondary">
-                    <strong>Autor:</strong> {displayAuthor}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    <strong>Título:</strong> {title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    <strong>Publicado em:</strong> {formattedDate}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    <strong>URL:</strong> {fullUrl}
-                  </Typography>
-                </Stack>
-              </Paper>
-            </Stack>
-          </Collapse>
-        </Stack>
-      </Stack>
-
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert onClose={() => setSnackbar((s) => ({ ...s, open: false }))} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

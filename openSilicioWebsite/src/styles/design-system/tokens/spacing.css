@@ -1,0 +1,22 @@
+/* Spacing — a 24px leading unit with a 12px half step. Every vertical
+   measure is a multiple of one of the two; horizontal gutters use the
+   same scale so the grid reads. */
+:root {
+  --leading: 24px;
+  --half: 12px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 56px;
+  --space-9: 72px;
+  --space-10: 96px;
+
+  --edge: clamp(20px, 5vw, 56px); /* page gutter */
+  --measure: 62ch;                /* body text max width */
+  --grid-gap: 32px;
+}

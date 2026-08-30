@@ -1,10 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
-import { ThemeProvider, CssBaseline, AppBar, Toolbar, Typography, IconButton, Box, Container, Button, Drawer, List, ListItem, ListItemButton, ListItemText, useMediaQuery, useTheme } from '@mui/material'
-import Brightness4Icon from '@mui/icons-material/Brightness4'
-import Brightness7Icon from '@mui/icons-material/Brightness7'
-import MenuIcon from '@mui/icons-material/Menu'
-import CloseIcon from '@mui/icons-material/Close'
+import { ThemeProvider, CssBaseline, Box, Container, Drawer, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { BrowserRouter, Routes, Route, Link as RouterLink, useLocation } from 'react-router-dom'
+import { useScroll, useMotionValueEvent } from 'framer-motion'
 import { getTheme, type ColorMode } from './theme'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -67,27 +64,53 @@ const saveMode = (mode: ColorMode): void => {
   }
 }
 
+// Inline Lucide-style icons (stroke-width 1.5) — the system's icon rules
+// call for these directly rather than a filled icon-font set.
+function MoonIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  )
+}
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.5 1.5M16.5 16.5 18 18M18 6l-1.5 1.5M7.5 16.5 6 18" />
+    </svg>
+  )
+}
+function MenuGlyph() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  )
+}
+function CloseGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  )
+}
+
 function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void }) {
   const location = useLocation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [condensed, setCondensed] = useState(false)
+  const { scrollY } = useScroll()
+  useMotionValueEvent(scrollY, 'change', (latest) => setCondensed(latest > 48))
   const isAdminRoute = location.pathname.startsWith('/admin')
-  
+
   if (isAdminRoute) {
     return null
   }
 
-  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-    if (
-      event.type === 'keydown' &&
-      ((event as React.KeyboardEvent).key === 'Tab' ||
-        (event as React.KeyboardEvent).key === 'Shift')
-    ) {
-      return
-    }
-    setDrawerOpen(open)
-  }
+  const closeDrawer = () => setDrawerOpen(false)
 
   const menuItems = [
     { label: 'Início', path: '/' },
@@ -97,77 +120,78 @@ function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void 
     { label: 'Sobre', path: '/sobre' },
   ]
 
+  const isCurrent = (path: string) => location.pathname === path
+  const logo = mode === 'dark' ? '/logo-mark-white.png' : '/logo-mark-steel.png'
+
   return (
-    <AppBar position="static" color="transparent" elevation={0}>
-      <Toolbar sx={{ gap: { xs: 1, md: 2 }, minHeight: 80, justifyContent: 'space-between' }}>
-        <Box component={RouterLink} to="/" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
-          <Box component="img" src="/open-silicio-logo.jpg" alt="OpenSilício" sx={{ width: { xs: 40, md: 56 }, height: { xs: 40, md: 56 }, mr: 1, borderRadius: 1 }} />
-          <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.25rem', md: '1.5rem' } }}>OpenSilício</Typography>
-        </Box>
-        
-        {/* Desktop Menu */}
+    <Box
+      component="header"
+      className={[mode === 'dark' ? 'field' : undefined, 'nav-sticky', condensed ? 'nav-condensed' : undefined].filter(Boolean).join(' ')}
+      sx={{ zIndex: (t) => t.zIndex.appBar }}
+    >
+
+      <nav className="nav" style={{ justifyContent: 'space-between' }}>
+        <RouterLink to="/" className="nav-brand" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <img className="nav-brand__mark" src={logo} alt="" />
+          <span className="nav-brand__name">OpenSilício</span>
+        </RouterLink>
+
         {!isMobile && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             {menuItems.map((item) => (
-              <Button key={item.path} component={RouterLink} to={item.path} color="primary">
+              <RouterLink key={item.path} to={item.path} aria-current={isCurrent(item.path) ? 'page' : undefined}>
                 {item.label}
-              </Button>
+              </RouterLink>
             ))}
-            <IconButton onClick={toggleMode} color="inherit" aria-label="Alternar tema" size="large">
-              {mode === 'dark' ? <Brightness7Icon fontSize="large" /> : <Brightness4Icon fontSize="large" />}
-            </IconButton>
+            <button type="button" className="btn btn-secondary btn-icon" onClick={toggleMode} aria-label="Alternar tema escuro">
+              {mode === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
           </Box>
         )}
 
-        {/* Mobile Menu Toggle */}
         {isMobile && (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton onClick={toggleMode} color="inherit" aria-label="Alternar tema" size="large">
-              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-            </IconButton>
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="menu"
-              onClick={toggleDrawer(true)}
-              size="large"
-            >
-              <MenuIcon fontSize="large" />
-            </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <button type="button" className="btn btn-secondary btn-icon" onClick={toggleMode} aria-label="Alternar tema escuro">
+              {mode === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
+            <button type="button" className="btn btn-secondary btn-icon" onClick={() => setDrawerOpen(true)} aria-label="Abrir menu">
+              <MenuGlyph />
+            </button>
           </Box>
         )}
-      </Toolbar>
+      </nav>
 
-      {/* Mobile Drawer */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={toggleDrawer(false)}
-        PaperProps={{
-          sx: { width: 250, pt: 2, px: 2 }
-        }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <IconButton onClick={toggleDrawer(false)} size="large">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <List>
+      <Drawer anchor="right" open={drawerOpen} onClose={closeDrawer} PaperProps={{ sx: { width: 280, p: 3, borderRadius: 0 } }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+          <span className="kicker" style={{ margin: 0 }}>Navegação</span>
+          <button type="button" className="btn btn-secondary btn-icon" onClick={closeDrawer} aria-label="Fechar menu">
+            <CloseGlyph />
+          </button>
+        </Stack>
+        <Stack>
           {menuItems.map((item) => (
-            <ListItem key={item.path} disablePadding>
-              <ListItemButton
-                component={RouterLink}
-                to={item.path}
-                onClick={toggleDrawer(false)}
-                sx={{ borderRadius: 2, mb: 1 }}
-              >
-                <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: 600 }} />
-              </ListItemButton>
-            </ListItem>
+            <RouterLink
+              key={item.path}
+              to={item.path}
+              onClick={closeDrawer}
+              style={{
+                padding: '10px 0',
+                borderTop: '1px solid var(--color-line)',
+                fontFamily: 'var(--font-heading)',
+                fontWeight: 600,
+                fontSize: 20,
+                letterSpacing: '.02em',
+                textTransform: 'uppercase',
+                color: isCurrent(item.path) ? 'var(--color-accent)' : 'var(--color-text)',
+                textDecoration: 'none',
+              }}
+            >
+              {item.label}
+            </RouterLink>
           ))}
-        </List>
+        </Stack>
       </Drawer>
-    </AppBar>
+    </Box>
   )
 }
 
@@ -180,6 +204,12 @@ function AppContent() {
   // Save theme preference to localStorage whenever it changes
   useEffect(() => {
     saveMode(mode)
+  }, [mode])
+
+  // Drive the plain-CSS design tokens (independent of MUI's theme) from the
+  // same mode — see tokens/colors.css's [data-color-mode="dark"] overrides.
+  useEffect(() => {
+    document.documentElement.dataset.colorMode = mode
   }, [mode])
 
   // Listen for system preference changes (optional enhancement)

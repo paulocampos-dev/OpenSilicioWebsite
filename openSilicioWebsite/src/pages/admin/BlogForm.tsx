@@ -305,6 +305,50 @@ export default function BlogForm() {
                 helperText="Introdução opcional exibida no topo do artigo, abaixo da imagem de capa"
               />
 
+              <Box>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                  Nesta página (opcional)
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+                  Lista curta dos títulos de seção do artigo, exibida como sumário ao lado do texto. Preencha na mesma ordem em que as seções aparecem no conteúdo.
+                </Typography>
+                <Stack spacing={1.5}>
+                  {(post.toc_items || []).map((item, index) => (
+                    <Stack key={index} direction="row" spacing={1} alignItems="center">
+                      <TextField
+                        value={item}
+                        onChange={(e) => {
+                          const toc_items = [...(post.toc_items || [])];
+                          toc_items[index] = e.target.value;
+                          setPost({ ...post, toc_items });
+                        }}
+                        placeholder={`Seção ${index + 1}`}
+                        fullWidth
+                        size="small"
+                      />
+                      <Button
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          const toc_items = (post.toc_items || []).filter((_, i) => i !== index);
+                          setPost({ ...post, toc_items });
+                        }}
+                      >
+                        Remover
+                      </Button>
+                    </Stack>
+                  ))}
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setPost({ ...post, toc_items: [...(post.toc_items || []), ''] })}
+                    sx={{ alignSelf: 'flex-start' }}
+                  >
+                    Adicionar seção
+                  </Button>
+                </Stack>
+              </Box>
+
               <TextField
                 label="Autor"
                 value={post.author}

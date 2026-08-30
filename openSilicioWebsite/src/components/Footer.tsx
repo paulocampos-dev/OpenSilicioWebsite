@@ -1,356 +1,104 @@
-import { Box, Container, Grid, Stack, Typography, Link, Divider, Button } from '@mui/material'
+import { useEffect, useState } from 'react'
+import { Box, Container, Grid, Stack, Typography, Link } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
-import EmailIcon from '@mui/icons-material/Email'
-import InstagramIcon from '@mui/icons-material/Instagram'
-import LinkedInIcon from '@mui/icons-material/LinkedIn'
-import LocationOnIcon from '@mui/icons-material/LocationOn'
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
+import { settingsApi } from '../services/api'
+import type { SiteSettings } from '../types'
+
+function InstagramGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="0" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r=".5" fill="currentColor" />
+    </svg>
+  )
+}
+function LinkedInGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="0" />
+      <path d="M8 10v7M8 7v.5M12 17v-4a2 2 0 0 1 4 0v4" />
+    </svg>
+  )
+}
+
+const linkStyle = { color: 'var(--color-on-field-muted)', textDecoration: 'none', fontSize: '15px' }
 
 export default function Footer() {
+  const [settings, setSettings] = useState<SiteSettings | null>(null)
+
+  useEffect(() => {
+    settingsApi.getAll().then(setSettings).catch(() => {})
+  }, [])
+
+  const email = settings?.contact_email || 'opensilicio@gmail.com'
+  const instagram = settings?.instagram_url || 'https://www.instagram.com/opensilicio/'
+  const linkedin = settings?.linkedin_url || 'https://www.linkedin.com/company/opensilicio/'
+  const address = settings?.address || 'Escola Politécnica da USP\nAv. Prof. Luciano Gualberto, trav. 3, 158\nSão Paulo — SP, 05508-010'
+
   return (
-    <Box
-      component="footer"
-      sx={{
-        width: '100vw',
-        position: 'relative',
-        left: '50%',
-        right: '50%',
-        marginLeft: '-50vw',
-        marginRight: '-50vw',
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-        color: 'white',
-        pt: { xs: 8, md: 10 },
-        pb: { xs: 4, md: 5 },
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'url(/closeup_electronic_stock.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: 0.05,
-          zIndex: 0,
-        },
-      }}
-    >
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        <Grid container spacing={4} alignItems="flex-start">
-          {/* Logo and Description */}
-          <Grid size={{ xs: 12, md: 3 }}>
-            <Stack spacing={2.5}>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 800,
-                  background: 'linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                OpenSilício
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'rgba(255,255,255,0.7)',
-                  lineHeight: 1.7,
-                  fontSize: '0.9rem',
-                }}
-              >
+    <Box component="footer" className="field" sx={{ pt: 7, pb: 3 }}>
+      <Container maxWidth="lg">
+        <Grid container spacing={5}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Stack spacing={2}>
+              <span className="nav-brand" style={{ marginRight: 0 }}>
+                <img className="nav-brand__mark" src="/logo-mark-white.png" alt="" />
+                <span className="nav-brand__name">OpenSilício</span>
+              </span>
+              <Typography sx={{ color: 'var(--color-on-field-muted)', fontSize: '15px', lineHeight: '24px', maxWidth: '34ch' }}>
                 Democratizando o design de chips através de educação aberta e colaboração.
               </Typography>
             </Stack>
           </Grid>
 
-          {/* Quick Links - Recursos */}
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <Stack spacing={2}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  mb: 1,
-                }}
-              >
-                Recursos
-              </Typography>
-              <Link
-                component={RouterLink}
-                to="/educacao"
-                sx={{
-                  color: 'rgba(255,255,255,0.7)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  transition: 'color 0.3s ease',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Educação
-              </Link>
-              <Link
-                component={RouterLink}
-                to="/blog"
-                sx={{
-                  color: 'rgba(255,255,255,0.7)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  transition: 'color 0.3s ease',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Blog
-              </Link>
-              <Link
-                component={RouterLink}
-                to="/wiki"
-                sx={{
-                  color: 'rgba(255,255,255,0.7)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  transition: 'color 0.3s ease',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Wiki
-              </Link>
+            <Stack spacing={1.5}>
+              <span className="kicker" style={{ color: 'var(--color-steel-300)' }}>Recursos</span>
+              <Link component={RouterLink} to="/educacao" sx={linkStyle}>Educação</Link>
+              <Link component={RouterLink} to="/blog" sx={linkStyle}>Blog</Link>
+              <Link component={RouterLink} to="/wiki" sx={linkStyle}>Wiki</Link>
             </Stack>
           </Grid>
 
-          {/* Quick Links - Sobre */}
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <Stack spacing={2}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  mb: 1,
-                }}
-              >
-                Sobre
-              </Typography>
-              <Link
-                component={RouterLink}
-                to="/sobre"
-                sx={{
-                  color: 'rgba(255,255,255,0.7)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  transition: 'color 0.3s ease',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Nossa História
-              </Link>
-              <Link
-                component={RouterLink}
-                to="/educacao"
-                sx={{
-                  color: 'rgba(255,255,255,0.7)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  transition: 'color 0.3s ease',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Eventos
-              </Link>
-              <Link
-                component={RouterLink}
-                to="/blog"
-                sx={{
-                  color: 'rgba(255,255,255,0.7)',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  transition: 'color 0.3s ease',
-                  '&:hover': {
-                    color: 'white',
-                  },
-                }}
-              >
-                Projetos
-              </Link>
+            <Stack spacing={1.5}>
+              <span className="kicker" style={{ color: 'var(--color-steel-300)' }}>Sobre</span>
+              <Link component={RouterLink} to="/sobre" sx={linkStyle}>Nossa História</Link>
             </Stack>
           </Grid>
 
-          {/* Contact Information */}
-          <Grid size={{ xs: 12, md: 5 }}>
-            <Stack spacing={2.5}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  mb: 1,
-                }}
-              >
-                Contato
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Stack spacing={1.5}>
+              <span className="kicker" style={{ color: 'var(--color-steel-300)' }}>Contato</span>
+              <Link href={`mailto:${email}`} sx={linkStyle}>{email}</Link>
+              <Typography sx={{ color: 'var(--color-on-field-muted)', fontSize: '15px', lineHeight: '22px', whiteSpace: 'pre-line' }}>
+                {address}
               </Typography>
-
-              {/* Email */}
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <EmailIcon sx={{ fontSize: 20, color: 'rgba(255,255,255,0.7)' }} />
-                <Link
-                  href="mailto:opensilicio@gmail.com"
-                  sx={{
-                    color: 'rgba(255,255,255,0.7)',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    transition: 'color 0.3s ease',
-                    '&:hover': {
-                      color: 'white',
-                    },
-                  }}
-                >
-                  opensilicio@gmail.com
+              <Stack direction="row" spacing={1}>
+                <Link href={instagram} target="_blank" rel="noopener noreferrer" className="btn btn-icon" sx={{ border: '1px solid var(--color-line-on-field)', color: 'var(--color-on-field)' }} aria-label="Instagram">
+                  <InstagramGlyph />
                 </Link>
-              </Stack>
-
-              {/* Social Media */}
-              <Stack direction="row" spacing={2}>
-                <Link
-                  href="https://www.instagram.com/opensilicio/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: 'rgba(255,255,255,0.7)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      color: 'white',
-                      transform: 'translateY(-2px)',
-                    },
-                  }}
-                >
-                  <InstagramIcon sx={{ fontSize: 28 }} />
+                <Link href={linkedin} target="_blank" rel="noopener noreferrer" className="btn btn-icon" sx={{ border: '1px solid var(--color-line-on-field)', color: 'var(--color-on-field)' }} aria-label="LinkedIn">
+                  <LinkedInGlyph />
                 </Link>
-                <Link
-                  href="https://www.linkedin.com/company/opensilicio/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    color: 'rgba(255,255,255,0.7)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      color: 'white',
-                      transform: 'translateY(-2px)',
-                    },
-                  }}
-                >
-                  <LinkedInIcon sx={{ fontSize: 28 }} />
-                </Link>
-              </Stack>
-
-              {/* Location */}
-              <Stack spacing={1}>
-                <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                  <LocationOnIcon sx={{ fontSize: 20, color: 'rgba(255,255,255,0.7)', mt: 0.3 }} />
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: 'rgba(255,255,255,0.7)',
-                        lineHeight: 1.6,
-                        fontSize: '0.9rem',
-                      }}
-                    >
-                      Escola Politécnica da USP
-                      <br />
-                      Av. Prof. Luciano Gualberto, trav. 3, 158
-                      <br />
-                      São Paulo - SP, 05508-010
-                    </Typography>
-                  </Box>
-                </Stack>
-
-                {/* Small Map */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 100,
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.8571788848367!2d-46.73196892377715!3d-23.55816996166836!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce561c8ca73f31%3A0xc82c181c9b7eaf3e!2sEscola%20Polit%C3%A9cnica%20da%20USP!5e0!3m2!1sen!2sbr!4v1710000000000!5m2!1sen!2sbr"
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Localização Escola Politécnica da USP"
-                  />
-                </Box>
               </Stack>
             </Stack>
           </Grid>
         </Grid>
 
-        {/* Bottom Bar */}
-        <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.1)' }} />
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={2}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'rgba(255,255,255,0.5)',
-              fontSize: '0.85rem',
-            }}
-          >
-            © {new Date().getFullYear()} OpenSilício - Todos os direitos reservados
+        <Box className="caption-rule" sx={{ mt: 5 }} />
+        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2} sx={{ pt: 2.5 }}>
+          <Typography sx={{ color: 'var(--color-on-field-muted)', fontSize: '13px' }}>
+            © {new Date().getFullYear()} OpenSilício · Grupo de Pesquisa e Extensão — Poli USP
           </Typography>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'rgba(255,255,255,0.5)',
-                fontSize: '0.85rem',
-              }}
-            >
-              Grupo de Pesquisa e Extensão - Poli USP
-            </Typography>
-            <Button
-              component={RouterLink}
-              to="/login"
-              variant="outlined"
-              size="small"
-              startIcon={<AdminPanelSettingsIcon />}
-              sx={{
-                color: 'rgba(255,255,255,0.7)',
-                borderColor: 'rgba(255,255,255,0.3)',
-                fontSize: '0.85rem',
-                textTransform: 'none',
-                '&:hover': {
-                  color: 'white',
-                  borderColor: 'rgba(255,255,255,0.5)',
-                  backgroundColor: 'rgba(255,255,255,0.05)',
-                },
-              }}
-            >
-              Admin
-            </Button>
-          </Stack>
+          <RouterLink
+            to="/login"
+            className="btn btn-secondary"
+            style={{ fontSize: '13px', color: 'var(--color-on-field)', borderColor: 'var(--color-line-on-field)' }}
+          >
+            Admin
+          </RouterLink>
         </Stack>
       </Container>
     </Box>
