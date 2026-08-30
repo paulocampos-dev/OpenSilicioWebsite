@@ -34,8 +34,10 @@ RUN for pkg in react code file history link list markdown rich-text utils select
 
 # Build arguments for environment variables
 ARG VITE_API_URL
+ARG VITE_GA_MEASUREMENT_ID
 ARG CACHEBUST=latest
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID
 
 # Invalidate Docker layer cache when source changes (set to git SHA in CI/CD)
 RUN echo "Build cache bust: ${CACHEBUST}"

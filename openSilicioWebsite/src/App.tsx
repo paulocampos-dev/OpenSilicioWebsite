@@ -4,9 +4,11 @@ import { BrowserRouter, Routes, Route, Link as RouterLink, useLocation } from 'r
 import { useScroll, useMotionValueEvent } from 'framer-motion'
 import { getTheme, type ColorMode } from './theme'
 import { AuthProvider } from './contexts/AuthContext'
+import { trackPageView } from './lib/analytics'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminLayout from './components/AdminLayout'
 import Footer from './components/Footer'
+import CookieConsent from './components/CookieConsent'
 
 // Public Pages
 import Landing from './pages/Landing'
@@ -206,6 +208,14 @@ function AppContent() {
     saveMode(mode)
   }, [mode])
 
+  // Track page views on route change. Admin routes are excluded so staff
+  // sessions don't mix into public visitor analytics.
+  useEffect(() => {
+    if (!isAdminRoute) {
+      trackPageView(location.pathname + location.search)
+    }
+  }, [location, isAdminRoute])
+
   // Drive the plain-CSS design tokens (independent of MUI's theme) from the
   // same mode — see tokens/colors.css's [data-color-mode="dark"] overrides.
   useEffect(() => {
@@ -353,6 +363,7 @@ function AppContent() {
           )}
         </Box>
         {!isAdminRoute && <Footer />}
+        {!isAdminRoute && <CookieConsent />}
       </Box>
     </ThemeProvider>
   )

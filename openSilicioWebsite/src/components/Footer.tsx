@@ -3,6 +3,7 @@ import { Box, Container, Grid, Stack, Typography, Link } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
 import { settingsApi } from '../services/api'
 import type { SiteSettings } from '../types'
+import { reopenCookieConsent } from '../lib/cookieConsent'
 
 function InstagramGlyph() {
   return (
@@ -89,9 +90,14 @@ export default function Footer() {
 
         <Box className="caption-rule" sx={{ mt: 5 }} />
         <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2} sx={{ pt: 2.5 }}>
-          <Typography sx={{ color: 'var(--color-on-field-muted)', fontSize: '13px' }}>
-            © {new Date().getFullYear()} OpenSilício · Grupo de Pesquisa e Extensão — Poli USP
-          </Typography>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Typography sx={{ color: 'var(--color-on-field-muted)', fontSize: '13px' }}>
+              © {new Date().getFullYear()} OpenSilício · Grupo de Pesquisa e Extensão — Poli USP
+            </Typography>
+            <Link component="button" type="button" onClick={reopenCookieConsent} sx={{ ...linkStyle, fontSize: '13px', cursor: 'pointer' }}>
+              Cookies
+            </Link>
+          </Stack>
           <RouterLink
             to="/login"
             className="btn btn-secondary"
