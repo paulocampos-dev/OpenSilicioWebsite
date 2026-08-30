@@ -4,15 +4,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import LexicalErrorBoundary from './lexical/LexicalErrorBoundary';
-import { HeadingNode, QuoteNode } from '@lexical/rich-text';
-import { ListItemNode, ListNode } from '@lexical/list';
-import { CodeHighlightNode, CodeNode } from '@lexical/code';
-import { LinkNode } from '@lexical/link';
-import { EquationNode } from './lexical/nodes/EquationNode';
-import { WikiLinkNode } from './lexical/nodes/WikiLinkNode';
-import { YouTubeNode } from './lexical/nodes/YouTubeNode';
-import { ImageNode } from './lexical/nodes/ImageNode';
-import { ImageGalleryNode } from './lexical/nodes/ImageGalleryNode';
+import { LEXICAL_NODES } from './lexical/nodeSet';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 interface LexicalContentProps {
@@ -84,20 +76,7 @@ export default function LexicalContent({ content }: LexicalContentProps) {
     onError: (error: Error) => {
       console.error('Lexical content error:', error);
     },
-    nodes: [
-      HeadingNode,
-      QuoteNode,
-      ListNode,
-      ListItemNode,
-      CodeNode,
-      CodeHighlightNode,
-      LinkNode,
-      EquationNode,
-      WikiLinkNode,
-      YouTubeNode,
-      ImageNode,
-      ImageGalleryNode,
-    ],
+    nodes: LEXICAL_NODES,
     editable: false,
     editorState: content,
   };
