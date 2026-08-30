@@ -21,6 +21,7 @@ import WikiList from './pages/WikiList'
 import WikiDetail from './pages/WikiDetail'
 import About from './pages/About'
 import Login from './pages/Login'
+import NotFound from './pages/NotFound'
 
 // Admin Pages
 import Dashboard from './pages/admin/Dashboard'
@@ -236,6 +237,7 @@ function AppContent() {
               <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><WikiDetail /></Container>} />
               <Route path="/sobre" element={<Container sx={{ py: 4 }}><About /></Container>} />
               <Route path="/login" element={<Container sx={{ py: 4 }}><Login /></Container>} />
+              <Route path="*" element={<Container sx={{ py: 4 }}><NotFound /></Container>} />
             </Routes>
           )}
           {isAdminRoute && (
