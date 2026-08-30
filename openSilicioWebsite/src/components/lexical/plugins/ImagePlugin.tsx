@@ -15,9 +15,9 @@ import {
 import { useEffect } from 'react';
 import { $createImageNode, $isImageNode } from '../nodes/ImageNode';
 import { insertUploadedImages, pickImageFiles, uploadImageFiles, MAX_IMAGE_SIZE } from '../utils/imageUploadUtils';
+import { $mergeImageIntoTarget } from '../utils/imageMerge';
 
 const MAX_IMAGE_SIZE_MB = MAX_IMAGE_SIZE / (1024 * 1024);
-import { $mergeImageIntoTarget } from '../utils/imageMerge';
 
 export const INSERT_IMAGE_COMMAND: LexicalCommand<void> = createCommand('INSERT_IMAGE_COMMAND');
 
