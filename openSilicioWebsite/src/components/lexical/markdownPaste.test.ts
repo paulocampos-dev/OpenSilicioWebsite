@@ -79,4 +79,34 @@ describe('markdownToSerializedNodes', () => {
       { discrete: true },
     )
   })
+
+  it('keeps the text and inline formatting of every converted block', () => {
+    // ElementNode.exportJSON() devolve `children: []` fixo, então serializar
+    // filho a filho monta os blocos certos e perde todo o texto. Aviso honesto:
+    // este teste NÃO pega essa regressão. O ambiente headless preserva o texto
+    // mesmo com a serialização errada; no navegador, não. A verificação real
+    // foi feita colando no editor de verdade, e é lá que precisa ser refeita se
+    // esta função mudar.
+    const nodes = markdownToSerializedNodes(
+      '## Título\n\nUm **parágrafo** com [link](https://example.com).\n\n- item um\n- item dois',
+    )
+
+    const editor = createHeadlessEditor({ nodes: LEXICAL_NODES })
+    editor.update(
+      () => {
+        const root = $getRoot()
+        root.append($createParagraphNode())
+        const selection = root.getLastChild()!.selectEnd()
+        $insertGeneratedNodes(editor, $generateNodesFromSerializedNodes(nodes), selection)
+
+        const texto = root.getTextContent()
+        expect(texto).toContain('Título')
+        expect(texto).toContain('parágrafo')
+        expect(texto).toContain('link')
+        expect(texto).toContain('item um')
+        expect(texto).toContain('item dois')
+      },
+      { discrete: true },
+    )
+  })
 })
