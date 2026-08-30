@@ -361,7 +361,8 @@ export default function BlogForm() {
                 freeSolo
                 options={categories}
                 value={post.category || ''}
-                onChange={(_, newValue) => setPost({ ...post, category: newValue || '' })}
+                // Only onInputChange (not onChange too): both fire for a freeSolo selection,
+                // and writing the same controlled value from both caused a setState loop.
                 onInputChange={(_, newInputValue) => setPost({ ...post, category: newInputValue })}
                 renderInput={(params) => (
                   <TextField
