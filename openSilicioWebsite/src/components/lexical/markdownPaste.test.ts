@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createHeadlessEditor } from '@lexical/headless'
 import { $getRoot, $createParagraphNode, $createTextNode } from 'lexical'
 import { $generateNodesFromSerializedNodes, $insertGeneratedNodes } from '@lexical/clipboard'
-import { looksLikeMarkdown, markdownToSerializedNodes } from './markdownPaste'
+import { isTrivialHtml, looksLikeMarkdown, markdownToSerializedNodes } from './markdownPaste'
 import { LEXICAL_NODES } from './nodeSet'
 import { $isHeadingNode } from '@lexical/rich-text'
 
@@ -17,6 +17,25 @@ describe('looksLikeMarkdown', () => {
   it('does not flag ordinary prose that merely contains # or *', () => {
     expect(looksLikeMarkdown('O projeto custou R$ 200 * 3 unidades')).toBe(false)
     expect(looksLikeMarkdown('Envie um e-mail para contato@opensilicio.com.br')).toBe(false)
+  })
+
+  it('returns false for blank/whitespace-only text', () => {
+    expect(looksLikeMarkdown('   ')).toBe(false)
+  })
+})
+
+describe('isTrivialHtml', () => {
+  it('treats bare wrapper markup as trivial', () => {
+    expect(isTrivialHtml('')).toBe(true)
+    expect(isTrivialHtml('<meta charset="utf-8">plain text')).toBe(true)
+    expect(isTrivialHtml('<div><span style="color:red">plain text</span></div>')).toBe(true)
+  })
+
+  it('treats markup with actual rich structure as non-trivial', () => {
+    expect(isTrivialHtml('<h2>Título</h2>')).toBe(false)
+    expect(isTrivialHtml('<ul><li>item</li></ul>')).toBe(false)
+    expect(isTrivialHtml('<p>veja o <a href="https://example.com">link</a></p>')).toBe(false)
+    expect(isTrivialHtml('<p><strong>negrito</strong></p>')).toBe(false)
   })
 })
 
@@ -59,9 +78,5 @@ describe('markdownToSerializedNodes', () => {
       },
       { discrete: true },
     )
-  })
-
-  it('is never reached for blank input, since looksLikeMarkdown filters it out first', () => {
-    expect(looksLikeMarkdown('   ')).toBe(false)
   })
 })
