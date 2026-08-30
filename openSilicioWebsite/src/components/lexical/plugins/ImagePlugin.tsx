@@ -14,8 +14,10 @@ import {
 } from 'lexical';
 import { useEffect } from 'react';
 import { $createImageNode, $isImageNode } from '../nodes/ImageNode';
-import { $createImageGalleryNode, $isImageGalleryNode } from '../nodes/ImageGalleryNode';
-import { insertUploadedImages, pickImageFiles, uploadImageFiles } from '../utils/imageUploadUtils';
+import { insertUploadedImages, pickImageFiles, uploadImageFiles, MAX_IMAGE_SIZE } from '../utils/imageUploadUtils';
+
+const MAX_IMAGE_SIZE_MB = MAX_IMAGE_SIZE / (1024 * 1024);
+import { $mergeImageIntoTarget } from '../utils/imageMerge';
 
 export const INSERT_IMAGE_COMMAND: LexicalCommand<void> = createCommand('INSERT_IMAGE_COMMAND');
 
@@ -25,8 +27,8 @@ async function uploadImage(file: File): Promise<string | null> {
 }
 
 function insertImageWithUpload(editor: LexicalEditor, file: File) {
-  if (file.size > 50 * 1024 * 1024) {
-    alert(`A imagem ${file.name} excede o limite de tamanho (50MB)`);
+  if (file.size > MAX_IMAGE_SIZE) {
+    alert(`A imagem ${file.name} excede o limite de tamanho (${MAX_IMAGE_SIZE_MB}MB)`);
     return;
   }
 
@@ -51,21 +53,8 @@ function insertImageWithUpload(editor: LexicalEditor, file: File) {
           const node = $getNodeByKey(imageNode.getKey());
           if (!node || !$isImageNode(node)) return;
 
-          const prevSibling = node.getPreviousSibling();
-
-          if ($isImageNode(prevSibling) && !prevSibling.isLoading()) {
-            const galleryNode = $createImageGalleryNode({
-              images: [prevSibling.getSrc(), url],
-              layout: 'grid',
-            });
-            prevSibling.remove();
-            node.replace(galleryNode);
-          } else if ($isImageGalleryNode(prevSibling)) {
-            prevSibling.setImages([...prevSibling.getImages(), url]);
-            node.remove();
-          } else {
-            node.setSrc(url);
-          }
+          const merged = $mergeImageIntoTarget(node.getPreviousSibling(), node, url);
+          if (!merged) node.setSrc(url);
         });
       } else {
         editor.update(() => {
@@ -174,17 +163,7 @@ function mergeImagePluginCommands(editor: LexicalEditor) {
           const draggedNode = $getNodeByKey(draggedKey);
           if (!draggedNode || !$isImageNode(draggedNode)) return;
 
-          if ($isImageNode(targetLexicalNode) && targetLexicalNode.getKey() !== draggedKey) {
-            const galleryNode = $createImageGalleryNode({
-              images: [targetLexicalNode.getSrc(), draggedNode.getSrc()],
-              layout: 'grid',
-            });
-            targetLexicalNode.replace(galleryNode);
-            draggedNode.remove();
-          } else if ($isImageGalleryNode(targetLexicalNode) && targetLexicalNode.getKey() !== draggedKey) {
-            targetLexicalNode.setImages([...targetLexicalNode.getImages(), draggedNode.getSrc()]);
-            draggedNode.remove();
-          }
+          $mergeImageIntoTarget(targetLexicalNode, draggedNode, draggedNode.getSrc());
         });
 
         return true;

@@ -7,6 +7,8 @@ import type { EducationResource } from '../types'
 import DuotonePhoto from '../components/design/DuotonePhoto'
 import CardGridSkeleton from '../components/design/CardGridSkeleton'
 import RevealOnLoad from '../components/design/RevealOnLoad'
+import Pager from '../components/design/Pager'
+import { usePagedFilter } from '../components/design/usePagedFilter'
 
 const MotionGridItem = motion.create(Grid)
 
@@ -21,7 +23,6 @@ export default function Educacao() {
   const [tab, setTab] = useState<Kind>('Todos')
   const [level, setLevel] = useState<Level>('Todos')
   const [query, setQuery] = useState<string>('')
-  const [page, setPage] = useState<number>(1)
   const [resources, setResources] = useState<EducationResource[]>([])
   const [loading, setLoading] = useState(true)
   const pageSize = 6
@@ -52,18 +53,17 @@ export default function Educacao() {
     return c
   }, [resources])
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return resources.filter((r) => {
+  const { pageItems, filteredCount, page, totalPages, setPage } = usePagedFilter(resources, {
+    pageSize,
+    filterFn: (r) => {
       const matchesTab = tab === 'Todos' || r.category === tab
       const matchesLevel = level === 'Todos' || r.difficulty === level
+      const q = query.trim().toLowerCase()
       const matchesQuery = !q || r.title.toLowerCase().includes(q) || r.description.toLowerCase().includes(q)
       return matchesTab && matchesLevel && matchesQuery
-    })
-  }, [tab, level, query, resources])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  const pageItems = filtered.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize)
+    },
+    deps: [tab, level, query],
+  })
 
   return (
     <Stack spacing={5}>
@@ -82,7 +82,7 @@ export default function Educacao() {
             <button
               key={k}
               type="button"
-              onClick={() => { setTab(k); setPage(1) }}
+              onClick={() => setTab(k)}
               className="filter-pill"
               style={{
                 padding: '10px 16px',
@@ -108,7 +108,7 @@ export default function Educacao() {
             placeholder="Buscar por título ou descrição"
             aria-label="Buscar recursos"
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(1) }}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </Box>
 
@@ -118,7 +118,7 @@ export default function Educacao() {
             <button
               key={lvl}
               type="button"
-              onClick={() => { setLevel(lvl); setPage(1) }}
+              onClick={() => setLevel(lvl)}
               className={level === lvl ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
               style={level === lvl ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
             >
@@ -171,21 +171,12 @@ export default function Educacao() {
         </RevealOnLoad>
       )}
 
-      {!loading && filtered.length > 0 && (
+      {!loading && filteredCount > 0 && (
         <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2}>
           <Typography sx={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
-            Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} de {filtered.length}
+            Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filteredCount)} de {filteredCount}
           </Typography>
-          <Stack direction="row" spacing={1}>
-            <button type="button" className="btn btn-secondary" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>←</button>
-            {Array.from({ length: totalPages }).map((_, i) => {
-              const n = i + 1
-              return (
-                <button key={n} type="button" className={n === page ? 'btn btn-primary' : 'btn btn-secondary'} onClick={() => setPage(n)}>{n}</button>
-              )
-            })}
-            <button type="button" className="btn btn-secondary" disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>→</button>
-          </Stack>
+          <Pager page={page} totalPages={totalPages} onChange={setPage} />
         </Stack>
       )}
     </Stack>

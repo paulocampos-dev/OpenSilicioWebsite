@@ -3,7 +3,8 @@ import { uploadApi } from '../../../services/api';
 import { $createImageNode } from '../nodes/ImageNode';
 import { $createImageGalleryNode, GalleryLayout } from '../nodes/ImageGalleryNode';
 
-const MAX_IMAGE_SIZE = 50 * 1024 * 1024;
+export const MAX_IMAGE_SIZE = 50 * 1024 * 1024;
+const MAX_IMAGE_SIZE_MB = MAX_IMAGE_SIZE / (1024 * 1024);
 
 export async function uploadImageFiles(files: File[]): Promise<string[]> {
   const uploadedUrls: string[] = [];
@@ -11,7 +12,7 @@ export async function uploadImageFiles(files: File[]): Promise<string[]> {
   for (const file of files) {
     if (!file.type.startsWith('image/')) continue;
     if (file.size > MAX_IMAGE_SIZE) {
-      console.warn(`Imagem ${file.name} excede 50MB e foi ignorada.`);
+      console.warn(`Imagem ${file.name} excede ${MAX_IMAGE_SIZE_MB}MB e foi ignorada.`);
       continue;
     }
 

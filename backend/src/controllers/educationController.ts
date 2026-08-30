@@ -2,17 +2,14 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { educationService } from '../services/EducationService';
 import { asyncHandler } from '../middleware/errorHandler';
-import { BadRequestError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
 import { filterUndefined } from '../utils/filterUndefined';
+import { parsePagination } from '../utils/parsePagination';
+import { parsePublishedFilter } from '../utils/parsePublishedFilter';
 
 export const getAllResources = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { published, page = '1', limit = '10' } = req.query;
-
-  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10));
-
-  const publishedFilter = published === 'true' ? true : published === 'false' ? false : undefined;
+  const { page: pageNum, limit: limitNum } = parsePagination(req.query, 10);
+  const publishedFilter = parsePublishedFilter(req.query);
 
   const result = await educationService.getAllResources(publishedFilter, { page: pageNum, limit: limitNum });
 
@@ -26,11 +23,8 @@ export const getResourceById = asyncHandler(async (req: AuthRequest, res: Respon
 });
 
 export const createResource = asyncHandler(async (req: AuthRequest, res: Response) => {
+  // req.body is already validated by validate(educationResourceSchema) in the route
   const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, published } = req.body;
-
-  if (!title || !description || !content) {
-    throw new BadRequestError('Campos obrigatórios faltando');
-  }
 
   const resource = await educationService.createResource({
     title,

@@ -2,19 +2,15 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { blogService } from '../services/BlogService';
 import { asyncHandler } from '../middleware/errorHandler';
-import { BadRequestError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
 import { filterUndefined } from '../utils/filterUndefined';
+import { parsePagination } from '../utils/parsePagination';
+import { parsePublishedFilter } from '../utils/parsePublishedFilter';
 
 export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) => {
   console.log('📝 [BlogController.getAllPosts] CALLED - This is the BLOG controller');
-  const { published, page = '1', limit = '10' } = req.query;
-
-  // Parse and validate pagination parameters
-  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10));
-
-  const publishedFilter = published === 'true' ? true : published === 'false' ? false : undefined;
+  const { page: pageNum, limit: limitNum } = parsePagination(req.query, 10);
+  const publishedFilter = parsePublishedFilter(req.query);
 
   const result = await blogService.getAllPosts(publishedFilter, { page: pageNum, limit: limitNum });
   console.log('📝 [BlogController.getAllPosts] Returning', result.data.length, 'blog posts');
@@ -35,11 +31,8 @@ export const getPostBySlug = asyncHandler(async (req: AuthRequest, res: Response
 });
 
 export const createPost = asyncHandler(async (req: AuthRequest, res: Response) => {
+  // req.body is already validated by validate(blogPostSchema) in the route
   const { slug, title, excerpt, cover_letter, content, author, image_url, category, published } = req.body;
-
-  if (!slug || !title || !excerpt || !content) {
-    throw new BadRequestError('Campos obrigatórios faltando');
-  }
 
   const post = await blogService.createPost({
     slug,

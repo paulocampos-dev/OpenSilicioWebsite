@@ -1,12 +1,14 @@
 import { Box, Grid, Stack, Typography } from '@mui/material'
 import { Link as RouterLink } from 'react-router-dom'
-import { useMemo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
 import DuotonePhoto from '../components/design/DuotonePhoto'
 import CardGridSkeleton from '../components/design/CardGridSkeleton'
 import RevealOnLoad from '../components/design/RevealOnLoad'
+import Pager from '../components/design/Pager'
+import { usePagedFilter } from '../components/design/usePagedFilter'
 
 const MotionGridItem = motion.create(Grid)
 
@@ -14,7 +16,6 @@ export default function Blog() {
   const reduce = useReducedMotion()
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('Todos')
-  const [currentPage, setCurrentPage] = useState<number>(1)
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [categories, setCategories] = useState<string[]>(['Todos'])
   const [loading, setLoading] = useState(true)
@@ -50,24 +51,16 @@ export default function Blog() {
     }
   }
 
-  const filteredPosts: BlogPost[] = useMemo(() => {
-    const matchesCategory = (post: BlogPost) =>
-      selectedCategory === 'Todos' || post.category === selectedCategory
-    const matchesQuery = (post: BlogPost) => {
-      if (!searchQuery.trim()) return true
-      const q = searchQuery.toLowerCase()
-      return post.title.toLowerCase().includes(q) || post.excerpt.toLowerCase().includes(q)
-    }
-    return posts.filter((p) => matchesCategory(p) && matchesQuery(p))
-  }, [selectedCategory, searchQuery, posts])
-
-  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / pageSize))
-  const pageStartIndex = (currentPage - 1) * pageSize
-  const postsOnPage = filteredPosts.slice(pageStartIndex, pageStartIndex + pageSize)
-
-  const handleChangePage = (newPage: number) => {
-    setCurrentPage(Math.min(Math.max(1, newPage), totalPages))
-  }
+  const { pageItems: postsOnPage, filteredCount, page, totalPages, setPage } = usePagedFilter(posts, {
+    pageSize,
+    filterFn: (post) => {
+      const matchesCategory = selectedCategory === 'Todos' || post.category === selectedCategory
+      const q = searchQuery.trim().toLowerCase()
+      const matchesQuery = !q || post.title.toLowerCase().includes(q) || post.excerpt.toLowerCase().includes(q)
+      return matchesCategory && matchesQuery
+    },
+    deps: [selectedCategory, searchQuery],
+  })
 
   return (
     <Stack spacing={5}>
@@ -86,7 +79,7 @@ export default function Blog() {
           type="search"
           placeholder="Buscar posts..."
           value={searchQuery}
-          onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1) }}
+          onChange={(e) => setSearchQuery(e.target.value)}
           style={{ maxWidth: 420 }}
         />
         <Stack direction="row" flexWrap="wrap" gap={1}>
@@ -94,7 +87,7 @@ export default function Blog() {
             <button
               key={category}
               type="button"
-              onClick={() => { setSelectedCategory(category); setCurrentPage(1) }}
+              onClick={() => setSelectedCategory(category)}
               className={selectedCategory === category ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
               style={selectedCategory === category ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
             >
@@ -143,19 +136,8 @@ export default function Blog() {
         </RevealOnLoad>
       )}
 
-      {!loading && filteredPosts.length > 0 && (
-        <Stack direction="row" spacing={1} justifyContent="center">
-          <button type="button" className="btn btn-secondary" disabled={currentPage === 1} onClick={() => handleChangePage(currentPage - 1)}>←</button>
-          {Array.from({ length: totalPages }).map((_, idx) => {
-            const pageNumber = idx + 1
-            return (
-              <button key={pageNumber} type="button" className={pageNumber === currentPage ? 'btn btn-primary' : 'btn btn-secondary'} onClick={() => handleChangePage(pageNumber)}>
-                {pageNumber}
-              </button>
-            )
-          })}
-          <button type="button" className="btn btn-secondary" disabled={currentPage === totalPages} onClick={() => handleChangePage(currentPage + 1)}>→</button>
-        </Stack>
+      {!loading && filteredCount > 0 && (
+        <Pager page={page} totalPages={totalPages} onChange={setPage} />
       )}
     </Stack>
   )

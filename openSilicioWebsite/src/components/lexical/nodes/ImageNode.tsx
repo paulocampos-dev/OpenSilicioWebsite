@@ -18,6 +18,7 @@ import { ImageLightbox } from '../ImageLightbox';
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection';
 import { mergeRegister } from '@lexical/utils';
 import { $getNodeByKey, COMMAND_PRIORITY_HIGH, COMMAND_PRIORITY_LOW, DRAGSTART_COMMAND, KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, SELECTION_CHANGE_COMMAND, CLICK_COMMAND } from 'lexical';
+import { computeResizedDimensions } from '../utils/computeResizedDimensions';
 
 export interface ImagePayload {
   altText: string;
@@ -60,7 +61,6 @@ function ImageResizer({
     startHeight: number;
     startX: number;
     startY: number;
-    direction: number;
     isResizing: boolean;
   }>({
     currentWidth: 0,
@@ -70,11 +70,10 @@ function ImageResizer({
     startHeight: 0,
     startX: 0,
     startY: 0,
-    direction: 0,
     isResizing: false,
   });
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>, direction: number) => {
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!imageRef.current) return;
     const image = imageRef.current;
 
@@ -93,7 +92,6 @@ function ImageResizer({
     positioning.startX = event.clientX;
     positioning.startY = event.clientY;
     positioning.isResizing = true;
-    positioning.direction = direction;
 
     onResizeStart();
     document.addEventListener('pointermove', handlePointerMove);
@@ -104,22 +102,18 @@ function ImageResizer({
     const image = imageRef.current;
     const positioning = positioningRef.current;
 
-    const isHorizontal = positioning.direction & (1 << 0) || positioning.direction & (1 << 2);
-    let diff = Math.floor(positioning.startX - event.clientX);
+    const result = computeResizedDimensions({
+      startWidth: positioning.startWidth,
+      ratio: positioning.ratio,
+      startX: positioning.startX,
+      clientX: event.clientX,
+    });
 
-    // Direction calculation modifier
-    if (positioning.direction === 2 /* East */) {
-      diff = -diff;
-    }
-
-    let width = positioning.startWidth + diff;
-    let height = width / positioning.ratio;
-
-    if (width > 50 && image) {
-      image.style.width = width + 'px';
-      image.style.height = height + 'px';
-      positioning.currentWidth = width;
-      positioning.currentHeight = height;
+    if (result && image) {
+      image.style.width = result.width + 'px';
+      image.style.height = result.height + 'px';
+      positioning.currentWidth = result.width;
+      positioning.currentHeight = result.height;
     }
   };
 
@@ -141,7 +135,6 @@ function ImageResizer({
     document.removeEventListener('pointerup', handlePointerUp);
   };
 
-  // 1 = West, 2 = East, 4 = South-East corner
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
       <div
@@ -160,7 +153,7 @@ function ImageResizer({
           pointerEvents: 'auto',
           boxShadow: '0 0 0 2px #fff',
         }}
-        onPointerDown={(event) => handlePointerDown(event, 2)}
+        onPointerDown={handlePointerDown}
       />
       <div
         className="image-resizer image-resizer-se"
@@ -177,7 +170,7 @@ function ImageResizer({
           pointerEvents: 'auto',
           boxShadow: '0 0 0 2px #fff',
         }}
-        onPointerDown={(event) => handlePointerDown(event, 2)}
+        onPointerDown={handlePointerDown}
       />
     </div>
   );

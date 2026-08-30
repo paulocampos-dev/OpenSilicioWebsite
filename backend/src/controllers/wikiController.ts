@@ -8,15 +8,13 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { BadRequestError, NotFoundError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
 import { filterUndefined } from '../utils/filterUndefined';
+import { parsePagination } from '../utils/parsePagination';
+import { parsePublishedFilter } from '../utils/parsePublishedFilter';
 
 export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response) => {
   console.log('✅ [WikiController.getAllEntries] CALLED - This is the WIKI controller');
-  const { published, page = '1', limit = '20' } = req.query;
-
-  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 20));
-
-  const publishedFilter = published === 'true' ? true : published === 'false' ? false : undefined;
+  const { page: pageNum, limit: limitNum } = parsePagination(req.query, 20);
+  const publishedFilter = parsePublishedFilter(req.query);
 
   const result = await wikiService.getAllEntries(publishedFilter, { page: pageNum, limit: limitNum });
   console.log('✅ [WikiController.getAllEntries] Returning', result.data.length, 'wiki entries');
@@ -38,11 +36,8 @@ export const getEntryBySlug = asyncHandler(async (req: AuthRequest, res: Respons
 });
 
 export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
+  // req.body is already validated by validate(wikiEntrySchema) in the route
   const { term, slug, definition, cover_letter, content, aliases, published } = req.body;
-
-  if (!term || !slug || !definition) {
-    throw new BadRequestError('Campos obrigatórios faltando');
-  }
 
   const entry = await wikiService.createEntry({
     term,
@@ -117,11 +112,8 @@ export const getWikiLinksForContent = asyncHandler(async (req: AuthRequest, res:
 });
 
 export const createWikiLink = asyncHandler(async (req: AuthRequest, res: Response) => {
+  // req.body is already validated by validate(wikiLinkSchema) in the route
   const { contentType, contentId, wikiEntryId, linkText } = req.body;
-
-  if (!contentType || !contentId || !wikiEntryId || !linkText) {
-    throw new BadRequestError('Campos obrigatórios faltando');
-  }
 
   const id = uuidv4();
 
@@ -206,14 +198,13 @@ export const getPendingLinksGroupedPublic = asyncHandler(async (_req: AuthReques
 
 // Pending wiki links management
 export const getAllPendingLinks = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { page = '1', limit = '50', grouped } = req.query;
+  const { grouped } = req.query;
 
   if (grouped === 'true') {
     const result = await pendingWikiLinksService.getPendingGroupedByTerm();
     res.json(result);
   } else {
-    const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 50));
+    const { page: pageNum, limit: limitNum } = parsePagination(req.query, 50);
 
     const result = await pendingWikiLinksService.getAllPendingWithContent({
       page: pageNum,
