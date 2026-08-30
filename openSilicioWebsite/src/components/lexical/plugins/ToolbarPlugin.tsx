@@ -59,6 +59,13 @@ import { INSERT_EQUATION_COMMAND } from './EquationPlugin';
 import { INSERT_YOUTUBE_COMMAND, extractYouTubeVideoID } from './YouTubePlugin';
 import { INSERT_IMAGE_GALLERY_COMMAND } from './ImageGalleryPlugin';
 import { INSERT_IMAGE_COMMAND } from './ImagePlugin';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import WebIcon from '@mui/icons-material/Web';
+import MemoryIcon from '@mui/icons-material/Memory';
+import { INSERT_WAVEDROM_COMMAND } from './WaveDromPlugin';
+import { INSERT_EMBED_COMMAND } from './EmbedPlugin';
+import { INSERT_SEVEN_SEGMENT_COMMAND } from './SevenSegmentPlugin';
+import { verificarUrlEmbed } from '../nodes/EmbedNode';
 
 const LowPriority = 1;
 
@@ -264,6 +271,27 @@ export default function ToolbarPlugin() {
         alert('URL inválida do YouTube. Use um formato como: https://www.youtube.com/watch?v=VIDEO_ID');
       }
     }
+  }, [editor]);
+
+  // O diagrama entra com um exemplo pronto em vez de pedir o JSON de cara:
+  // é mais fácil editar algo que já renderiza do que escrever do zero.
+  const inserirWaveDrom = useCallback(() => {
+    editor.dispatchCommand(INSERT_WAVEDROM_COMMAND, {});
+  }, [editor]);
+
+  const inserirEmbed = useCallback(() => {
+    const url = prompt('URL da ferramenta (Wokwi, SiliWiz, Tiny Tapeout ou DigitalJS):');
+    if (!url) return;
+    const verificado = verificarUrlEmbed(url);
+    if (!verificado.ok) {
+      alert(verificado.motivo);
+      return;
+    }
+    editor.dispatchCommand(INSERT_EMBED_COMMAND, { url: verificado.url });
+  }, [editor]);
+
+  const inserirSeteSegmentos = useCallback(() => {
+    editor.dispatchCommand(INSERT_SEVEN_SEGMENT_COMMAND, {});
   }, [editor]);
 
   return (
@@ -527,6 +555,27 @@ export default function ToolbarPlugin() {
         <Tooltip title="Inserir Equação (bloco)">
           <IconButton size="small" onClick={() => insertEquation(false)}>
             <FunctionsIcon fontSize="small" sx={{ transform: 'scale(1.3)' }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
+      <Divider orientation="vertical" flexItem />
+
+      {/* Widgets interativos dos tutoriais */}
+      <Box sx={{ display: 'flex', gap: 0.5 }}>
+        <Tooltip title="Inserir Diagrama de Ondas (WaveDrom)">
+          <IconButton size="small" onClick={inserirWaveDrom}>
+            <TimelineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Incorporar Ferramenta (Wokwi, SiliWiz, DigitalJS)">
+          <IconButton size="small" onClick={inserirEmbed}>
+            <WebIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Inserir Decodificador de 7 Segmentos">
+          <IconButton size="small" onClick={inserirSeteSegmentos}>
+            <MemoryIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>

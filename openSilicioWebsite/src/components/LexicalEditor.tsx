@@ -24,6 +24,7 @@ import ContextMenuPlugin from './lexical/plugins/ContextMenuPlugin';
 import MarkdownPastePlugin from './lexical/plugins/MarkdownPastePlugin';
 import { LEXICAL_NODES } from './lexical/nodeSet';
 import { EDITOR_TRANSFORMERS } from './lexical/transformers';
+import { OsWidgetPlugins } from './lexical/widgets';
 
 interface LexicalEditorProps {
   content: string;
@@ -292,6 +293,7 @@ function LexicalEditorInner({
             <ImagePlugin />
             <ImageGalleryPlugin />
             <ContextMenuPlugin />
+            <OsWidgetPlugins />
           </div>
         </div>
       </Paper>
