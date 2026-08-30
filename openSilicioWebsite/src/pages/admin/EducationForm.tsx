@@ -305,6 +305,7 @@ export default function EducationForm() {
                 <MenuItem value="Projetos">Projetos</MenuItem>
                 <MenuItem value="Guias">Guias</MenuItem>
                 <MenuItem value="Tutoriais">Tutoriais</MenuItem>
+                <MenuItem value="Teóricos">Teóricos</MenuItem>
               </TextField>
 
               <TextField

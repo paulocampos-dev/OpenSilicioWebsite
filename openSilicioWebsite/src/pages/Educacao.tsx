@@ -6,7 +6,7 @@ import { educationApi } from '../services/api'
 import type { EducationResource } from '../types'
 
 type Level = 'Todos' | 'Iniciante' | 'Intermediário' | 'Avançado'
-type Kind = 'Todos' | 'Projetos' | 'Guias' | 'Tutoriais'
+type Kind = 'Todos' | 'Projetos' | 'Guias' | 'Tutoriais' | 'Teóricos'
 
 export default function Educacao() {
   const [tab, setTab] = useState<Kind>('Todos')
@@ -61,7 +61,7 @@ export default function Educacao() {
       {/* Tabs */}
       <Box>
         <Tabs value={tab} onChange={(_, v) => { setTab(v); setPage(1) }} variant="scrollable" scrollButtons allowScrollButtonsMobile>
-          {(['Todos','Projetos','Guias','Tutoriais'] as Kind[]).map((k) => (
+          {(['Todos','Projetos','Guias','Tutoriais','Teóricos'] as Kind[]).map((k) => (
             <Tab key={k} value={k} label={k} />
           ))}
         </Tabs>
