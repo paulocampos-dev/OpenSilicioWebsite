@@ -49,6 +49,19 @@ describe('campos anuláveis aceitam null vindo do formulário', () => {
     expect(r.success).toBe(true);
   });
 
+  it('aceita uma data de publicação ISO no update de educação', () => {
+    const r = educationResourceUpdateSchema.safeParse({
+      ...base,
+      created_at: '2026-06-01T12:00:00.000Z',
+    });
+    expect(r.success).toBe(true);
+  });
+
+  it('rejeita data de publicação que não seja ISO 8601', () => {
+    const r = educationResourceUpdateSchema.safeParse({ ...base, created_at: '01/06/2026' });
+    expect(r.success).toBe(false);
+  });
+
   it('continua rejeitando uma URL de imagem inválida', () => {
     const r = educationResourceUpdateSchema.safeParse({ ...base, image_url: 'nao-e-url' });
     expect(r.success).toBe(false);

@@ -188,6 +188,14 @@ export const educationResourceSchema = z.object({
     .int('Ordem na série deve ser um número inteiro')
     .min(0, 'Ordem na série não pode ser negativa')
     .nullish(),
+  // Data de publicação editável. Serve para datar conteúdo que foi escrito
+  // antes de entrar no site, em vez de todo post nascer com a data em que
+  // alguém colou o texto. Só o update aceita: no create a coluna tem default,
+  // e listar o campo no INSERT gravaria NULL quando ele não viesse.
+  created_at: z
+    .string()
+    .datetime({ message: 'Data de publicação deve ser ISO 8601, ex.: 2026-06-01T12:00:00.000Z' })
+    .optional(),
   published: z.boolean().optional(),
 });
 

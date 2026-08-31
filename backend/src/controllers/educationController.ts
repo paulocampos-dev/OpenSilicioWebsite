@@ -66,7 +66,7 @@ export const createResource = asyncHandler(async (req: AuthRequest, res: Respons
 
 export const updateResource = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, toc_items, series, series_order, published } = req.body;
+  const { title, description, cover_letter, image_url, content, category, difficulty, overview, resources, toc_items, series, series_order, published, created_at } = req.body;
 
   // Filter out undefined values to support partial updates
   const updateData = filterUndefined({
@@ -83,6 +83,7 @@ export const updateResource = asyncHandler(async (req: AuthRequest, res: Respons
     series: normalizarSeries(series),
     series_order,
     published,
+    created_at,
   });
 
   const resource = await educationService.updateResource(id, updateData);

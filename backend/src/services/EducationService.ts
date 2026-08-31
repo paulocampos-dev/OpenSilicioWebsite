@@ -17,7 +17,7 @@ export interface EducationResource {
   series?: string | null;
   series_order?: number;
   published: boolean;
-  created_at: Date;
+  created_at: Date | string;
   updated_at: Date;
 }
 
@@ -128,7 +128,11 @@ export class EducationService extends BaseService<EducationResource> {
    * Update an education resource
    */
   async updateResource(id: string, data: Partial<EducationResource>): Promise<EducationResource> {
-    const fields = Object.keys(data).filter((key) => key !== 'id' && key !== 'created_at' && key !== 'updated_at');
+    // created_at fica de fora da lista negra de propósito: a data de publicação
+    // é editável, para datar conteúdo escrito antes de entrar no site. O
+    // updated_at continua sendo do banco, que o escreve com NOW() a cada
+    // update, e o id nunca muda.
+    const fields = Object.keys(data).filter((key) => key !== 'id' && key !== 'updated_at');
     return this.update(id, data, fields);
   }
 
