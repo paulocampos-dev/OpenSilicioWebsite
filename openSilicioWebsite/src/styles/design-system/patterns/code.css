@@ -54,6 +54,18 @@
   border-bottom: 1px solid var(--color-line);
 }
 
+/* Blocos sem linguagem (saída de terminal, árvore de diretórios) são marcados
+   como "plain": o Prism não realça nada e o rótulo não faz sentido, então ele
+   some e o padding de cima volta ao normal. Sem linguagem nenhuma o
+   @lexical/code assume javascript, que rotula errado e pinta palavras soltas. */
+.os-code[data-language="plain"] {
+  padding-top: 1em;
+}
+
+.os-code[data-language="plain"]::before {
+  content: none;
+}
+
 /* A posição de cada botão vem por style inline, medida sobre o bloco
    correspondente. O translateX o encosta na borda direita do bloco. */
 .os-copiar-codigo {

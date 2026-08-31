@@ -227,7 +227,12 @@ function LexicalEditorInner({
               fontStyle: 'italic',
               color: 'text.secondary',
             },
-            '& code': {
+            // Só o código embutido na frase. O bloco de código também é um
+            // <code>, mas vem com a classe .os-code e é estilizado pelo design
+            // system em patterns/code.css: sem o :not(), esta regra vence por
+            // especificidade e come o padding que reserva o espaço do rótulo
+            // de idioma, que então cai por cima da primeira linha.
+            '& code:not(.os-code)': {
               backgroundColor:
                 theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
               padding: '2px 6px',
