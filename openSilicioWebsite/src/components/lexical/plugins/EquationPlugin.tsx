@@ -1,6 +1,7 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $insertNodes, COMMAND_PRIORITY_EDITOR, createCommand, LexicalCommand } from 'lexical';
 import { useEffect } from 'react';
+import { $isCodeNode } from '@lexical/code';
 import { $createEquationNode, EquationNode } from '../nodes/EquationNode';
 import { $wrapNodeInElement } from '@lexical/utils';
 import { $createParagraphNode, $isRootOrShadowRoot, LexicalNode, TextNode } from 'lexical';
@@ -42,6 +43,12 @@ export default function EquationPlugin(): null {
   useEffect(() => {
     // Transform raw text like $E=mc^2$ or $$E=mc^2$$ into EquationNodes
     return editor.registerNodeTransform(TextNode, (textNode: TextNode) => {
+      // Nada de equação dentro de código. Um bloco de shell com
+      // `$PDK_ROOT/$PDK` tem dois cifrões e casaria aqui: o trecho inteiro
+      // virava uma EquationNode e o texto original sumia sem aviso. Vale para
+      // o bloco (os CodeHighlightNode são TextNode) e para o código embutido.
+      if ($isCodeNode(textNode.getParent()) || textNode.hasFormat('code')) return;
+
       const textContent = textNode.getTextContent();
 
       // Match block equations $$...$$ first
