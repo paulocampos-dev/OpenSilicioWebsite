@@ -354,6 +354,29 @@ export default function EducationForm() {
                 />
               </Stack>
 
+              <TextField
+                label="Data de publicação"
+                type="date"
+                value={
+                  resource.created_at
+                    ? new Date(resource.created_at).toISOString().slice(0, 10)
+                    : ''
+                }
+                onChange={(e) => {
+                  // O campo dá só o dia. Fixamos meio-dia UTC para a data
+                  // exibida não escorregar de dia no fuso do servidor, que
+                  // roda em UTC-3.
+                  const dia = e.target.value;
+                  const proximo: Partial<EducationResource> = { ...resource };
+                  if (!dia) delete proximo.created_at;
+                  else proximo.created_at = `${dia}T12:00:00.000Z`;
+                  setResource(proximo);
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+                sx={{ maxWidth: { sm: 260 } }}
+                helperText="Data mostrada na listagem. Em branco, vale a data de criação."
+              />
+
               <Box>
                 <Typography variant="subtitle2" fontWeight={600} gutterBottom>
                   Nesta página (opcional)
