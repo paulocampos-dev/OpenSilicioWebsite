@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Box, useTheme, Skeleton, Stack } from '@mui/material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -6,6 +6,7 @@ import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import LexicalErrorBoundary from './lexical/LexicalErrorBoundary';
 import { LEXICAL_NODES } from './lexical/nodeSet';
 import { LEXICAL_THEME } from './lexical/theme';
+import { useBotoesDeCopiar } from './lexical/CopiarCodigo';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 interface LexicalContentProps {
@@ -42,6 +43,8 @@ function LexicalContentInner() {
 
 export default function LexicalContent({ content }: LexicalContentProps) {
   const theme = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
+  useBotoesDeCopiar(containerRef, content);
 
   // Don't render if no content or invalid format
   if (!content) {
@@ -84,6 +87,7 @@ export default function LexicalContent({ content }: LexicalContentProps) {
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         '& .ContentEditable__root': {
           outline: 'none',

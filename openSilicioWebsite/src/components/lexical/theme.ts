@@ -6,6 +6,9 @@
    em cor é o mapa abaixo. Se o leitor tiver outro tema, o post sai sem cor. */
 
 export const LEXICAL_THEME = {
+  // Classe no <code> do bloco, usada pelo rótulo de idioma e pelo botão de
+  // copiar em patterns/code.css.
+  code: 'os-code',
   codeHighlight: {
     atrule: 'os-tok-keyword',
     attr: 'os-tok-attr',
