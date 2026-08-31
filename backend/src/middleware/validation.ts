@@ -85,8 +85,7 @@ export const blogPostSchema = z.object({
     .string()
     .max(2000, 'Carta de apresentação deve ter no máximo 2000 caracteres')
     .trim()
-    .optional()
-    .or(z.literal('')),
+    .nullish(),
   content: z
     .string({
       required_error: 'Conteúdo é obrigatório',
@@ -104,7 +103,7 @@ export const blogPostSchema = z.object({
     .refine((val) => !val || val === '' || /^https?:\/\/.+/.test(val), {
       message: 'URL da imagem inválida',
     })
-    .optional(),
+    .nullish(),
   category: z
     .string()
     .max(100, 'Categoria deve ter no máximo 100 caracteres')
@@ -140,15 +139,14 @@ export const educationResourceSchema = z.object({
     .string()
     .max(2000, 'Carta de apresentação deve ter no máximo 2000 caracteres')
     .trim()
-    .optional()
-    .or(z.literal('')),
+    .nullish(),
   image_url: z
     .string()
     .max(2048, 'URL da imagem deve ter no máximo 2048 caracteres')
     .refine((val) => !val || val === '' || /^https?:\/\/.+/.test(val), {
       message: 'URL da imagem inválida',
     })
-    .optional(),
+    .nullish(),
   content: z
     .string({
       required_error: 'Conteúdo é obrigatório',
@@ -224,8 +222,7 @@ export const wikiEntrySchema = z.object({
     .string()
     .max(2000, 'Carta de apresentação deve ter no máximo 2000 caracteres')
     .trim()
-    .optional()
-    .or(z.literal('')),
+    .nullish(),
   content: z
     .string()
     .max(50000000, 'Conteúdo deve ter no máximo 50000000 caracteres')
