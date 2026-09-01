@@ -86,14 +86,19 @@ export default function Curso() {
   const feitas = concluidas(curso.slug, slugsPublicados)
   const proxima = retomarEm(curso.slug, slugsPublicados)
   const comecou = feitas > 0
-  const restante = curso.duracao_seg > 0 ? Math.round(curso.duracao_seg * (1 - feitas / Math.max(slugsPublicados.length, 1))) : 0
+  // Soma o que falta aula a aula: proporção sobre a duração total erra sempre
+  // que as aulas têm tamanhos diferentes.
+  const restante = curso.modulos
+    .flatMap((m) => m.aulas)
+    .filter((a) => a.publicado && !concluida(curso.slug, a.slug))
+    .reduce((soma, a) => soma + (a.publicado ? a.duracao_seg ?? 0 : 0), 0)
 
-  // A numeração das aulas corre no curso inteiro, então cada módulo precisa
-  // saber quantas vieram antes dele.
+  // A numeração corre no curso inteiro e conta só aula publicada, então cada
+  // módulo precisa saber quantas publicadas vieram antes dele.
   let contadas = 0
   const numeroInicialPorModulo = curso.modulos.map((modulo) => {
     const inicio = contadas + 1
-    contadas += modulo.aulas.length
+    contadas += modulo.aulas.filter((a) => a.publicado).length
     return inicio
   })
 

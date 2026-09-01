@@ -8,6 +8,7 @@ describe('extrairIdDoYouTube', () => {
     expect(extrairIdDoYouTube(`https://youtu.be/${ID}`)).toBe(ID);
     expect(extrairIdDoYouTube(`https://www.youtube.com/embed/${ID}`)).toBe(ID);
     expect(extrairIdDoYouTube(`https://www.youtube.com/shorts/${ID}`)).toBe(ID);
+    expect(extrairIdDoYouTube(`https://www.youtube.com/live/${ID}`)).toBe(ID);
     expect(extrairIdDoYouTube(ID)).toBe(ID);
   });
 

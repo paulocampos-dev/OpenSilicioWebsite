@@ -49,20 +49,28 @@ export default function ListaDeAulas({
 }: {
   aulas: AulaNaArvore[]
   cursoSlug: string
-  /** A numeração corre no curso inteiro, não reinicia a cada módulo. */
+  /**
+   * A numeração corre no curso inteiro e conta só aula publicada, para bater
+   * com o "aula 3 de 5" do cabeçalho, que também ignora rascunho. Aula em
+   * rascunho sai sem número: ainda não tem lugar na sequência.
+   */
   numeroInicial: number
   concluida: (slug: string) => boolean
   aulaAtual?: string
 }) {
+  let publicadasAntes = 0
+
   return (
     <Box>
-      {aulas.map((aula, indice) => {
-        const numero = String(numeroInicial + indice).padStart(2, '0')
+      {aulas.map((aula) => {
+        const numero = aula.publicado
+          ? String(numeroInicial + publicadasAntes++).padStart(2, '0')
+          : ''
 
         if (!aula.publicado) {
           return (
             <Box key={aula.id} sx={{ ...grade, opacity: 0.55 }}>
-              <span style={{ fontSize: 13, color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}>{numero}</span>
+              <span />
               <span />
               <Typography sx={{ fontSize: 15, color: 'var(--color-text-muted)' }}>{aula.titulo}</Typography>
               <span style={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)' }}>

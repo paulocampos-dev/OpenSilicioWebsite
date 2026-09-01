@@ -4,8 +4,8 @@ import { motion, useReducedMotion } from 'framer-motion'
 /**
  * A barra de progresso do curso: uma régua de 4px, quadrada, sem raio.
  *
- * Anima só a largura do preenchimento, e uma vez por mudança de valor, então
- * não é uma daquelas animações que ficam repintando sozinhas.
+ * Anima o preenchimento uma vez por mudança de valor, então não é uma daquelas
+ * animações que ficam repintando sozinhas.
  */
 export default function BarraDeProgresso({
   concluidas,

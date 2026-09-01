@@ -84,7 +84,8 @@ export const getAulaById = asyncHandler(async (req: AuthRequest, res: Response) 
 });
 
 export const criarCurso = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { slug, titulo, descricao, ementa, image_url, nivel, publicado } = req.body;
+  const { slug, titulo, descricao, ementa, image_url, nivel, publicado } =
+    req.body as CorpoDeCursoNovo;
 
   const curso = await cursoService.criarCurso({
     slug,
@@ -101,6 +102,19 @@ export const criarCurso = asyncHandler(async (req: AuthRequest, res: Response) =
 });
 
 /**
+ * O que os schemas de criação garantem que chegou no corpo.
+ *
+ * `validate(cursoSchema)` e `validate(aulaSchema)` já rodaram e rejeitaram o
+ * que não tem esta forma, então declarar os obrigatórios como obrigatórios é
+ * descrever o que de fato existe, e não um otimismo.
+ */
+type CorpoDeCursoNovo = Pick<Curso, 'slug' | 'titulo' | 'descricao'> &
+  Partial<Pick<Curso, 'ementa' | 'image_url' | 'nivel' | 'publicado'>>;
+
+type CorpoDeAulaNova = Pick<CursoAula, 'modulo_id' | 'slug' | 'titulo'> &
+  Partial<Pick<CursoAula, 'video_id' | 'duracao_seg' | 'conteudo' | 'publicado'>>;
+
+/**
  * Só os campos presentes no corpo vão para o UPDATE.
  *
  * Montado campo a campo em vez de filtrar `Object.entries(req.body)`: aquilo
@@ -111,7 +125,10 @@ const somenteDefinidos = <T extends object>(dados: T): Partial<T> =>
   Object.fromEntries(Object.entries(dados).filter(([, valor]) => valor !== undefined)) as Partial<T>;
 
 export const atualizarCurso = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { slug, titulo, descricao, ementa, image_url, nivel, publicado } = req.body;
+  // req.body é `any`; validate(cursoUpdateSchema) já rejeitou o que não tem
+  // esta forma, então a fronteira é aqui e daqui para baixo o tipo vale.
+  const { slug, titulo, descricao, ementa, image_url, nivel, publicado } =
+    req.body as Partial<Curso>;
 
   const dados = somenteDefinidos({
     slug,
@@ -162,7 +179,8 @@ export const deletarModulo = asyncHandler(async (req: AuthRequest, res: Response
 });
 
 export const criarAula = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado } = req.body;
+  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado } =
+    req.body as CorpoDeAulaNova;
 
   const aula = await cursoService.criarAula({
     curso_id: req.params.cursoId,
@@ -181,7 +199,8 @@ export const criarAula = asyncHandler(async (req: AuthRequest, res: Response) =>
 });
 
 export const atualizarAula = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado } = req.body;
+  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado } =
+    req.body as Partial<CursoAula>;
 
   const dados = somenteDefinidos({
     modulo_id,

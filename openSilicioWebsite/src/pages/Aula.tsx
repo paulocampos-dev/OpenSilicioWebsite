@@ -59,10 +59,13 @@ function Espinha({
       </Typography>
 
       {curso.modulos.map((modulo, indice) => {
-        // A numeração corre no curso inteiro, como no currículo, então cada
-        // módulo precisa saber quantas aulas vieram antes dele.
+        // Mesma regra do currículo: numeração corrida pelo curso, contando só
+        // aula publicada, para não brigar com o "aula 3 de 5" do cabeçalho.
         const numeroInicial =
-          curso.modulos.slice(0, indice).reduce((soma, m) => soma + m.aulas.length, 0) + 1
+          curso.modulos
+            .slice(0, indice)
+            .reduce((soma, m) => soma + m.aulas.filter((a) => a.publicado).length, 0) + 1
+        let publicadasAntes = 0
 
         return (
         <Box key={modulo.id} sx={{ mb: 2 }}>
@@ -70,16 +73,16 @@ function Espinha({
             Módulo {indice + 1} · {modulo.titulo}
           </Typography>
           <Stack spacing={0.25}>
-            {modulo.aulas.map((aula, posicao) => {
-              const numero = String(numeroInicial + posicao).padStart(2, '0')
-
+            {modulo.aulas.map((aula) => {
               if (!aula.publicado) {
                 return (
                   <Typography key={aula.id} sx={{ fontSize: 14, color: 'var(--color-text-faint)', opacity: 0.7 }}>
-                    {numero}  {aula.titulo}
+                    {aula.titulo}
                   </Typography>
                 )
               }
+
+              const numero = String(numeroInicial + publicadasAntes++).padStart(2, '0')
 
               const atual = aula.slug === aulaAtual
               return (

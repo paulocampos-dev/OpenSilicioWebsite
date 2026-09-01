@@ -52,7 +52,7 @@ export interface CursoNaListagem extends Curso {
    * tem cartão próprio, e o slug é o que o progresso guardado no navegador usa
    * como chave, então sem ele não dá para desenhar a barra sem abrir o curso.
    */
-  aulas_publicadas: Array<{ slug: string; titulo: string }>;
+  aulas_publicadas: Array<{ slug: string; titulo: string; duracao_seg: number | null }>;
 }
 
 /**
@@ -150,7 +150,8 @@ export class CursoService extends BaseService<Curso> {
                    -- depois da aula). Ordenar só por au.ordem intercala os
                    -- módulos, e aí o botão "começar" do índice aponta para a
                    -- aula errada.
-                   JSON_AGG(JSON_BUILD_OBJECT('slug', au.slug, 'titulo', au.titulo)
+                   JSON_AGG(JSON_BUILD_OBJECT('slug', au.slug, 'titulo', au.titulo,
+                                              'duracao_seg', au.duracao_seg)
                             ORDER BY mo.ordem, au.ordem, au.id)
                      FILTER (WHERE au.publicado) AS publicadas_json
               FROM curso_aulas au
@@ -470,28 +471,26 @@ export class CursoService extends BaseService<Curso> {
    * em que metade da lista está reordenada. O escopo (`curso_id`/`modulo_id`)
    * fica no WHERE para uma lista com id de outro curso não mexer onde não deve.
    */
-  /** Devolve quantas linhas de fato mudaram de posição. */
   private async reordenar(
     tabela: 'curso_modulos' | 'curso_aulas',
     colunaDeEscopo: 'curso_id' | 'modulo_id',
     escopo: string,
     ids: string[],
-  ): Promise<number> {
-    const { rowCount } = await this.pool.query(
+  ): Promise<void> {
+    await this.pool.query(
       `UPDATE ${tabela} t
           SET ordem = v.posicao - 1, updated_at = NOW()
          FROM unnest($1::uuid[]) WITH ORDINALITY AS v(id, posicao)
         WHERE t.id = v.id AND t.${colunaDeEscopo} = $2`,
       [ids, escopo],
     );
-    return rowCount ?? 0;
   }
 
-  async reordenarModulos(cursoId: string, ids: string[]): Promise<number> {
+  async reordenarModulos(cursoId: string, ids: string[]): Promise<void> {
     return this.reordenar('curso_modulos', 'curso_id', cursoId, ids);
   }
 
-  async reordenarAulas(moduloId: string, ids: string[]): Promise<number> {
+  async reordenarAulas(moduloId: string, ids: string[]): Promise<void> {
     return this.reordenar('curso_aulas', 'modulo_id', moduloId, ids);
   }
 }

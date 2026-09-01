@@ -44,7 +44,7 @@ function Cabecalho() {
 export default function Cursos() {
   const [cursos, setCursos] = useState<CursoNaListagem[]>([])
   const [carregando, setCarregando] = useState(true)
-  const { concluidas, retomarEm } = useProgressoDeCurso()
+  const { concluida, concluidas, retomarEm } = useProgressoDeCurso()
 
   useEffect(() => {
     cursosApi
@@ -73,13 +73,20 @@ export default function Cursos() {
           // A posição é a da aula que o botão abre, não a contagem de
           // concluídas: quem terminou a 1 e a 3 e vai retomar a 2 tem que ler
           // "aula 2", e não "aula 3".
-          const restante = Math.round(curso.duracao_seg * (1 - feitas / slugs.length))
+          //
+          // O tempo restante soma a duração das aulas que faltam de verdade,
+          // uma a uma. Uma regra de três sobre a duração total erraria sempre
+          // que as aulas tivessem tamanhos diferentes, que é o caso normal.
+          const restante = curso.aulas_publicadas
+            .filter((a) => !concluida(curso.slug, a.slug))
+            .reduce((soma, a) => soma + (a.duracao_seg ?? 0), 0)
+
           return { curso, aula, feitas, posicao: posicao + 1, total: slugs.length, restante }
         }
       }
     }
     return null
-  }, [cursos, concluidas, retomarEm])
+  }, [cursos, concluida, concluidas, retomarEm])
 
   return (
     <Stack spacing={5}>

@@ -74,7 +74,7 @@ export interface CursoNaListagem extends Curso {
    * onde a aula não tem cartão próprio; o slug é a chave do progresso guardado
    * no navegador, e sem ele a barra do índice não teria como ser desenhada.
    */
-  aulas_publicadas: Array<{ slug: string; titulo: string }>;
+  aulas_publicadas: Array<{ slug: string; titulo: string; duracao_seg: number | null }>;
 }
 
 /**

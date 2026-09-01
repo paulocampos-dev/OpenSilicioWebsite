@@ -67,8 +67,8 @@ describe('Cursos API', () => {
       // O rascunho não entra na soma: é o denominador do progresso do leitor.
       expect(curso.duracao_seg).toBe(1320);
       expect(curso.aulas_publicadas).toEqual([
-        { slug: 'pdk', titulo: 'O que é um PDK' },
-        { slug: 'verilog', titulo: 'Seu primeiro Verilog' },
+        { slug: 'pdk', titulo: 'O que é um PDK', duracao_seg: 480 },
+        { slug: 'verilog', titulo: 'Seu primeiro Verilog', duracao_seg: 840 },
       ]);
     });
 
@@ -313,6 +313,18 @@ describe('Cursos API', () => {
         b.aulas[0].id,
       ]);
       expect(rows[0].ordem).toBe(0);
+    });
+
+    it('id malformado dá 404, não 500', async () => {
+      const token = await getAuthToken();
+
+      // Sem a guarda, o Postgres recusa o texto como uuid (22P02) e o erro
+      // sobe como 500, dizendo "quebrou" quando a resposta certa é "não existe".
+      const resposta = await request(app)
+        .get('/api/cursos/id/nao-e-um-uuid')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(resposta.status).toBe(404);
     });
 
     it('esvaziar o resumo de um módulo realmente apaga', async () => {

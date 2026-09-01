@@ -37,7 +37,11 @@ class ObservadorFalso {
 }
 
 /** O último observador ainda ligado, que é o da aula na tela. */
-const observadorAtivo = () => observadores.filter((o) => !o.desconectado).at(-1)
+const observadorAtivo = () => {
+  // Sem Array.at: o tsconfig mira es2020, que não tem esse método.
+  const ligados = observadores.filter((o) => !o.desconectado)
+  return ligados.length > 0 ? ligados[ligados.length - 1] : undefined
+}
 
 function Sentinela({ aoChegar, ativo, chave }: { aoChegar: () => void; ativo?: boolean; chave: string }) {
   const referencia = useAoChegarAoFim(aoChegar, ativo)
