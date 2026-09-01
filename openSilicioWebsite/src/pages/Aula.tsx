@@ -155,12 +155,20 @@ export default function Aula() {
     [curso],
   )
 
+  /**
+   * A marcação automática só vale para aula com texto.
+   *
+   * O sentinela fica no pé do conteúdo, então numa aula só de vídeo ele já
+   * nasce dentro da tela e a aula seria dada como concluída antes de o leitor
+   * apertar o play. Saber que o vídeo acabou exigiria a iframe API do YouTube;
+   * até lá, aula sem texto se marca no botão.
+   */
   useAoChegarAoFim(
     fimDoTexto,
     () => {
       if (cursoSlug && aulaSlug) marcarAutomatico(cursoSlug, aulaSlug)
     },
-    Boolean(dados),
+    Boolean(dados?.aula.conteudo),
   )
 
   if (carregando) return <DetailPageSkeleton />
@@ -278,7 +286,7 @@ export default function Aula() {
                 <LexicalContent content={aula.conteudo} />
               ) : (
                 <Typography sx={{ color: 'var(--color-text-muted)' }}>
-                  Esta aula é só o vídeo.
+                  {aula.video_id ? 'Esta aula é só o vídeo.' : 'Esta aula ainda não tem conteúdo.'}
                 </Typography>
               )}
             </Box>

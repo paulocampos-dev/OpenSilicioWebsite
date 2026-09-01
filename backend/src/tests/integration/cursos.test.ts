@@ -72,6 +72,41 @@ describe('Cursos API', () => {
       ]);
     });
 
+    it('ordena as aulas atravessando os módulos, não por ordem dentro de cada um', async () => {
+      // Cada módulo numera as aulas a partir de zero, então ordenar só por
+      // curso_aulas.ordem intercala os módulos e o botão "começar" do índice
+      // manda o leitor para a aula errada.
+      const { curso, modulo } = await criarCurso({
+        aulas: [
+          { slug: 'm1-a1', titulo: 'M1 A1', publicado: true },
+          { slug: 'm1-a2', titulo: 'M1 A2', publicado: true },
+        ],
+      });
+
+      const { rows: segundos } = await testPool.query(
+        `INSERT INTO curso_modulos (curso_id, titulo, ordem) VALUES ($1, 'Frontend', 1) RETURNING *`,
+        [curso.id],
+      );
+      for (const [indice, slug] of ['m2-a1', 'm2-a2'].entries()) {
+        await testPool.query(
+          `INSERT INTO curso_aulas (curso_id, modulo_id, slug, titulo, publicado, ordem)
+           VALUES ($1, $2, $3, $4, true, $5)`,
+          [curso.id, segundos[0].id, slug, slug.toUpperCase(), indice],
+        );
+      }
+      expect(modulo.id).toBeDefined();
+
+      const resposta = await request(app).get('/api/cursos').query({ published: true });
+
+      const encontrado = resposta.body.data.find((c: { slug: string }) => c.slug === curso.slug);
+      expect(encontrado.aulas_publicadas.map((a: { slug: string }) => a.slug)).toEqual([
+        'm1-a1',
+        'm1-a2',
+        'm2-a1',
+        'm2-a2',
+      ]);
+    });
+
     it('não lista curso despublicado', async () => {
       await criarCurso({ slug: 'rascunho-de-curso', publicado: false });
 

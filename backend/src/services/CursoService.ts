@@ -143,13 +143,19 @@ export class CursoService extends BaseService<Curso> {
              WHERE curso_id = c.id
           ) m ON true
           LEFT JOIN LATERAL (
-            SELECT COUNT(*) FILTER (WHERE publicado)::int          AS publicadas,
-                   COUNT(*) FILTER (WHERE NOT publicado)::int      AS rascunhos,
-                   COALESCE(SUM(duracao_seg) FILTER (WHERE publicado), 0)::int AS duracao,
-                   JSON_AGG(JSON_BUILD_OBJECT('slug', slug, 'titulo', titulo) ORDER BY ordem)
-                     FILTER (WHERE publicado) AS publicadas_json
-              FROM curso_aulas
-             WHERE curso_id = c.id
+            SELECT (COUNT(*) FILTER (WHERE au.publicado))::int     AS publicadas,
+                   (COUNT(*) FILTER (WHERE NOT au.publicado))::int AS rascunhos,
+                   COALESCE(SUM(au.duracao_seg) FILTER (WHERE au.publicado), 0)::int AS duracao,
+                   -- A ordem tem que atravessar os módulos (ordem do módulo,
+                   -- depois da aula). Ordenar só por au.ordem intercala os
+                   -- módulos, e aí o botão "começar" do índice aponta para a
+                   -- aula errada.
+                   JSON_AGG(JSON_BUILD_OBJECT('slug', au.slug, 'titulo', au.titulo)
+                            ORDER BY mo.ordem, au.ordem, au.id)
+                     FILTER (WHERE au.publicado) AS publicadas_json
+              FROM curso_aulas au
+              JOIN curso_modulos mo ON mo.id = au.modulo_id
+             WHERE au.curso_id = c.id
           ) a ON true
           ${filtro}
          ORDER BY c.created_at DESC
