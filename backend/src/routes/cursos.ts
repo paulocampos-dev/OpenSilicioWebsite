@@ -42,11 +42,13 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * Um id malformado vira 404, e não o 500 que o Postgres devolveria ao recusar
  * o texto como uuid (22P02). O recurso não existe: é essa a resposta certa.
  */
-const exigirUuid = (parametro: string) => (req: Request, _res: Response, next: NextFunction) => {
-  const valor = req.params[parametro];
-  if (!valor || !UUID.test(valor)) return next(new NotFoundError('Curso'));
-  next();
-};
+const exigirUuid =
+  (parametro: string, recurso = 'Curso') =>
+  (req: Request, _res: Response, next: NextFunction) => {
+    const valor = req.params[parametro];
+    if (!valor || !UUID.test(valor)) return next(new NotFoundError(recurso));
+    next();
+  };
 
 // As rotas de segmento fixo vêm antes das de parâmetro, senão /aulas/:id cairia
 // no lugar errado quando um curso tivesse o slug "aulas".
@@ -54,7 +56,7 @@ const exigirUuid = (parametro: string) => (req: Request, _res: Response, next: N
 // — leitura autenticada (admin) —
 router.get('/admin/todos', authMiddleware, listarCursosAdmin);
 router.get('/id/:id', authMiddleware, exigirUuid('id'), getCursoById);
-router.get('/aulas/:id', authMiddleware, exigirUuid('id'), getAulaById);
+router.get('/aulas/:id', authMiddleware, exigirUuid('id', 'Aula'), getAulaById);
 router.get('/completo/:slug', authMiddleware, getCursoCompleto);
 
 // — leitura pública —
@@ -68,15 +70,15 @@ router.put('/:id', authMiddleware, exigirUuid('id'), validate(cursoUpdateSchema)
 router.delete('/:id', authMiddleware, exigirUuid('id'), deletarCurso);
 
 // — escrita: módulos —
-router.post('/:cursoId/modulos', authMiddleware, validate(moduloSchema), criarModulo);
-router.put('/:cursoId/modulos/ordem', authMiddleware, validate(reordenarSchema), reordenarModulos);
-router.put('/modulos/:id', authMiddleware, exigirUuid('id'), validate(moduloUpdateSchema), atualizarModulo);
-router.delete('/modulos/:id', authMiddleware, exigirUuid('id'), deletarModulo);
+router.post('/:cursoId/modulos', authMiddleware, exigirUuid('cursoId'), validate(moduloSchema), criarModulo);
+router.put('/:cursoId/modulos/ordem', authMiddleware, exigirUuid('cursoId'), validate(reordenarSchema), reordenarModulos);
+router.put('/modulos/:id', authMiddleware, exigirUuid('id', 'Módulo'), validate(moduloUpdateSchema), atualizarModulo);
+router.delete('/modulos/:id', authMiddleware, exigirUuid('id', 'Módulo'), deletarModulo);
 
 // — escrita: aulas —
-router.post('/:cursoId/aulas', authMiddleware, validate(aulaSchema), criarAula);
-router.put('/modulos/:moduloId/aulas/ordem', authMiddleware, validate(reordenarSchema), reordenarAulas);
-router.put('/aulas/:id', authMiddleware, exigirUuid('id'), validate(aulaUpdateSchema), atualizarAula);
-router.delete('/aulas/:id', authMiddleware, exigirUuid('id'), deletarAula);
+router.post('/:cursoId/aulas', authMiddleware, exigirUuid('cursoId'), validate(aulaSchema), criarAula);
+router.put('/modulos/:moduloId/aulas/ordem', authMiddleware, exigirUuid('moduloId', 'Módulo'), validate(reordenarSchema), reordenarAulas);
+router.put('/aulas/:id', authMiddleware, exigirUuid('id', 'Aula'), validate(aulaUpdateSchema), atualizarAula);
+router.delete('/aulas/:id', authMiddleware, exigirUuid('id', 'Aula'), deletarAula);
 
 export default router;

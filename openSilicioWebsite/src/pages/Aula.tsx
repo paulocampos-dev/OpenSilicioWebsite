@@ -135,23 +135,48 @@ export default function Aula() {
     setCarregando(true)
     setVerbetes([])
 
+    // Esta página não desmonta ao trocar de aula, e a espinha convida a clicar
+    // rápido. Sem a trava, uma resposta atrasada da aula anterior chegaria
+    // depois e pintaria o conteúdo dela sob a URL da nova.
+    let cancelado = false
+
     cursosApi
       .getAula(cursoSlug, aulaSlug)
       .then((resposta) => {
+        if (cancelado) return
         setDados(resposta)
         // Acessório: sem os verbetes a aula continua legível, só sem popover.
-        wikiApi.getLinks('curso_aula', resposta.aula.id).then(setVerbetes).catch(() => {})
+        wikiApi
+          .getLinks('curso_aula', resposta.aula.id)
+          .then((links) => {
+            if (!cancelado) setVerbetes(links)
+          })
+          .catch(() => {})
       })
       .catch((erro) => {
+        if (cancelado) return
         if (import.meta.env.DEV) console.error('Erro ao carregar aula:', erro)
         setDados(null)
       })
-      .finally(() => setCarregando(false))
+      .finally(() => {
+        if (!cancelado) setCarregando(false)
+      })
 
     // A árvore é a espinha. Vem de outra chamada porque a rota da aula devolve
     // só as vizinhas, e trazer o currículo inteiro junto de cada aula seria
     // repetir o mesmo dado a cada navegação.
-    cursosApi.getBySlug(cursoSlug).then(setCurso).catch(() => setCurso(null))
+    cursosApi
+      .getBySlug(cursoSlug)
+      .then((arvore) => {
+        if (!cancelado) setCurso(arvore)
+      })
+      .catch(() => {
+        if (!cancelado) setCurso(null)
+      })
+
+    return () => {
+      cancelado = true
+    }
   }, [cursoSlug, aulaSlug])
 
   useEffect(() => {

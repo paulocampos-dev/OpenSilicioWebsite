@@ -19,7 +19,7 @@ import { cursosApi } from '../../services/api';
 import type { CursoAula, CursoComArvore } from '../../types';
 import { comoRelogio, segundosDe } from '../../utils/duracao';
 import { extrairIdDoYouTube } from '../../utils/youtube';
-import { emSlug } from './CursoForm';
+import { emSlug, emSlugDigitado } from '../../utils/slug';
 
 export default function AulaForm() {
   const { cursoSlug, aulaId } = useParams<{ cursoSlug: string; aulaId: string }>();
@@ -99,7 +99,7 @@ export default function AulaForm() {
     try {
       const dados = {
         modulo_id: aula.modulo_id,
-        slug: aula.slug,
+        slug: emSlug(aula.slug ?? ''),
         titulo: aula.titulo,
         video_id: aula.video_id?.trim() || null,
         duracao_seg: segundos,
@@ -176,7 +176,7 @@ export default function AulaForm() {
             value={aula.slug ?? ''}
             onChange={(e) => {
               setSlugTocado(true);
-              setAula({ ...aula, slug: emSlug(e.target.value) });
+              setAula({ ...aula, slug: emSlugDigitado(e.target.value) });
             }}
             helperText={`Endereço: /cursos/${curso.slug}/${aula.slug || '...'}`}
           />

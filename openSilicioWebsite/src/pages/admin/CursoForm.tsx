@@ -19,18 +19,9 @@ import LexicalEditor from '../../components/LexicalEditor';
 import ThumbnailUploadField from '../../components/admin/ThumbnailUploadField';
 import { cursosApi, uploadApi } from '../../services/api';
 import type { Curso, NivelCurso } from '../../types';
+import { emSlug, emSlugDigitado } from '../../utils/slug';
 
 const niveis: NivelCurso[] = ['Iniciante', 'Intermediário', 'Avançado'];
-
-/** Título em slug, para o autor não ter que inventar um à mão. */
-export const emSlug = (texto: string): string =>
-  texto
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 255);
 
 export default function CursoForm() {
   const { id } = useParams<{ id: string }>();
@@ -106,7 +97,7 @@ export default function CursoForm() {
     setSalvando(true);
     try {
       const dados = {
-        slug: curso.slug,
+        slug: emSlug(curso.slug ?? ''),
         titulo: curso.titulo,
         descricao: curso.descricao,
         ementa: curso.ementa || null,
@@ -181,7 +172,7 @@ export default function CursoForm() {
             value={curso.slug ?? ''}
             onChange={(e) => {
               setSlugTocado(true);
-              setCurso({ ...curso, slug: emSlug(e.target.value) });
+              setCurso({ ...curso, slug: emSlugDigitado(e.target.value) });
             }}
             helperText={`Endereço: /cursos/${curso.slug || '...'}`}
           />

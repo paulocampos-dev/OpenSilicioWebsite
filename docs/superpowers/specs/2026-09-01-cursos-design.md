@@ -104,6 +104,10 @@ Notes on the shape:
   which embeds `https://www.youtube-nocookie.com/embed/${videoID}`. A second
   video source would need a `video_fonte` column; not now.
 - Deleting a curso cascades to every módulo and every aula body.
+- `ordem` defaults to 0, `duracao_seg` carries a `> 0` check, and the tables get
+  the indexes the read queries actually use.
+- Every route taking an id checks the uuid shape first, so a malformed id is a
+  404 rather than the 500 Postgres would raise on `22P02`.
 
 ## API
 
@@ -119,6 +123,8 @@ split (`CursoService extends BaseService`, thin controller, zod schema in
 | `POST /api/cursos` and friends | Admin CRUD for all three levels, behind `authMiddleware`. |
 | `GET /api/cursos/admin/todos` | Admin index: publicados and rascunhos, behind `authMiddleware`. |
 | `GET /api/cursos/id/:id` | One curso by id, behind `authMiddleware`, for the admin form. |
+| `GET /api/cursos/completo/:slug` | The tree including drafts, behind `authMiddleware`, for the structure screen. |
+| `GET /api/cursos/aulas/:id` | One aula by id, behind `authMiddleware`, for the aula editor. |
 | `PUT /api/cursos/:cursoId/modulos/ordem` | Reorder módulos within a curso. |
 | `PUT /api/cursos/modulos/:moduloId/aulas/ordem` | Reorder aulas within a módulo. |
 
@@ -182,8 +188,11 @@ deliberate divergence, not an inconsistency to fix here.
 
 ### Pages
 
-**Index (C).** A resume panel renders above the index rows only when
-`localStorage` holds an in-progress course, so a first visit sees a plain index.
+**Index (C).** A resume panel renders above the index rows only for a course
+that is genuinely part-finished, meaning at least one aula complete and at least
+one still to go. A first visit, and a reader who opened an aula without
+finishing anything, both see a plain index: with nothing completed there is no
+progress to resume, only a bookmark.
 Rows carry titulo, descrição, nível, aula count, duração and a progress bar.
 
 **Syllabus (E).** Left column: ementa, then módulos as titled blocks with aula
@@ -193,8 +202,10 @@ and the metadata list, plus a second panel listing the course's wiki terms.
 
 **Aula (F).** A fixed left spine holds the entire course tree with the current
 aula marked. Main column: breadcrumb, "aula 7 de 15", title, the YouTube embed
-in a `BlueprintFrame`, a mark-as-complete control, the Lexical body, and
-previous/next. Below the `md` breakpoint the spine collapses into a drawer, the
+in a `BlueprintFrame`, the Lexical body, then the mark-as-complete control and
+previous/next. The control sits below the body rather than above it, as the mock
+drew it, because the sentinel that drives automatic marking has to be at the
+foot of the text and the button belongs beside it. Below the `md` breakpoint the spine collapses into a drawer, the
 same `Drawer` pattern the header already uses on mobile.
 
 Reuse rather than rebuild: `BlueprintFrame`, `DuotonePhoto`, `CardGridSkeleton`,
@@ -226,9 +237,11 @@ The single map handles both completion modes without a second structure:
   Un-marking stores `'nao-concluida'`, which permanently blocks the automatic
   path for that aula. Without this, un-marking would be undone by the next scroll.
 
-Video aulas do **not** auto-mark. The sentinel sits at the foot of the aula
-body, so on an aula that is only a player it starts on screen and the aula would
-be finished before the reader pressed play. Knowing that a video ended needs the
+An aula with **no text** does not auto-mark. The gate is the presence of a
+body, not the presence of a video: an aula that is a player plus written notes
+auto-marks when the reader reaches the foot of those notes, exactly like a text
+aula. What is excluded is the aula with nothing to scroll, where the sentinel
+starts on screen and the aula would be finished before the reader pressed play. Knowing that a video ended needs the
 YouTube iframe API, an external script for one small signal, so an aula with no
 text is marked by hand.
 

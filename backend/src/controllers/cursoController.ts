@@ -23,6 +23,16 @@ const sincronizarSilencioso = (aulaId: string, conteudo: string | null | undefin
 const limparCache = () => clearCache('GET:/api/cursos');
 
 /**
+ * Apara os campos de texto.
+ *
+ * O `.trim()` dos schemas é um transform, e validate() joga fora o resultado do
+ * parse, então sem isto "  Título  " chegaria ao banco com os espaços. Mesma
+ * razão pela qual a normalização do vídeo mora aqui.
+ */
+const aparado = (valor: unknown): string | undefined =>
+  typeof valor === 'string' ? valor.trim() : undefined;
+
+/**
  * O formulário manda '' quando o campo de vídeo fica em branco, e a URL inteira
  * quando não. Os dois viram o que o banco guarda: o id, ou nulo. `undefined`
  * passa intacto para não apagar o vídeo numa atualização parcial.
@@ -89,8 +99,8 @@ export const criarCurso = asyncHandler(async (req: AuthRequest, res: Response) =
 
   const curso = await cursoService.criarCurso({
     slug,
-    titulo,
-    descricao,
+    titulo: aparado(titulo),
+    descricao: aparado(descricao),
     ementa,
     image_url,
     nivel,
@@ -132,8 +142,8 @@ export const atualizarCurso = asyncHandler(async (req: AuthRequest, res: Respons
 
   const dados = somenteDefinidos({
     slug,
-    titulo,
-    descricao,
+    titulo: aparado(titulo),
+    descricao: aparado(descricao),
     ementa,
     image_url,
     nivel,
@@ -154,8 +164,8 @@ export const deletarCurso = asyncHandler(async (req: AuthRequest, res: Response)
 export const criarModulo = asyncHandler(async (req: AuthRequest, res: Response) => {
   const modulo = await cursoService.criarModulo({
     curso_id: req.params.cursoId,
-    titulo: req.body.titulo,
-    resumo: req.body.resumo,
+    titulo: aparado(req.body.titulo) ?? '',
+    resumo: aparado(req.body.resumo) ?? null,
   });
 
   limparCache();
@@ -164,8 +174,9 @@ export const criarModulo = asyncHandler(async (req: AuthRequest, res: Response) 
 
 export const atualizarModulo = asyncHandler(async (req: AuthRequest, res: Response) => {
   const modulo = await cursoService.atualizarModulo(req.params.id, {
-    titulo: req.body.titulo,
-    resumo: req.body.resumo,
+    titulo: aparado(req.body.titulo),
+    // Distinto de undefined: null aqui é "apague o resumo".
+    resumo: req.body.resumo === null ? null : aparado(req.body.resumo),
   });
 
   limparCache();
@@ -186,7 +197,7 @@ export const criarAula = asyncHandler(async (req: AuthRequest, res: Response) =>
     curso_id: req.params.cursoId,
     modulo_id,
     slug,
-    titulo,
+    titulo: aparado(titulo) ?? '',
     video_id: normalizarVideo(video_id) ?? null,
     duracao_seg: duracao_seg ?? null,
     conteudo: conteudo ?? null,
@@ -205,7 +216,7 @@ export const atualizarAula = asyncHandler(async (req: AuthRequest, res: Response
   const dados = somenteDefinidos({
     modulo_id,
     slug,
-    titulo,
+    titulo: aparado(titulo),
     video_id: normalizarVideo(video_id),
     duracao_seg,
     conteudo,

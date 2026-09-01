@@ -124,9 +124,9 @@ rediscovering them.
 ## Cursos
 
 The `/cursos` tab is a separate content type from Educação: `cursos` ->
-`curso_modulos` -> `curso_aulas` (migrations 014 and 015). Design and the UI
-mocks it was built from are in
-`docs/superpowers/specs/2026-09-01-cursos-design.md`.
+`curso_modulos` -> `curso_aulas` (migrations 014 and 015). The design is in
+`docs/superpowers/specs/2026-09-01-cursos-design.md`, and the UI mocks it was
+built from are beside it in `2026-09-01-cursos-mocks.html`.
 
 - **An aula's `curso_id` is denormalized but cannot drift.** A composite foreign
   key on `(curso_id, modulo_id)` makes the database reject any aula whose curso

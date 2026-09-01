@@ -165,6 +165,36 @@ describe('Cursos API', () => {
       expect(rascunho).not.toHaveProperty('slug');
     });
 
+    it('devolve os módulos na ordem, e as aulas dentro de cada um', async () => {
+      const { curso, modulo } = await criarCurso({
+        slug: 'ordem-da-arvore',
+        aulas: [
+          { slug: 'a1', titulo: 'A1', publicado: true },
+          { slug: 'a2', titulo: 'A2', publicado: true },
+        ],
+      });
+
+      // Criado com ordem 0, igual ao primeiro: o desempate por id manteria uma
+      // ordem arbitrária, então o segundo módulo recebe a posição seguinte.
+      await testPool.query(
+        `INSERT INTO curso_modulos (curso_id, titulo, ordem) VALUES ($1, 'Frontend', 1)`,
+        [curso.id],
+      );
+      await testPool.query('UPDATE curso_modulos SET ordem = 0 WHERE id = $1', [modulo.id]);
+
+      const resposta = await request(app).get(`/api/cursos/${curso.slug}`);
+
+      expect(resposta.status).toBe(200);
+      expect(resposta.body.modulos.map((m: { titulo: string }) => m.titulo)).toEqual([
+        'Ambiente',
+        'Frontend',
+      ]);
+      expect(resposta.body.modulos[0].aulas.map((a: { slug: string }) => a.slug)).toEqual([
+        'a1',
+        'a2',
+      ]);
+    });
+
     it('devolve 404 para curso despublicado', async () => {
       const { curso } = await criarCurso({ publicado: false });
 
@@ -244,6 +274,39 @@ describe('Cursos API', () => {
         .send({ slug: 'sem-token', titulo: 'Sem token', descricao: 'x' });
 
       expect(resposta.status).toBe(401);
+    });
+
+    it('cria e atualiza um curso pela API, aparando os espaços', async () => {
+      const token = await getAuthToken();
+
+      const criado = await request(app)
+        .post('/api/cursos')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          slug: 'curso-pela-api',
+          titulo: '  Do RTL ao GDS  ',
+          descricao: '  Uma trilha.  ',
+          nivel: 'Iniciante',
+        });
+
+      expect(criado.status).toBe(201);
+      // O .trim() dos schemas é transform, e validate() descarta o parse: sem
+      // aparar no controller os espaços chegariam ao banco.
+      expect(criado.body.titulo).toBe('Do RTL ao GDS');
+      expect(criado.body.descricao).toBe('Uma trilha.');
+      expect(criado.body.publicado).toBe(false);
+
+      const atualizado = await request(app)
+        .put(`/api/cursos/${criado.body.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ titulo: 'Do RTL ao GDS, revisado', publicado: true });
+
+      expect(atualizado.status).toBe(200);
+      expect(atualizado.body.titulo).toBe('Do RTL ao GDS, revisado');
+      expect(atualizado.body.publicado).toBe(true);
+      // Um update parcial não pode apagar o que não veio no corpo.
+      expect(atualizado.body.descricao).toBe('Uma trilha.');
+      expect(atualizado.body.nivel).toBe('Iniciante');
     });
 
     it('normaliza a URL do YouTube para o id ao criar a aula', async () => {
