@@ -110,10 +110,14 @@ export class WikiLinkNode extends LinkNode {
 
   static importDOM(): DOMConversionMap | null {
     return {
-      a: (node: Node) => ({
-        conversion: convertAnchorElement,
-        priority: 1,
-      }),
+      // Só reivindica a âncora que é mesmo um verbete. O LinkNode registra
+      // <a> na prioridade 1 e o Lexical desempata pelo último importer
+      // registrado, que é este node: sem o filtro, todo link colado virava
+      // wikilink, e um link externo ganhava a classe .wiki-link e a aparência
+      // de termo interno. Devolver null faz o Lexical seguir para o LinkNode
+      // e criar um link normal, como o `br` do próprio Lexical faz.
+      a: (node: Node) =>
+        ehLinkDeWiki(node) ? { conversion: convertAnchorElement, priority: 2 } : null,
     };
   }
 
@@ -140,6 +144,20 @@ export class WikiLinkNode extends LinkNode {
     }
     return null;
   }
+}
+
+/**
+ * Uma âncora é verbete se veio do próprio editor, que marca a classe
+ * `wiki-link` em createDOM, ou se aponta para a wiki. As duas checagens são
+ * necessárias: o HTML da página do leitor traz a classe, e a URL cobre o
+ * markdown escrito à mão. Note que a prioridade 2 acima só decide o caso do
+ * verbete; para todo o resto o importer devolve null e sai da disputa.
+ */
+function ehLinkDeWiki(node: Node): boolean {
+  if (!(node instanceof HTMLAnchorElement)) return false;
+  if (node.classList.contains('wiki-link')) return true;
+  const href = node.getAttribute('href');
+  return href !== null && href.startsWith('/wiki/');
 }
 
 function convertAnchorElement(domNode: Node): DOMConversionOutput {
