@@ -101,8 +101,15 @@ rediscovering them.
   Conteúdo); every other category renders one. Title, description, cover letter
   and the rest are form fields, not editor content, and they are React-controlled
   (set them with the native value setter plus an `input` event).
-- **Wiki term association lives in the `content_wiki_links` table**, written only
-  by the "Adicionar Link da Wiki" button. No front matter or markup creates it.
+- **Wiki term association lives in the `content_wiki_links` table**, and since
+  `53324f5` the server derives it from the saved content: on every blog/education
+  create or update it walks the Lexical JSON for `wikilink` nodes, resolves the
+  slugs against `wiki_entries` and rewrites that content's rows in a transaction
+  (`backend/src/services/wikiLinkSync.ts`). So pasting
+  `<a href="/wiki/slug" class="wiki-link">term</a>` is enough to create the link,
+  and deleting it from the text removes the chip. A slug with no matching entry is
+  dropped silently, so check the row count after saving. `termos_wiki` in the
+  content front matter is a to-do list for authors, not a source of truth.
 - **The API authenticates with a Bearer token, not a cookie** — a cookie-only
   request gets `401 Token não fornecido`. Drive the real admin UI instead of
   reaching for the token.
