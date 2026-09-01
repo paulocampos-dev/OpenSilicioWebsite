@@ -65,6 +65,51 @@ like "0 pending migrations" even when your new migration hasn't run.
   browser, for UI work) before considering it done — don't rely on `lint`
   alone given the current ESLint breakage.
 
+## The Lexical editor and the admin panel
+
+Hard-won behaviour. Most of these fail silently, so assume them rather than
+rediscovering them.
+
+- **Never inject nodes into the contenteditable DOM.** Lexical removes foreign
+  nodes and the two sides loop until the tab dies (this took production down
+  once). Anything that must sit on top of the editor goes in an overlay layer —
+  see the copy button in `styles/design-system/patterns/code.css`.
+- **`setEditorState` does not fire `OnChangePlugin`.** The admin form's `content`
+  state therefore stays stale, and clicking Salvar afterwards writes the
+  *pre-mutation* state and silently reverts your change. Pasting does fire it, so
+  clear-then-paste is safe; a mutation done only through `setEditorState` needs a
+  real edit before saving.
+- **The form has no autosave.** The Salvar submit button is the only reliable
+  write path.
+- **Lexical ignores selection set from a script**, so `document.execCommand`
+  works or no-ops depending on Lexical's own internal selection. Don't rely on it
+  for programmatic edits; it once left a stray character in a published post.
+  Real key events work.
+- **`LEXICAL_NODES` in `components/lexical/nodeSet.ts` is the single source of
+  truth.** The editor and the read-only renderer must register the identical
+  set, or content silently fails to render. Notably there is **no `TableNode`**:
+  markdown tables are dropped on paste.
+- **A code block with no language becomes `javascript`** in `@lexical/code`, and
+  that choice is persisted — wrong label plus stray syntax colouring on terminal
+  output. Use `plain` for anything that isn't really code.
+- Two node importers are deliberately narrow, and widening them re-breaks
+  content: `WikiLinkNode.importDOM` claims an anchor only when it carries the
+  `wiki-link` class or a `/wiki/` href (otherwise `LinkNode` takes it), and the
+  `$...$` equation transform skips code nodes and requires Pandoc-style
+  delimiters so shell variables survive. Both have tests.
+- **Category "Projetos" renders three editors** (Visão Geral, Recursos,
+  Conteúdo); every other category renders one. Title, description, cover letter
+  and the rest are form fields, not editor content, and they are React-controlled
+  (set them with the native value setter plus an `input` event).
+- **Wiki term association lives in the `content_wiki_links` table**, written only
+  by the "Adicionar Link da Wiki" button. No front matter or markup creates it.
+- **The API authenticates with a Bearer token, not a cookie** — a cookie-only
+  request gets `401 Token não fornecido`. Drive the real admin UI instead of
+  reaching for the token.
+- **Uploads accept jpeg/jpg/png/gif/webp/mp4/webm/ogg only; SVG is rejected.**
+  The toolbar button opens a native file dialog, but `ImagePlugin` also handles
+  `PASTE_COMMAND` with `clipboardData.files`.
+
 ## Deployment
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`, which SSHes into
