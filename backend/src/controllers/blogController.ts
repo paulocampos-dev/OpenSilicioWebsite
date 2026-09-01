@@ -6,6 +6,13 @@ import { clearCache } from '../middleware/cache';
 import { filterUndefined } from '../utils/filterUndefined';
 import { parsePagination } from '../utils/parsePagination';
 import { parsePublishedFilter } from '../utils/parsePublishedFilter';
+import { sincronizarLinksDeWiki } from '../services/wikiLinkSync';
+
+/** Ver services/wikiLinkSync.ts. Falhar aqui não pode derrubar o salvamento. */
+const sincronizarSilencioso = (contentId: string, content: string | null | undefined) =>
+  sincronizarLinksDeWiki('blog', contentId, [content]).catch((erro) => {
+    console.error(`Falha ao sincronizar links de wiki do post ${contentId}:`, erro);
+  });
 
 export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) => {
   console.log('📝 [BlogController.getAllPosts] CALLED - This is the BLOG controller');
@@ -46,6 +53,8 @@ export const createPost = asyncHandler(async (req: AuthRequest, res: Response) =
     published,
   });
 
+  await sincronizarSilencioso(post.id, post.content);
+
   // Clear blog cache after creating a post
   clearCache('GET:/api/blog');
 
@@ -70,6 +79,8 @@ export const updatePost = asyncHandler(async (req: AuthRequest, res: Response) =
   });
 
   const post = await blogService.updatePost(id, updateData);
+
+  await sincronizarSilencioso(post.id, post.content);
 
   // Clear blog cache after updating a post
   clearCache('GET:/api/blog');
