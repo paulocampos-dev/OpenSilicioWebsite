@@ -113,7 +113,7 @@ split (`CursoService extends BaseService`, thin controller, zod schema in
 
 | Route | Returns |
 |---|---|
-| `GET /api/cursos?published=true` | List with aggregate counts: `modulos`, `aulas`, `duracao_seg`, plus `titulos_aulas` for search. One query with a lateral join, not N+1. |
+| `GET /api/cursos?published=true` | List with aggregate counts: `modulos`, `aulas`, `aulas_rascunho`, `duracao_seg`, plus `aulas_publicadas` (slug and title of each). One query with two lateral joins, not N+1. |
 | `GET /api/cursos/:slug` | Curso plus the whole módulo and aula tree. Titles, slugs, durations and `publicado` only. No aula bodies. The syllabus in one request. |
 | `GET /api/cursos/:slug/aulas/:aulaSlug` | One aula with its body, plus previous and next within the course. |
 | `POST /api/cursos` and friends | Admin CRUD for all three levels, behind `authMiddleware`. |
@@ -138,9 +138,13 @@ existing code:
   need `.nullish()`, not `.optional()`, or a `null` sent by the admin form is
   rejected.
 
-`video_id` is validated with `/^[A-Za-z0-9_-]{11}$/`. The admin form accepts a
-full YouTube URL or a bare id and normalizes before submit; the server checks
-the normalized form.
+`video_id` accepts whatever the author pastes: a `watch?v=` URL, a `youtu.be`
+link, an `/embed/` or `/shorts/` path, or the bare id. A zod `.refine()` rejects
+anything with no recognizable id in it, and the controller converts what survives
+to the 11-character id before it reaches the database. The refine runs at parse
+time so it is not lost the way a `.transform()` would be. The admin form parses
+the same shapes locally, but only to show a live preview: the backend decides
+what gets stored.
 
 ## Frontend
 
@@ -248,9 +252,14 @@ type CartaoEducacao = {
 
 Two adapters, `cartaoDeCurso` and `cartaoDeRecurso`, feed one grid. The union
 stays at the edge instead of spreading through the component. `buscavel` is why
-`GET /api/cursos` returns `titulos_aulas`: searching Educação for "Yosys" finds
-the curso whose aula covers it, which is what "aulas reachable via search" has
-to mean once aulas are not cards.
+`GET /api/cursos` returns `aulas_publicadas`: searching Educação for "Yosys"
+finds the curso whose aula covers it, which is what "aulas reachable via search"
+has to mean once aulas are not cards.
+
+That field carries the slug alongside the title, rather than titles alone as
+first drafted. The index draws a progress bar per curso, and progress is keyed
+by aula slug, so without the slugs the bar could not be computed without opening
+every course.
 
 ### Wiki, forward direction
 

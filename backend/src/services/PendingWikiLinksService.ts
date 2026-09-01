@@ -5,7 +5,7 @@ import { BaseService, PaginationOptions, WhereCondition } from './BaseService';
 export interface PendingWikiLink {
   id: string;
   term: string;
-  content_type: 'blog' | 'education';
+  content_type: 'blog' | 'education' | 'curso_aula';
   content_id: string;
   context?: string;
   created_at: Date;
@@ -40,11 +40,13 @@ export class PendingWikiLinksService extends BaseService<PendingWikiLink> {
         CASE
           WHEN pwl.content_type = 'blog' THEN bp.title
           WHEN pwl.content_type = 'education' THEN er.title
+          WHEN pwl.content_type = 'curso_aula' THEN ca.titulo
           ELSE NULL
         END as content_title
       FROM pending_wiki_links pwl
       LEFT JOIN blog_posts bp ON pwl.content_type = 'blog' AND pwl.content_id = bp.id
       LEFT JOIN education_resources er ON pwl.content_type = 'education' AND pwl.content_id = er.id
+      LEFT JOIN curso_aulas ca ON pwl.content_type = 'curso_aula' AND pwl.content_id = ca.id
       ORDER BY pwl.created_at DESC
       LIMIT $1 OFFSET $2
     `;

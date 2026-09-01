@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { z, ZodSchema } from 'zod';
+import { extrairIdDoYouTube } from '../utils/youtube';
 
 // Generic validation middleware
 export const validate = (schema: ZodSchema) => {
@@ -243,8 +244,8 @@ export const wikiEntryUpdateSchema = wikiEntrySchema.partial().strip();
 
 // Wiki link validation schema
 export const wikiLinkSchema = z.object({
-  contentType: z.enum(['blog', 'education'], {
-    errorMap: () => ({ message: 'Tipo de conteúdo deve ser blog ou education' }),
+  contentType: z.enum(['blog', 'education', 'curso_aula'], {
+    errorMap: () => ({ message: 'Tipo de conteúdo deve ser blog, education ou curso_aula' }),
   }),
   contentId: z
     .string({
@@ -263,4 +264,96 @@ export const wikiLinkSchema = z.object({
     .min(1, 'Texto do link não pode ser vazio')
     .max(255, 'Texto do link deve ter no máximo 255 caracteres')
     .trim(),
+});
+
+// — Cursos —
+//
+// Lembrete que vale para todos os schemas abaixo: validate() joga fora o
+// resultado do parse e passa o req.body cru adiante, então .transform() aqui
+// seria código morto. Normalização (slug, id do vídeo) fica no controller.
+
+const slug = z
+  .string({ required_error: 'Slug é obrigatório' })
+  .min(1, 'Slug não pode ser vazio')
+  .max(255, 'Slug deve ter no máximo 255 caracteres')
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug deve conter só minúsculas, números e hífens');
+
+export const cursoSchema = z.object({
+  slug,
+  titulo: z
+    .string({ required_error: 'Título é obrigatório' })
+    .min(1, 'Título não pode ser vazio')
+    .max(500, 'Título deve ter no máximo 500 caracteres')
+    .trim(),
+  descricao: z
+    .string({ required_error: 'Descrição é obrigatória' })
+    .min(1, 'Descrição não pode ser vazia')
+    .max(2000, 'Descrição deve ter no máximo 2000 caracteres')
+    .trim(),
+  ementa: z.string().max(50000000, 'Ementa longa demais').nullish(),
+  image_url: z
+    .string()
+    .max(2048, 'URL da imagem deve ter no máximo 2048 caracteres')
+    .refine((val) => !val || val === '' || /^https?:\/\/.+/.test(val), {
+      message: 'URL da imagem inválida',
+    })
+    .nullish(),
+  nivel: z
+    .enum(['Iniciante', 'Intermediário', 'Avançado'], {
+      errorMap: () => ({ message: 'Nível deve ser Iniciante, Intermediário ou Avançado' }),
+    })
+    .nullish(),
+  publicado: z.boolean().optional(),
+});
+
+export const cursoUpdateSchema = cursoSchema.partial().strip();
+
+export const moduloSchema = z.object({
+  titulo: z
+    .string({ required_error: 'Título é obrigatório' })
+    .min(1, 'Título não pode ser vazio')
+    .max(500, 'Título deve ter no máximo 500 caracteres')
+    .trim(),
+  resumo: z.string().max(2000, 'Resumo deve ter no máximo 2000 caracteres').trim().nullish(),
+});
+
+export const moduloUpdateSchema = moduloSchema.partial().strip();
+
+export const aulaSchema = z.object({
+  modulo_id: z
+    .string({ required_error: 'Módulo é obrigatório' })
+    .uuid('ID do módulo deve ser um UUID válido'),
+  slug,
+  titulo: z
+    .string({ required_error: 'Título é obrigatório' })
+    .min(1, 'Título não pode ser vazio')
+    .max(500, 'Título deve ter no máximo 500 caracteres')
+    .trim(),
+  // Aceita o que o autor colar: URL do watch, do youtu.be, do embed, ou o id
+  // sozinho. Quem converte para o id de 11 caracteres é o controller, porque
+  // um .transform() aqui seria descartado pelo validate().
+  video_id: z
+    .string()
+    .max(200, 'Endereço do vídeo longo demais')
+    .refine((val) => val === '' || extrairIdDoYouTube(val) !== null, {
+      message: 'Não reconheci um vídeo do YouTube nesse endereço',
+    })
+    .nullish(),
+  duracao_seg: z
+    .number()
+    .int('Duração deve ser um número inteiro de segundos')
+    .positive('Duração deve ser maior que zero')
+    .max(86400, 'Duração deve ser menor que 24 horas')
+    .nullish(),
+  conteudo: z.string().max(50000000, 'Conteúdo longo demais').nullish(),
+  publicado: z.boolean().optional(),
+});
+
+export const aulaUpdateSchema = aulaSchema.partial().strip();
+
+export const reordenarSchema = z.object({
+  ids: z
+    .array(z.string().uuid('Cada id deve ser um UUID válido'))
+    .min(1, 'A lista de ids não pode ser vazia')
+    .max(500, 'No máximo 500 itens por reordenação'),
 });

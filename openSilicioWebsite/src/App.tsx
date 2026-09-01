@@ -16,6 +16,9 @@ import Blog from './pages/Blog'
 import Post from './pages/Post'
 import Educacao from './pages/Educacao'
 import Recurso from './pages/Recurso'
+import Cursos from './pages/Cursos'
+import Curso from './pages/Curso'
+import Aula from './pages/Aula'
 import WikiList from './pages/WikiList'
 import WikiDetail from './pages/WikiDetail'
 import About from './pages/About'
@@ -28,6 +31,10 @@ import BlogList from './pages/admin/BlogList'
 import BlogForm from './pages/admin/BlogForm'
 import EducationList from './pages/admin/EducationList'
 import EducationForm from './pages/admin/EducationForm'
+import CursoList from './pages/admin/CursoList'
+import CursoForm from './pages/admin/CursoForm'
+import CursoEstrutura from './pages/admin/CursoEstrutura'
+import AulaForm from './pages/admin/AulaForm'
 import AdminWikiList from './pages/admin/WikiList'
 import WikiForm from './pages/admin/WikiForm'
 import Settings from './pages/admin/Settings'
@@ -117,6 +124,7 @@ function Header({ mode, toggleMode }: { mode: ColorMode; toggleMode: () => void 
   const menuItems = [
     { label: 'Início', path: '/' },
     { label: 'Educação', path: '/educacao' },
+    { label: 'Cursos', path: '/cursos' },
     { label: 'Blog', path: '/blog' },
     { label: 'Wiki', path: '/wiki' },
     { label: 'Sobre', path: '/sobre' },
@@ -273,6 +281,9 @@ function AppContent() {
               <Route path="/blog/:slug" element={<Container sx={{ py: 4 }}><Post /></Container>} />
               <Route path="/educacao" element={<Container sx={{ py: 4 }}><Educacao /></Container>} />
               <Route path="/educacao/:id" element={<Container sx={{ py: 4 }}><Recurso /></Container>} />
+              <Route path="/cursos" element={<Container sx={{ py: 4 }}><Cursos /></Container>} />
+              <Route path="/cursos/:cursoSlug" element={<Container sx={{ py: 4 }}><Curso /></Container>} />
+              <Route path="/cursos/:cursoSlug/:aulaSlug" element={<Container sx={{ py: 4 }}><Aula /></Container>} />
               <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiList /></Container>} />
               <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><WikiDetail /></Container>} />
               <Route path="/sobre" element={<Container sx={{ py: 4 }}><About /></Container>} />
@@ -328,6 +339,41 @@ function AppContent() {
                 <ProtectedRoute>
                   <AdminLayout>
                     <EducationForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/cursos" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <CursoList />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/cursos/novo" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <CursoForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/cursos/editar/:id" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <CursoForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/cursos/:cursoSlug/estrutura" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <CursoEstrutura />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/cursos/:cursoSlug/aulas/:aulaId" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <AulaForm />
                   </AdminLayout>
                 </ProtectedRoute>
               } />

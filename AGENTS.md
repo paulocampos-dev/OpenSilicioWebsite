@@ -102,20 +102,52 @@ rediscovering them.
   and the rest are form fields, not editor content, and they are React-controlled
   (set them with the native value setter plus an `input` event).
 - **Wiki term association lives in the `content_wiki_links` table**, and since
-  `53324f5` the server derives it from the saved content: on every blog/education
-  create or update it walks the Lexical JSON for `wikilink` nodes, resolves the
-  slugs against `wiki_entries` and rewrites that content's rows in a transaction
-  (`backend/src/services/wikiLinkSync.ts`). So pasting
-  `<a href="/wiki/slug" class="wiki-link">term</a>` is enough to create the link,
-  and deleting it from the text removes the chip. A slug with no matching entry is
-  dropped silently, so check the row count after saving. `termos_wiki` in the
-  content front matter is a to-do list for authors, not a source of truth.
+  `53324f5` the server derives it from the saved content: on every
+  blog/education/curso-aula create or update it walks the Lexical JSON for
+  `wikilink` nodes, resolves the slugs against `wiki_entries` and rewrites that
+  content's rows in a transaction (`backend/src/services/wikiLinkSync.ts`). So
+  pasting `<a href="/wiki/slug" class="wiki-link">term</a>` is enough to create
+  the link, and deleting it from the text removes the chip. A slug with no
+  matching entry is dropped silently, so check the row count after saving.
+  `termos_wiki` in the content front matter is a to-do list for authors, not a
+  source of truth. `content_type` is `'blog' | 'education' | 'curso_aula'`, and
+  that literal lives in two CHECK constraints, the zod enum,
+  `PendingWikiLinksService` and the frontend types, so a fourth content type has
+  to widen all five.
 - **The API authenticates with a Bearer token, not a cookie** — a cookie-only
   request gets `401 Token não fornecido`. Drive the real admin UI instead of
   reaching for the token.
 - **Uploads accept jpeg/jpg/png/gif/webp/mp4/webm/ogg only; SVG is rejected.**
   The toolbar button opens a native file dialog, but `ImagePlugin` also handles
   `PASTE_COMMAND` with `clipboardData.files`.
+
+## Cursos
+
+The `/cursos` tab is a separate content type from Educação: `cursos` ->
+`curso_modulos` -> `curso_aulas` (migrations 014 and 015). Design and the UI
+mocks it was built from are in
+`docs/superpowers/specs/2026-09-01-cursos-design.md`.
+
+- **An aula's `curso_id` is denormalized but cannot drift.** A composite foreign
+  key on `(curso_id, modulo_id)` makes the database reject any aula whose curso
+  disagrees with its módulo's curso. Aula slugs are unique per *curso*, not per
+  módulo, so an aula can move between módulos without changing its URL.
+- **Video is a first-class field, not an embed in the body.** `video_id` holds
+  the 11-character YouTube id; the player is built on `youtube-nocookie.com`,
+  the same host `YouTubeNode` uses, so cookie consent is unaffected. The
+  controller normalizes any YouTube URL shape down to the id.
+- **A published curso can hold unpublished aulas.** The public tree returns them
+  with a title but no slug, no duration and no body, and the syllabus draws an
+  "em breve" row. They are excluded from the progress denominator, so publishing
+  an aula lowers every reader's percentage.
+- **Reader progress lives only in `localStorage`** under
+  `opensilicio-cursos-progresso`, since visitors have no accounts. The rules are
+  a pure module (`utils/progressoDeCurso.ts`) with tests; the hook only touches
+  storage. Marking is automatic on reaching the foot of an aula *and* manual;
+  un-marking stores `'nao-concluida'`, which is what stops the next scroll from
+  re-marking it.
+- **Reordering rewrites the whole list** in one `unnest ... WITH ORDINALITY`
+  update, so there is no half-reordered state. `ordem` has no unique constraint.
 
 ## Deployment
 

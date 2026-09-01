@@ -14,6 +14,7 @@ import pool from './config/database';
 import authRoutes from './routes/auth';
 import blogRoutes from './routes/blog';
 import educationRoutes from './routes/education';
+import cursoRoutes from './routes/cursos';
 import wikiRoutes from './routes/wiki';
 import uploadRoutes from './routes/upload';
 import imageUploadRoutes from './routes/imageUpload';
@@ -100,6 +101,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/education', educationRoutes);
+app.use('/api/cursos', cursoRoutes);
 app.use('/api/wiki', wikiRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/upload', imageUploadRoutes); // Image upload with compression

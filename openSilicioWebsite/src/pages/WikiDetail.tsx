@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import { Box, Stack, Typography } from '@mui/material'
 import { wikiApi } from '../services/api'
-import type { WikiEntry } from '../types'
+import type { AparicaoDeVerbete, WikiEntry } from '../types'
+import BlueprintFrame from '../components/design/BlueprintFrame'
 import LexicalContent from '../components/LexicalContent'
 import CoverLetterDisplay from '../components/CoverLetterDisplay'
 import BlankSheet from '../components/design/BlankSheet'
@@ -15,6 +16,7 @@ export default function WikiDetail() {
   const [loading, setLoading] = useState(true)
   const [isPending, setIsPending] = useState(false)
   const [pendingTerm, setPendingTerm] = useState('')
+  const [aparicoes, setAparicoes] = useState<AparicaoDeVerbete[]>([])
 
   useEffect(() => {
     if (slug) {
@@ -30,6 +32,8 @@ export default function WikiDetail() {
       } else {
         const data = await wikiApi.getBySlug(slug!)
         setEntry(data)
+        // Acessório: sem a lista de aparições o verbete continua completo.
+        wikiApi.getAparicoes(slug!).then(setAparicoes).catch(() => {})
       }
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -108,6 +112,22 @@ export default function WikiDetail() {
         <Box sx={{ border: '1px solid var(--color-line)', p: { xs: 3, md: 5 } }}>
           <LexicalContent content={entry.content} />
         </Box>
+      )}
+
+      {aparicoes.length > 0 && (
+        <BlueprintFrame sx={{ p: 2.5, maxWidth: '62ch' }}>
+          <span className="kicker">Onde aparece</span>
+          <Stack spacing={1} sx={{ mt: 1 }}>
+            {aparicoes.map((aparicao) => (
+              <Typography key={`${aparicao.content_type}-${aparicao.content_id}`} sx={{ fontSize: 15, lineHeight: '22px' }}>
+                <RouterLink to={aparicao.href}>{aparicao.titulo}</RouterLink>
+                {aparicao.contexto && (
+                  <span style={{ color: 'var(--color-text-faint)' }}> · {aparicao.contexto}</span>
+                )}
+              </Typography>
+            ))}
+          </Stack>
+        </BlueprintFrame>
       )}
     </Stack>
     </RevealOnLoad>
