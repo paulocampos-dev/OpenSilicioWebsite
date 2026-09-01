@@ -48,6 +48,7 @@ export default function CursoForm() {
   });
   const [slugTocado, setSlugTocado] = useState(false);
   const [carregando, setCarregando] = useState(editando);
+  const [naoEncontrado, setNaoEncontrado] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [enviandoImagem, setEnviandoImagem] = useState(false);
   const [progresso, setProgresso] = useState(0);
@@ -60,18 +61,16 @@ export default function CursoForm() {
   useEffect(() => {
     if (!id) return;
 
-    // A listagem é a única rota que devolve curso por id; a de slug é pública e
-    // não serve para editar rascunho.
     cursosApi
-      .getAll(undefined, 1, 100)
-      .then((resposta) => {
-        const encontrado = resposta.data.find((c) => c.id === id);
-        if (encontrado) {
-          setCurso(encontrado);
-          setSlugTocado(true);
-        }
+      .getById(id)
+      .then((encontrado) => {
+        setCurso(encontrado);
+        setSlugTocado(true);
       })
-      .catch((erro) => console.error('Erro ao carregar curso:', erro))
+      .catch((erro) => {
+        console.error('Erro ao carregar curso:', erro);
+        setNaoEncontrado(true);
+      })
       .finally(() => setCarregando(false));
   }, [id]);
 
@@ -133,6 +132,17 @@ export default function CursoForm() {
   };
 
   if (carregando) return <Typography>Carregando...</Typography>;
+
+  // Sem isto, um id inexistente renderizava um formulário em branco com o
+  // título "Editar curso", e salvar criaria confusão em vez de um erro.
+  if (naoEncontrado) {
+    return (
+      <Box>
+        <Typography variant="h4" gutterBottom>Curso não encontrado</Typography>
+        <Button component={RouterLink} to="/admin/cursos">Voltar aos cursos</Button>
+      </Box>
+    );
+  }
 
   return (
     <Box>

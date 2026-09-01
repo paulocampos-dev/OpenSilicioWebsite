@@ -76,7 +76,7 @@ describe('Cursos API', () => {
       // Cada módulo numera as aulas a partir de zero, então ordenar só por
       // curso_aulas.ordem intercala os módulos e o botão "começar" do índice
       // manda o leitor para a aula errada.
-      const { curso, modulo } = await criarCurso({
+      const { curso } = await criarCurso({
         aulas: [
           { slug: 'm1-a1', titulo: 'M1 A1', publicado: true },
           { slug: 'm1-a2', titulo: 'M1 A2', publicado: true },
@@ -94,8 +94,6 @@ describe('Cursos API', () => {
           [curso.id, segundos[0].id, slug, slug.toUpperCase(), indice],
         );
       }
-      expect(modulo.id).toBeDefined();
-
       const resposta = await request(app).get('/api/cursos').query({ published: true });
 
       const encontrado = resposta.body.data.find((c: { slug: string }) => c.slug === curso.slug);
@@ -105,6 +103,34 @@ describe('Cursos API', () => {
         'm2-a1',
         'm2-a2',
       ]);
+    });
+
+    it('ignora ?published=false na rota pública', async () => {
+      await criarCurso({ slug: 'rascunho-pedido', publicado: false });
+      await criarCurso({ slug: 'no-ar', publicado: true });
+
+      // Sem isto a rota pública entrega o título dos rascunhos a quem pedir.
+      const resposta = await request(app).get('/api/cursos').query({ published: false });
+
+      expect(resposta.status).toBe(200);
+      const slugs = resposta.body.data.map((c: { slug: string }) => c.slug);
+      expect(slugs).not.toContain('rascunho-pedido');
+      expect(slugs).toContain('no-ar');
+    });
+
+    it('a rota do admin lista rascunhos, e só com token', async () => {
+      await criarCurso({ slug: 'rascunho-do-admin', publicado: false });
+
+      const semToken = await request(app).get('/api/cursos/admin/todos');
+      expect(semToken.status).toBe(401);
+
+      const token = await getAuthToken();
+      const comToken = await request(app)
+        .get('/api/cursos/admin/todos')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(comToken.status).toBe(200);
+      expect(comToken.body.data.map((c: { slug: string }) => c.slug)).toContain('rascunho-do-admin');
     });
 
     it('não lista curso despublicado', async () => {
@@ -261,6 +287,50 @@ describe('Cursos API', () => {
         [modulo.id],
       );
       expect(rows.map((r) => r.slug)).toEqual(['c', 'b', 'a']);
+    });
+
+    it('reordenar não mexe em aula de outro módulo', async () => {
+      const token = await getAuthToken();
+      const a = await criarCurso({
+        slug: 'escopo-a',
+        aulas: [{ slug: 'a1', titulo: 'A1', publicado: true }],
+      });
+      const b = await criarCurso({
+        slug: 'escopo-b',
+        aulas: [{ slug: 'b1', titulo: 'B1', publicado: true }],
+      });
+
+      // O id do outro módulo entra na lista; o WHERE de escopo tem que ignorá-lo,
+      // senão uma requisição forjada reordenaria o curso alheio.
+      const resposta = await request(app)
+        .put(`/api/cursos/modulos/${a.modulo.id}/aulas/ordem`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ ids: [b.aulas[0].id, a.aulas[0].id] });
+
+      expect(resposta.status).toBe(200);
+
+      const { rows } = await testPool.query('SELECT ordem FROM curso_aulas WHERE id = $1', [
+        b.aulas[0].id,
+      ]);
+      expect(rows[0].ordem).toBe(0);
+    });
+
+    it('esvaziar o resumo de um módulo realmente apaga', async () => {
+      const token = await getAuthToken();
+      const { modulo } = await criarCurso();
+
+      await request(app)
+        .put(`/api/cursos/modulos/${modulo.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ titulo: 'Ambiente', resumo: 'Um resumo qualquer' });
+
+      const resposta = await request(app)
+        .put(`/api/cursos/modulos/${modulo.id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ titulo: 'Ambiente', resumo: null });
+
+      expect(resposta.status).toBe(200);
+      expect(resposta.body.resumo).toBeNull();
     });
 
     it('apagar o curso leva módulos e aulas junto', async () => {

@@ -191,6 +191,11 @@ export class CursoService extends BaseService<Curso> {
     }
   }
 
+  /** Pelo id, para o admin abrir o formulário de um curso ainda em rascunho. */
+  async getCursoById(id: string): Promise<Curso> {
+    return this.getById(id);
+  }
+
   async getBySlug(slug: string, apenasPublicado: boolean): Promise<Curso> {
     const filtro = apenasPublicado ? 'AND publicado = true' : '';
     const { rows } = await this.pool.query<Curso>(
@@ -349,18 +354,31 @@ export class CursoService extends BaseService<Curso> {
     return rows[0];
   }
 
+  /**
+   * Só grava os campos que vieram.
+   *
+   * Um COALESCE($n, coluna) seria mais curto, mas aí `resumo: null` viraria
+   * "mantenha o que está lá" e nunca daria para apagar o resumo de um módulo:
+   * campo ausente e campo esvaziado precisam ser coisas diferentes.
+   */
   async atualizarModulo(
     id: string,
     dados: { titulo?: string; resumo?: string | null },
   ): Promise<CursoModulo> {
+    const campos = (['titulo', 'resumo'] as const).filter((c) => dados[c] !== undefined);
+    if (campos.length === 0) {
+      const { rows } = await this.pool.query<CursoModulo>(
+        'SELECT * FROM curso_modulos WHERE id = $1',
+        [id],
+      );
+      if (rows.length === 0) throw new NotFoundError('Módulo');
+      return rows[0];
+    }
+
+    const sets = campos.map((campo, i) => `${campo} = $${i + 2}`).join(', ');
     const { rows } = await this.pool.query<CursoModulo>(
-      `UPDATE curso_modulos
-          SET titulo = COALESCE($2, titulo),
-              resumo = COALESCE($3, resumo),
-              updated_at = NOW()
-        WHERE id = $1
-        RETURNING *`,
-      [id, dados.titulo ?? null, dados.resumo ?? null],
+      `UPDATE curso_modulos SET ${sets}, updated_at = NOW() WHERE id = $1 RETURNING *`,
+      [id, ...campos.map((campo) => dados[campo])],
     );
     if (rows.length === 0) throw new NotFoundError('Módulo');
     return rows[0];
@@ -452,24 +470,29 @@ export class CursoService extends BaseService<Curso> {
    * em que metade da lista está reordenada. O escopo (`curso_id`/`modulo_id`)
    * fica no WHERE para uma lista com id de outro curso não mexer onde não deve.
    */
-  async reordenarModulos(cursoId: string, ids: string[]): Promise<void> {
-    await this.pool.query(
-      `UPDATE curso_modulos m
+  /** Devolve quantas linhas de fato mudaram de posição. */
+  private async reordenar(
+    tabela: 'curso_modulos' | 'curso_aulas',
+    colunaDeEscopo: 'curso_id' | 'modulo_id',
+    escopo: string,
+    ids: string[],
+  ): Promise<number> {
+    const { rowCount } = await this.pool.query(
+      `UPDATE ${tabela} t
           SET ordem = v.posicao - 1, updated_at = NOW()
          FROM unnest($1::uuid[]) WITH ORDINALITY AS v(id, posicao)
-        WHERE m.id = v.id AND m.curso_id = $2`,
-      [ids, cursoId],
+        WHERE t.id = v.id AND t.${colunaDeEscopo} = $2`,
+      [ids, escopo],
     );
+    return rowCount ?? 0;
   }
 
-  async reordenarAulas(moduloId: string, ids: string[]): Promise<void> {
-    await this.pool.query(
-      `UPDATE curso_aulas a
-          SET ordem = v.posicao - 1, updated_at = NOW()
-         FROM unnest($1::uuid[]) WITH ORDINALITY AS v(id, posicao)
-        WHERE a.id = v.id AND a.modulo_id = $2`,
-      [ids, moduloId],
-    );
+  async reordenarModulos(cursoId: string, ids: string[]): Promise<number> {
+    return this.reordenar('curso_modulos', 'curso_id', cursoId, ids);
+  }
+
+  async reordenarAulas(moduloId: string, ids: string[]): Promise<number> {
+    return this.reordenar('curso_aulas', 'modulo_id', moduloId, ids);
   }
 }
 

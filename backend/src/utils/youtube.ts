@@ -6,8 +6,11 @@
  * permite montar o embed em youtube-nocookie.com, o mesmo host que o YouTubeNode
  * do Lexical já usa, então o consentimento de cookies não muda.
  *
- * Existe uma cópia disto no frontend (utils/youtube.ts) para a pré-visualização
- * do formulário. Este aqui é quem decide o que vai para o banco.
+ * Existe uma cópia disto em `openSilicioWebsite/src/utils/youtube.ts`, usada na
+ * pré-visualização do formulário. Este aqui é quem decide o que vai para o
+ * banco, mas as duas precisam reconhecer as mesmas formas: se o formulário
+ * reconhecer menos, ele recusa um endereço que a API gravaria sem reclamar.
+ * Os dois testes cobrem a mesma lista de casos.
  */
 
 const PADRAO_ID = /^[A-Za-z0-9_-]{11}$/;

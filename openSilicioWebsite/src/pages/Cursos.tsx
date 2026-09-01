@@ -48,7 +48,7 @@ export default function Cursos() {
 
   useEffect(() => {
     cursosApi
-      .getAll(true, 1, 50)
+      .getAll(1, 50)
       .then((resposta) => setCursos(resposta.data))
       .catch((erro) => {
         if (import.meta.env.DEV) console.error('Erro ao carregar cursos:', erro)
@@ -67,8 +67,15 @@ export default function Cursos() {
       const feitas = concluidas(curso.slug, slugs)
       if (feitas > 0 && feitas < slugs.length) {
         const proxima = retomarEm(curso.slug, slugs)
-        const aula = curso.aulas_publicadas.find((a) => a.slug === proxima)
-        if (aula) return { curso, aula, feitas, total: slugs.length }
+        const posicao = slugs.indexOf(proxima ?? '')
+        const aula = curso.aulas_publicadas[posicao]
+        if (aula) {
+          // A posição é a da aula que o botão abre, não a contagem de
+          // concluídas: quem terminou a 1 e a 3 e vai retomar a 2 tem que ler
+          // "aula 2", e não "aula 3".
+          const restante = Math.round(curso.duracao_seg * (1 - feitas / slugs.length))
+          return { curso, aula, feitas, posicao: posicao + 1, total: slugs.length, restante }
+        }
       }
     }
     return null
@@ -120,11 +127,16 @@ export default function Cursos() {
                 {emAndamento.curso.titulo}
               </Typography>
               <Typography sx={{ color: 'var(--color-text-muted)', mt: 0.75, mb: 1.5 }}>
-                Aula {emAndamento.feitas + 1} de {emAndamento.total}
+                Aula {emAndamento.posicao} de {emAndamento.total}
               </Typography>
               <BarraDeProgresso concluidas={emAndamento.feitas} total={emAndamento.total} />
               <Typography sx={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', mt: 1 }}>
-                {emAndamento.feitas} de {emAndamento.total} aulas concluídas
+                {[
+                  `${emAndamento.feitas} de ${emAndamento.total} aulas concluídas`,
+                  emAndamento.restante > 0 ? `restam ${duracaoPorExtenso(emAndamento.restante)}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
               </Typography>
             </Box>
             <RouterLink

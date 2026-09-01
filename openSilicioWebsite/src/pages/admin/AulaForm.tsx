@@ -18,29 +18,8 @@ import LexicalEditor from '../../components/LexicalEditor';
 import { cursosApi } from '../../services/api';
 import type { CursoAula, CursoComArvore } from '../../types';
 import { comoRelogio, segundosDe } from '../../utils/duracao';
+import { extrairIdDoYouTube } from '../../utils/youtube';
 import { emSlug } from './CursoForm';
-
-/**
- * O formulário aceita a URL inteira do YouTube; quem converte para o id de 11
- * caracteres é o backend, que é a única fonte da verdade sobre o que vai para o
- * banco. Isto aqui só serve para mostrar a previa enquanto o autor digita.
- */
-const idDoYouTube = (entrada: string): string | null => {
-  const limpo = entrada.trim();
-  if (/^[A-Za-z0-9_-]{11}$/.test(limpo)) return limpo;
-
-  const padroes = [
-    /[?&]v=([A-Za-z0-9_-]{11})/,
-    /youtu\.be\/([A-Za-z0-9_-]{11})/,
-    /\/embed\/([A-Za-z0-9_-]{11})/,
-    /\/shorts\/([A-Za-z0-9_-]{11})/,
-  ];
-  for (const padrao of padroes) {
-    const achado = padrao.exec(limpo);
-    if (achado?.[1]) return achado[1];
-  }
-  return null;
-};
 
 export default function AulaForm() {
   const { cursoSlug, aulaId } = useParams<{ cursoSlug: string; aulaId: string }>();
@@ -111,7 +90,7 @@ export default function AulaForm() {
       return;
     }
 
-    if (aula.video_id?.trim() && idDoYouTube(aula.video_id) === null) {
+    if (aula.video_id?.trim() && extrairIdDoYouTube(aula.video_id) === null) {
       setAviso({ open: true, message: 'Não reconheci um vídeo do YouTube nesse endereço', severity: 'error' });
       return;
     }
@@ -148,7 +127,7 @@ export default function AulaForm() {
   if (carregando) return <Typography>Carregando...</Typography>;
   if (!curso) return <Typography>Curso não encontrado.</Typography>;
 
-  const previa = aula.video_id ? idDoYouTube(aula.video_id) : null;
+  const previa = aula.video_id ? extrairIdDoYouTube(aula.video_id) : null;
 
   return (
     <Box>

@@ -61,7 +61,7 @@ export default function CursoEstrutura() {
     carregar();
   }, [carregar]);
 
-  const falhar = (mensagem: string) => (erro: unknown) => {
+  const falhar = (mensagem: string, erro: unknown) => {
     console.error(mensagem, erro);
     setAviso({ open: true, message: mensagem, severity: 'error' });
   };
@@ -84,7 +84,7 @@ export default function CursoEstrutura() {
       setDialogoModulo(null);
       await carregar();
     } catch (erro) {
-      falhar('Erro ao salvar o módulo')(erro);
+      falhar('Erro ao salvar o módulo', erro);
     }
   };
 
@@ -100,7 +100,7 @@ export default function CursoEstrutura() {
       await cursosApi.deletarModulo(id);
       await carregar();
     } catch (erro) {
-      falhar('Erro ao deletar o módulo')(erro);
+      falhar('Erro ao deletar o módulo', erro);
     }
   };
 
@@ -113,7 +113,7 @@ export default function CursoEstrutura() {
     try {
       await cursosApi.reordenarModulos(curso.id, nova.map((m) => m.id));
     } catch (erro) {
-      falhar('Erro ao reordenar os módulos')(erro);
+      falhar('Erro ao reordenar os módulos', erro);
       await carregar();
     }
   };
@@ -133,7 +133,7 @@ export default function CursoEstrutura() {
     try {
       await cursosApi.reordenarAulas(moduloId, nova.map((a) => a.id));
     } catch (erro) {
-      falhar('Erro ao reordenar as aulas')(erro);
+      falhar('Erro ao reordenar as aulas', erro);
       await carregar();
     }
   };
@@ -145,7 +145,7 @@ export default function CursoEstrutura() {
       await cursosApi.deletarAula(id);
       await carregar();
     } catch (erro) {
-      falhar('Erro ao deletar a aula')(erro);
+      falhar('Erro ao deletar a aula', erro);
     }
   };
 

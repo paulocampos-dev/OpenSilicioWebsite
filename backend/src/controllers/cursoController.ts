@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { cursoService } from '../services/CursoService';
+import { cursoService, type Curso, type CursoAula } from '../services/CursoService';
 import { asyncHandler } from '../middleware/errorHandler';
 import { clearCache } from '../middleware/cache';
 import { parsePagination } from '../utils/parsePagination';
@@ -33,12 +33,33 @@ const normalizarVideo = (valor: unknown): string | null | undefined => {
   return extrairIdDoYouTube(String(valor));
 };
 
+/**
+ * Índice público: sempre só o que está publicado.
+ *
+ * Diferente do blog e da Educação, que deixam `?published=false` passar numa
+ * rota sem autenticação e com isso entregam o título dos rascunhos a quem
+ * pedir. Quem precisa ver rascunho de curso é o admin, e ele tem a rota
+ * autenticada logo abaixo.
+ */
 export const listarCursos = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { page, limit } = parsePagination(req.query, 10);
+
+  const resultado = await cursoService.listar(true, { page, limit });
+  res.json(resultado);
+});
+
+/** Índice do admin: publicados e rascunhos, atrás do authMiddleware. */
+export const listarCursosAdmin = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { page, limit } = parsePagination(req.query, 10);
   const publicado = parsePublishedFilter(req.query);
 
   const resultado = await cursoService.listar(publicado, { page, limit });
   res.json(resultado);
+});
+
+export const getCursoById = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const curso = await cursoService.getCursoById(req.params.id);
+  res.json(curso);
 });
 
 export const getCurso = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -79,11 +100,28 @@ export const criarCurso = asyncHandler(async (req: AuthRequest, res: Response) =
   res.status(201).json(curso);
 });
 
+/**
+ * Só os campos presentes no corpo vão para o UPDATE.
+ *
+ * Montado campo a campo em vez de filtrar `Object.entries(req.body)`: aquilo
+ * devolve `Record<string, any>`, e o `any` atravessaria até o service sem que o
+ * compilador conferisse nada.
+ */
+const somenteDefinidos = <T extends object>(dados: T): Partial<T> =>
+  Object.fromEntries(Object.entries(dados).filter(([, valor]) => valor !== undefined)) as Partial<T>;
+
 export const atualizarCurso = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const permitidos = ['slug', 'titulo', 'descricao', 'ementa', 'image_url', 'nivel', 'publicado'];
-  const dados = Object.fromEntries(
-    Object.entries(req.body).filter(([campo, valor]) => permitidos.includes(campo) && valor !== undefined),
-  );
+  const { slug, titulo, descricao, ementa, image_url, nivel, publicado } = req.body;
+
+  const dados = somenteDefinidos({
+    slug,
+    titulo,
+    descricao,
+    ementa,
+    image_url,
+    nivel,
+    publicado,
+  } satisfies Partial<Curso>);
 
   const curso = await cursoService.atualizarCurso(req.params.id, dados);
   limparCache();
@@ -145,7 +183,7 @@ export const criarAula = asyncHandler(async (req: AuthRequest, res: Response) =>
 export const atualizarAula = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado } = req.body;
 
-  const dados = {
+  const dados = somenteDefinidos({
     modulo_id,
     slug,
     titulo,
@@ -153,12 +191,9 @@ export const atualizarAula = asyncHandler(async (req: AuthRequest, res: Response
     duracao_seg,
     conteudo,
     publicado,
-  };
+  } satisfies Partial<CursoAula>);
 
-  const aula = await cursoService.atualizarAula(
-    req.params.id,
-    Object.fromEntries(Object.entries(dados).filter(([, valor]) => valor !== undefined)),
-  );
+  const aula = await cursoService.atualizarAula(req.params.id, dados);
 
   await sincronizarSilencioso(aula.id, aula.conteudo);
   limparCache();

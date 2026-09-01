@@ -1,5 +1,5 @@
 import { Box, Drawer, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { cursosApi, wikiApi } from '../services/api'
 import type { AulaComVizinhas, CursoComArvore, WikiLink } from '../types'
@@ -58,17 +58,25 @@ function Espinha({
         {feitas} de {total}
       </Typography>
 
-      {curso.modulos.map((modulo, indice) => (
+      {curso.modulos.map((modulo, indice) => {
+        // A numeração corre no curso inteiro, como no currículo, então cada
+        // módulo precisa saber quantas aulas vieram antes dele.
+        const numeroInicial =
+          curso.modulos.slice(0, indice).reduce((soma, m) => soma + m.aulas.length, 0) + 1
+
+        return (
         <Box key={modulo.id} sx={{ mb: 2 }}>
           <Typography sx={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent)', fontWeight: 600, mb: 0.5 }}>
             Módulo {indice + 1} · {modulo.titulo}
           </Typography>
           <Stack spacing={0.25}>
-            {modulo.aulas.map((aula) => {
+            {modulo.aulas.map((aula, posicao) => {
+              const numero = String(numeroInicial + posicao).padStart(2, '0')
+
               if (!aula.publicado) {
                 return (
                   <Typography key={aula.id} sx={{ fontSize: 14, color: 'var(--color-text-faint)', opacity: 0.7 }}>
-                    {aula.titulo}
+                    {numero}  {aula.titulo}
                   </Typography>
                 )
               }
@@ -92,13 +100,14 @@ function Espinha({
                     '&:hover': { color: 'var(--color-accent-ink)' },
                   }}
                 >
-                  {aula.titulo}
+                  {numero}  {aula.titulo}
                 </Typography>
               )
             })}
           </Stack>
         </Box>
-      ))}
+        )
+      })}
     </Box>
   )
 }
@@ -116,7 +125,6 @@ export default function Aula() {
 
   const { concluida, concluidas, alternar, marcarAutomatico, visitar } = useProgressoDeCurso()
   const { popoverProps, containerHandlers } = useWikiGlossary(verbetes)
-  const fimDoTexto = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!cursoSlug || !aulaSlug) return
@@ -163,8 +171,7 @@ export default function Aula() {
    * apertar o play. Saber que o vídeo acabou exigiria a iframe API do YouTube;
    * até lá, aula sem texto se marca no botão.
    */
-  useAoChegarAoFim(
-    fimDoTexto,
+  const fimDoTexto = useAoChegarAoFim(
     () => {
       if (cursoSlug && aulaSlug) marcarAutomatico(cursoSlug, aulaSlug)
     },

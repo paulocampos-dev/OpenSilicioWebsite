@@ -26,7 +26,7 @@ const levels: Level[] = ['Todos', 'Iniciante', 'Intermediário', 'Avançado']
  * mas aqui aparecem lado a lado. Normalizar na borda, com um adaptador para
  * cada origem, evita espalhar uma união por toda a página.
  */
-interface CartaoEducacao {
+export interface CartaoEducacao {
   chave: string
   href: string
   titulo: string
@@ -40,13 +40,23 @@ interface CartaoEducacao {
   data: string
 }
 
-const cartaoDeRecurso = (recurso: EducationResource): CartaoEducacao => ({
+/**
+ * `category` vem do banco como texto livre, então um `as Kind` seria uma
+ * mentira: um recurso com categoria antiga ou vazia cairia numa aba que não
+ * existe e sumiria da grade. Aqui o valor é conferido contra a lista de abas.
+ */
+const categoriaDeRecurso = (valor: string | null | undefined): Exclude<Kind, 'Todos'> => {
+  const conhecidas = kinds.filter((k): k is Exclude<Kind, 'Todos'> => k !== 'Todos')
+  return conhecidas.find((k) => k === valor) ?? 'Guias'
+}
+
+export const cartaoDeRecurso = (recurso: EducationResource): CartaoEducacao => ({
   chave: `recurso-${recurso.id}`,
   href: `/educacao/${recurso.id}`,
   titulo: recurso.title,
   descricao: recurso.description,
   imagem: recurso.image_url ?? null,
-  categoria: (recurso.category as Exclude<Kind, 'Todos'>) ?? 'Guias',
+  categoria: categoriaDeRecurso(recurso.category),
   nivel: recurso.difficulty ?? null,
   meta: `Atualizado ${new Date(recurso.created_at).toLocaleDateString('pt-BR')}`,
   buscavel: `${recurso.title} ${recurso.description}`.toLowerCase(),
@@ -59,7 +69,7 @@ const cartaoDeRecurso = (recurso: EducationResource): CartaoEducacao => ({
  * das aulas entram no texto buscável, senão procurar por "Yosys" aqui não
  * acharia a aula que fala disso.
  */
-const cartaoDeCurso = (curso: CursoNaListagem): CartaoEducacao => ({
+export const cartaoDeCurso = (curso: CursoNaListagem): CartaoEducacao => ({
   chave: `curso-${curso.id}`,
   href: `/cursos/${curso.slug}`,
   titulo: curso.titulo,
@@ -96,7 +106,7 @@ export default function Educacao() {
       // As duas origens em paralelo: uma falhar não pode esvaziar a página toda.
       const [recursos, cursos] = await Promise.all([
         educationApi.getAll(true, 1, 100).catch(() => null),
-        cursosApi.getAll(true, 1, 100).catch(() => null),
+        cursosApi.getAll(1, 100).catch(() => null),
       ])
 
       const lista = [

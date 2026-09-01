@@ -117,7 +117,23 @@ split (`CursoService extends BaseService`, thin controller, zod schema in
 | `GET /api/cursos/:slug` | Curso plus the whole módulo and aula tree. Titles, slugs, durations and `publicado` only. No aula bodies. The syllabus in one request. |
 | `GET /api/cursos/:slug/aulas/:aulaSlug` | One aula with its body, plus previous and next within the course. |
 | `POST /api/cursos` and friends | Admin CRUD for all three levels, behind `authMiddleware`. |
-| `PUT /api/cursos/:id/ordem` | Reorder. Takes an ordered id list per level, rewrites positions in one transaction. |
+| `GET /api/cursos/admin/todos` | Admin index: publicados and rascunhos, behind `authMiddleware`. |
+| `GET /api/cursos/id/:id` | One curso by id, behind `authMiddleware`, for the admin form. |
+| `PUT /api/cursos/:cursoId/modulos/ordem` | Reorder módulos within a curso. |
+| `PUT /api/cursos/modulos/:moduloId/aulas/ordem` | Reorder aulas within a módulo. |
+
+Reordering is two endpoints rather than the single `PUT /api/cursos/:id/ordem`
+first sketched: each level is scoped by a different parent, and one route could
+not say "these aulas, within this módulo" without inventing a discriminator.
+Both share one private helper and rewrite the whole list in a single atomic
+`unnest ... WITH ORDINALITY` update, scoped by the parent id so a forged list
+containing another course's ids moves nothing.
+
+The public index is always filtered to published, ignoring `?published=`. Blog
+and Educação both accept that parameter on unauthenticated routes and will hand
+out draft titles to anyone who asks; Cursos does not, and the admin reads
+drafts through its own authenticated routes instead. The two older routes are
+left as they are, out of scope here.
 
 Public reads filter on `publicado = true` for the curso. Within a published
 curso, unpublished aulas are returned as `{ id, titulo, publicado: false }` with
@@ -139,12 +155,15 @@ existing code:
   rejected.
 
 `video_id` accepts whatever the author pastes: a `watch?v=` URL, a `youtu.be`
-link, an `/embed/` or `/shorts/` path, or the bare id. A zod `.refine()` rejects
+link, an `/embed/`, `/shorts/` or `/live/` path, or the bare id. A zod `.refine()` rejects
 anything with no recognizable id in it, and the controller converts what survives
 to the 11-character id before it reaches the database. The refine runs at parse
 time so it is not lost the way a `.transform()` would be. The admin form parses
 the same shapes locally, but only to show a live preview: the backend decides
-what gets stored.
+what gets stored. The two parsers live in `backend/src/utils/youtube.ts` and
+`openSilicioWebsite/src/utils/youtube.ts` and are covered by the same list of
+cases in both suites, because a form that recognizes less than the API would
+refuse an address the server would happily store.
 
 ## Frontend
 
@@ -207,8 +226,18 @@ The single map handles both completion modes without a second structure:
   Un-marking stores `'nao-concluida'`, which permanently blocks the automatic
   path for that aula. Without this, un-marking would be undone by the next scroll.
 
-Video aulas use the same scroll sentinel. Waiting for playback to end would
-require the YouTube iframe API, an external script for one small signal.
+Video aulas do **not** auto-mark. The sentinel sits at the foot of the aula
+body, so on an aula that is only a player it starts on screen and the aula would
+be finished before the reader pressed play. Knowing that a video ended needs the
+YouTube iframe API, an external script for one small signal, so an aula with no
+text is marked by hand.
+
+The observer is attached through a callback ref rather than a ref object plus an
+effect. The aula page does not unmount when the reader moves from one aula to
+the next, only its route params change, so an effect's dependencies would not
+change and the observer would stay bound to the previous aula's sentinel, which
+the loading skeleton has already removed from the DOM. Only the first aula of a
+session would ever auto-mark.
 
 The denominator counts published aulas only, so "em breve" rows never make 100%
 unreachable, and publishing a new aula moves the percentage down. That is
@@ -324,9 +353,13 @@ A `Cursos` section in `AdminLayout`, mirroring the existing list-plus-form shape
 | Route | Screen |
 |---|---|
 | `/admin/cursos` | list with publicado state, aula counts |
-| `/admin/cursos/novo`, `/admin/cursos/:id` | curso metadata: título, slug, descrição, nível, capa via `ThumbnailUploadField`, ementa in a Lexical editor, publicado |
-| `/admin/cursos/:id/estrutura` | the outline: add, rename, reorder and delete módulos and aulas; each aula links to its editor |
-| `/admin/cursos/:id/aulas/:aulaId` | aula: título, slug, vídeo, duração as `mm:ss`, publicado, Lexical body, `WikiLinkInserter` |
+| `/admin/cursos/novo`, `/admin/cursos/editar/:id` | curso metadata: título, slug, descrição, nível, capa via `ThumbnailUploadField`, ementa in a Lexical editor, publicado |
+| `/admin/cursos/:cursoSlug/estrutura` | the outline: add, rename, reorder and delete módulos and aulas; each aula links to its editor |
+| `/admin/cursos/:cursoSlug/aulas/:aulaId` | aula: título, slug, vídeo, duração as `mm:ss`, publicado, Lexical body, `WikiLinkInserter` |
+
+The structure and aula screens are keyed by the curso's slug because both read
+the whole tree, which is fetched by slug; the curso form is keyed by id because
+editing the slug is the whole point of that screen.
 
 The editor pitfalls in `CLAUDE.md` apply without change: never inject nodes into
 the contenteditable, Salvar is the only write path, `setEditorState` does not

@@ -340,14 +340,26 @@ export const settingsApi = {
 };
 
 export const cursosApi = {
-  getAll: async (published?: boolean, page = 1, limit = 20) => {
+  /** Índice público: só cursos publicados, sem token. */
+  getAll: async (page = 1, limit = 20) => {
     const response = await api.get<PaginatedResponse<CursoNaListagem>>('/cursos', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+  /** Índice do admin: inclui rascunhos, exige token. */
+  getAllAdmin: async (published?: boolean, page = 1, limit = 100) => {
+    const response = await api.get<PaginatedResponse<CursoNaListagem>>('/cursos/admin/todos', {
       params: {
         ...(published !== undefined ? { published } : {}),
         page,
         limit,
       },
     });
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get<Curso>(`/cursos/id/${id}`);
     return response.data;
   },
   /** O currículo público: só o que está publicado tem endereço. */

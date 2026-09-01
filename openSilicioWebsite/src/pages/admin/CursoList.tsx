@@ -48,7 +48,7 @@ export default function CursoList() {
 
   const carregar = async () => {
     try {
-      const resposta = await cursosApi.getAll(undefined, 1, 100);
+      const resposta = await cursosApi.getAllAdmin(undefined, 1, 100);
       setCursos(resposta.data);
     } catch (erro) {
       console.error('Erro ao carregar cursos:', erro);

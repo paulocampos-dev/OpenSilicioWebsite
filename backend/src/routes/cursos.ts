@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import {
   listarCursos,
+  listarCursosAdmin,
+  getCursoById,
   getCurso,
   getCursoCompleto,
   getAula,
@@ -37,6 +39,8 @@ const router = Router();
 // no lugar errado quando um curso tivesse o slug "aulas".
 
 // — leitura autenticada (admin) —
+router.get('/admin/todos', authMiddleware, listarCursosAdmin);
+router.get('/id/:id', authMiddleware, getCursoById);
 router.get('/aulas/:id', authMiddleware, getAulaById);
 router.get('/completo/:slug', authMiddleware, getCursoCompleto);
 

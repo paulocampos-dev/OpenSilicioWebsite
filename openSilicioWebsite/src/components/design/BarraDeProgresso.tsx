@@ -30,15 +30,18 @@ export default function BarraDeProgresso({
       aria-label={rotulo ?? `${concluidas} de ${total} aulas concluídas`}
       sx={{ height: altura, background: 'var(--color-line)', position: 'relative' }}
     >
+      {/* Anima scaleX, e não width, para a mudança ficar no compositor: é a
+          regra de animação do AGENTS.md. A origem à esquerda faz a barra
+          crescer a partir do início. */}
       <motion.span
         initial={false}
-        animate={{ width: `${fracao * 100}%` }}
+        animate={{ scaleX: fracao }}
         transition={{ duration: reduce ? 0 : 0.35, ease: 'easeOut' }}
         style={{
           position: 'absolute',
           inset: 0,
-          right: 'auto',
           display: 'block',
+          transformOrigin: 'left center',
           background: 'var(--color-accent)',
         }}
       />

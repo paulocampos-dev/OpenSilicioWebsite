@@ -77,40 +77,51 @@ export function useProgressoDeCurso() {
 }
 
 /**
- * Dispara quando o leitor alcança o elemento observado, uma vez só.
+ * Dispara uma vez quando o leitor alcança o elemento observado. Devolve a ref
+ * que deve ser presa nesse elemento.
  *
- * O gatilho é o pé do texto da aula, e vale igual para aula de vídeo: esperar o
- * fim da reprodução exigiria a iframe API do YouTube, um script externo inteiro
- * para um sinal só.
+ * É uma ref de callback, e não um objeto de ref com um efeito, porque a página
+ * da aula não desmonta ao navegar de uma aula para a outra: só os parâmetros da
+ * rota mudam. Com um efeito, as dependências não mudariam, o observador
+ * continuaria preso ao sentinela da aula anterior (que o esqueleto de
+ * carregamento já tirou do DOM) e só a primeira aula da sessão seria marcada. A
+ * ref de callback é chamada exatamente quando o nó entra e sai do DOM, então
+ * cada aula recebe o seu observador e o seu "ainda não disparei".
  */
-export function useAoChegarAoFim(
-  alvo: React.RefObject<HTMLElement | null>,
-  aoChegar: () => void,
-  ativo = true,
-) {
-  const jaDisparou = useRef(false)
+export function useAoChegarAoFim(aoChegar: () => void, ativo = true) {
   const callback = useRef(aoChegar)
   callback.current = aoChegar
 
-  useEffect(() => {
-    jaDisparou.current = false
-  }, [ativo])
+  const observador = useRef<IntersectionObserver | null>(null)
+  const jaDisparou = useRef(false)
 
-  useEffect(() => {
-    const elemento = alvo.current
-    if (!elemento || !ativo || typeof IntersectionObserver === 'undefined') return
+  const referencia = useCallback(
+    (elemento: HTMLElement | null) => {
+      observador.current?.disconnect()
+      observador.current = null
 
-    const observador = new IntersectionObserver(
-      (entradas) => {
-        if (entradas.some((e) => e.isIntersecting) && !jaDisparou.current) {
-          jaDisparou.current = true
-          callback.current()
-        }
-      },
-      { rootMargin: '0px 0px -10% 0px' },
-    )
+      if (!elemento || !ativo || typeof IntersectionObserver === 'undefined') return
 
-    observador.observe(elemento)
-    return () => observador.disconnect()
-  }, [alvo, ativo])
+      // Nó novo é aula nova: o disparo recomeça do zero.
+      jaDisparou.current = false
+
+      const observando = new IntersectionObserver(
+        (entradas) => {
+          if (entradas.some((e) => e.isIntersecting) && !jaDisparou.current) {
+            jaDisparou.current = true
+            callback.current()
+          }
+        },
+        { rootMargin: '0px 0px -10% 0px' },
+      )
+
+      observando.observe(elemento)
+      observador.current = observando
+    },
+    [ativo],
+  )
+
+  useEffect(() => () => observador.current?.disconnect(), [])
+
+  return referencia
 }
