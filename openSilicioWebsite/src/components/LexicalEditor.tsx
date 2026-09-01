@@ -32,7 +32,7 @@ interface LexicalEditorProps {
   content: string;
   onContentChange: (content: string) => void;
   placeholder?: string;
-  contentType?: 'blog' | 'education';
+  contentType?: 'blog' | 'education' | 'curso_aula';
   contentId?: string | undefined;
   onBeforeWikiLink?: () => Promise<any>;
 }

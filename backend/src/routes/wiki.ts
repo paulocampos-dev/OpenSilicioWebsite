@@ -7,6 +7,7 @@ import {
   updateEntry,
   deleteEntry,
   getWikiLinksForContent,
+  getAparicoes,
   createWikiLink,
   deleteWikiLink,
   addAlias,
@@ -36,6 +37,8 @@ router.use((req, res, next) => {
 router.get('/', cacheMiddleware({ ttl: 120 }), getAllEntries);
 router.get('/search/:term', cacheMiddleware({ ttl: 120 }), searchByTerm);
 router.get('/links/:contentType/:contentId', cacheMiddleware({ ttl: 120 }), getWikiLinksForContent);
+// Caminho inverso: onde este verbete é citado.
+router.get('/:slug/aparicoes', cacheMiddleware({ ttl: 120 }), getAparicoes);
 // Term + count only (no linking content ids/titles) — safe to expose publicly,
 // used by the empty-wiki "blank sheet" state.
 router.get('/pending/grouped', cacheMiddleware({ ttl: 120 }), getPendingLinksGroupedPublic);

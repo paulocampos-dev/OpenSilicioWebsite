@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cursos: structure and mocks</title>
+<style>
+  :root {
+    --doc-bg: #000;
+    --doc-fg: #fff;
+    --doc-dim: #9a9a9e;
+    --doc-line: #2a2a2e;
+    --doc-panel: #0d0d0f;
+    --doc-accent: #94bce3;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--doc-bg);
+    color: var(--doc-fg);
+    font: 15px/1.55 "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 20px 96px; }
+  h1, h2, h3, h4 {
+    font-family: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+    font-weight: 600; text-transform: uppercase; letter-spacing: .02em; margin: 0;
+  }
+  h1 { font-size: 42px; line-height: 1.04; }
+  h2 { font-size: 28px; line-height: 1.1; }
+  h3 { font-size: 20px; line-height: 1.1; }
+  p { margin: 0 0 12px; }
+  a { color: var(--doc-accent); }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  .kick {
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--doc-dim); font-weight: 600;
+  }
+  .lede { color: var(--doc-dim); max-width: 78ch; }
+  hr { border: 0; border-top: 1px solid var(--doc-line); margin: 40px 0; }
+  .sec { margin-top: 48px; }
+  .sec > h2 { border-bottom: 1px solid var(--doc-line); padding-bottom: 10px; margin-bottom: 20px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 14px 8px 0; border-bottom: 1px solid var(--doc-line); vertical-align: top; }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--doc-dim); font-weight: 600; }
+  td.mono { color: var(--doc-accent); white-space: nowrap; }
+
+  pre {
+    background: var(--doc-panel); border: 1px solid var(--doc-line);
+    padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.5;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0 0 16px;
+  }
+  ul { margin: 0 0 12px; padding-left: 20px; }
+  li { margin-bottom: 6px; }
+  .cols { display: grid; gap: 24px; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .cols.two { grid-template-columns: 1fr 1fr; } }
+
+  .toolbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    background: var(--doc-bg); border-bottom: 1px solid var(--doc-line);
+    padding: 10px 20px; margin: 0 -20px 0;
+  }
+  .toolbar .kick { margin-right: auto; }
+  .tgl {
+    appearance: none; -webkit-appearance: none; font: inherit; font-size: 13px;
+    background: transparent; color: var(--doc-fg); border: 1px solid var(--doc-line);
+    padding: 6px 14px; cursor: pointer;
+  }
+  .tgl[aria-pressed="true"] { background: #fff; color: #000; border-color: #fff; }
+
+  /* ---------- mock frame ---------- */
+  .variant { margin: 0 0 40px; }
+  .vhead { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px; }
+  .vtag {
+    font-family: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    font-size: 22px; font-weight: 700; color: #000; background: #fff;
+    width: 30px; height: 30px; display: inline-grid; place-items: center; flex: none;
+  }
+  .vnote { color: var(--doc-dim); font-size: 14px; max-width: 80ch; margin: 6px 0 12px; }
+
+  .screen {
+    --bg: #f2f2f3; --text: #1d1f20;
+    --muted: rgba(29,31,32,.70); --faint: rgba(29,31,32,.55);
+    --line: rgba(29,31,32,.16); --line-strong: rgba(29,31,32,.40);
+    --accent: #5980a6; --accent-ink: #416180;
+    --tagbg: #eef6ff; --tagfg: #2c455d; --paper: #f2f2f3;
+    --hatch: repeating-linear-gradient(45deg, transparent 0 10px, rgba(29,31,32,.05) 10px 11px);
+    --corner: rgba(29,31,32,.55);
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--doc-line);
+    font: 15px/1.55 "Barlow", system-ui, sans-serif;
+    overflow-x: auto;
+  }
+  body.dk .screen {
+    --bg: #16222e; --text: #f5f5f8;
+    --muted: rgba(245,245,248,.70); --faint: rgba(245,245,248,.55);
+    --line: rgba(245,245,248,.16); --line-strong: rgba(245,245,248,.40);
+    --accent: #5980a6; --accent-ink: #94bce3;
+    --tagbg: #eef6ff; --tagfg: #2c455d;
+    --hatch: repeating-linear-gradient(45deg, transparent 0 10px, rgba(242,242,243,.10) 10px 11px);
+    --corner: rgba(242,242,243,.70);
+  }
+  .screen .pad { padding: 24px 28px 32px; min-width: 720px; }
+  .screen h1, .screen h2, .screen h3, .screen h4 {
+    font-family: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", system-ui, sans-serif;
+    font-weight: 600; text-transform: uppercase; letter-spacing: .02em; margin: 0; color: var(--text);
+  }
+
+  /* site nav */
+  .snav {
+    display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+    padding: 12px 28px; border-bottom: 1px solid var(--line); min-width: 720px;
+  }
+  .snav .brand {
+    font-family: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+    font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: .03em;
+    margin-right: auto; display: flex; align-items: center; gap: 10px;
+  }
+  .snav .mark { width: 22px; height: 22px; border: 1.5px solid var(--accent); display: block; flex: none; }
+  .snav span.li { font-size: 15px; color: var(--muted); }
+  .snav span.li.on { color: var(--accent-ink); font-weight: 600; }
+  .snav span.li.new { color: var(--accent-ink); font-weight: 600; position: relative; }
+  .snav span.li.new::after {
+    content: "novo"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; letter-spacing: .12em; color: var(--accent); font-weight: 600;
+  }
+
+  /* primitives copied from the design system */
+  .kicker {
+    font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; display: block;
+  }
+  .crumb { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .crumb b { color: var(--accent-ink); font-weight: 600; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px;
+    font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    border: 1px solid transparent;
+  }
+  .tag.acc { background: var(--tagbg); color: var(--tagfg); }
+  .tag.out { border-color: var(--line-strong); color: var(--text); }
+  .tag.sol { background: var(--accent); color: var(--paper); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 20px; font-size: 15px; font-weight: 500; border: 1px solid transparent;
+  }
+  .btn.pri { background: var(--accent); color: #f2f2f3; border-color: var(--accent); }
+  .btn.sec { border-color: var(--line); color: var(--text); }
+  .bp { position: relative; border: 1px solid var(--line); background: transparent; }
+  .bp > i {
+    position: absolute; width: 15px; height: 15px; color: var(--corner); pointer-events: none;
+  }
+  .bp > i::before, .bp > i::after { content: ""; position: absolute; background: currentColor; }
+  .bp > i::before { left: 7px; top: 0; width: 1px; height: 100%; }
+  .bp > i::after { top: 7px; left: 0; width: 100%; height: 1px; }
+  .bp > i.tl { top: -8px; left: -8px; } .bp > i.tr { top: -8px; right: -8px; }
+  .bp > i.bl { bottom: -8px; left: -8px; } .bp > i.br { bottom: -8px; right: -8px; }
+  .slot {
+    display: grid; place-items: center; text-align: center; padding: 20px;
+    background: var(--hatch); border: 1px dashed var(--line-strong);
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint);
+  }
+  .bar { height: 4px; background: var(--line); position: relative; }
+  .bar > span { position: absolute; inset: 0 auto 0 0; background: var(--accent); display: block; }
+  .bar.thin { height: 2px; }
+  .muted { color: var(--muted); }
+  .faint { color: var(--faint); }
+  .meta { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+
+  /* aula rows */
+  .aulas { display: flex; flex-direction: column; }
+  .arow {
+    display: grid; grid-template-columns: 34px 18px 1fr auto 20px;
+    gap: 12px; align-items: center; padding: 9px 12px;
+    border-bottom: 1px solid var(--line); font-size: 15px;
+  }
+  .arow .num { font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .arow .dur { font-size: 13px; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .arow.done .tt { color: var(--muted); }
+  .arow.cur { background: var(--tagbg); }
+  body.dk .arow.cur { background: rgba(89,128,166,.22); }
+  .arow.cur .tt { font-weight: 600; color: var(--accent-ink); }
+  .g { display: block; color: var(--faint); }
+  .g.on { color: var(--accent); }
+  .modhead {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 14px 12px 8px; border-bottom: 1px solid var(--line-strong);
+  }
+  .modhead h4 { font-size: 20px; }
+  .modhead .n { font-size: 12px; letter-spacing: .1em; color: var(--accent); font-weight: 600; }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card { border: 1px solid var(--line); display: flex; flex-direction: column; }
+
+  .idxrow {
+    display: grid; grid-template-columns: 1fr 110px 90px 84px 150px;
+    gap: 20px; align-items: center; padding: 16px 12px; border-bottom: 1px solid var(--line);
+  }
+  .idxrow.head { padding: 8px 12px; border-bottom: 1px solid var(--line-strong); }
+  .idxrow.head span {
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 600;
+  }
+
+  .spine { border-right: 1px solid var(--line); padding: 18px 16px; }
+  .layout2 { display: grid; grid-template-columns: 280px 1fr; min-width: 720px; }
+  .layout37 { display: grid; grid-template-columns: 1fr 340px; gap: 40px; }
+
+  .pick { border: 1px solid var(--doc-line); padding: 16px 18px; background: var(--doc-panel); }
+  .pick h3 { margin-bottom: 8px; }
+  .pick p { color: var(--doc-dim); margin-bottom: 0; }
+  .q { border-left: 2px solid var(--doc-accent); padding-left: 14px; margin-bottom: 18px; }
+  .q b { display: block; margin-bottom: 2px; }
+  .q span { color: var(--doc-dim); }
+</style>
+</head>
+<body class="dk">
+<div class="wrap">
+
+  <div class="toolbar">
+    <span class="kick">Cursos: structure and mocks</span>
+    <button class="tgl" id="lt" type="button" aria-pressed="false">Light</button>
+    <button class="tgl" id="dt" type="button" aria-pressed="true">Dark</button>
+  </div>
+
+  <div class="sec" style="margin-top:28px">
+    <h1>Cursos</h1>
+    <p class="lede" style="margin-top:10px">
+      A fourth public tab. Its own content type, three levels deep, video as first-class data,
+      and reader-visible progress. Below: how it works, then seven mock screens across three
+      decision points. Pick one letter per decision.
+    </p>
+  </div>
+
+  <div class="sec">
+    <h2>Locked so far</h2>
+    <table>
+      <tr><th style="width:190px">Content model</th><td>Own tables. Not a view over Educação.</td></tr>
+      <tr><th>Structure</th><td>curso &rarr; módulo &rarr; aula</td></tr>
+      <tr><th>Video</th><td>First-class on the aula: <code>video_url</code> + <code>duracao_seg</code>, alongside Lexical content</td></tr>
+      <tr><th>Streamlined means</th><td>Progress the reader can see</td></tr>
+    </table>
+    <p class="lede" style="margin-top:14px">
+      You did not pick "guided linear navigation", so the persistent course spine shows up as an
+      option in decision 3 rather than as an assumption.
+    </p>
+  </div>
+
+  <div class="sec">
+    <h2>How it works</h2>
+
+    <div class="cols two">
+      <div>
+        <h3>Schema</h3>
+        <pre>cursos
+  id           uuid pk
+  slug         varchar unique
+  titulo       varchar
+  descricao    text          -- one line, for the card
+  ementa       text          -- Lexical: o que você vai aprender
+  image_url    text
+  nivel        varchar       -- Iniciante | Intermediário | Avançado
+  publicado    boolean
+  created_at, updated_at
+
+curso_modulos
+  id           uuid pk
+  curso_id     uuid  -> cursos on delete cascade
+  ordem        int
+  titulo       varchar
+  resumo       text  null
+
+curso_aulas
+  id           uuid pk
+  modulo_id    uuid  -> curso_modulos on delete cascade
+  ordem        int
+  slug         varchar       -- unique within the curso
+  titulo       varchar
+  video_url    text  null
+  duracao_seg  int   null
+  conteudo     text          -- Lexical JSON
+  publicado    boolean</pre>
+      </div>
+      <div>
+        <h3>API</h3>
+        <table>
+          <tr><td class="mono">GET /api/cursos</td><td>List with aggregate counts (módulos, aulas, duração total). One query with a lateral join, not N+1.</td></tr>
+          <tr><td class="mono">GET /api/cursos/:slug</td><td>Curso plus the full módulo/aula tree, titles and durations only. The whole syllabus in one request; no aula bodies.</td></tr>
+          <tr><td class="mono">GET /api/cursos/:slug/aulas/:aula</td><td>One aula with its body, plus previous/next.</td></tr>
+          <tr><td class="mono">admin CRUD</td><td>Curso, módulo and aula, plus a reorder endpoint that takes an ordered id list per level.</td></tr>
+        </table>
+
+        <h3 style="margin-top:22px">Frontend routes</h3>
+        <table>
+          <tr><td class="mono">/cursos</td><td>index</td></tr>
+          <tr><td class="mono">/cursos/:slug</td><td>syllabus</td></tr>
+          <tr><td class="mono">/cursos/:slug/:aula</td><td>aula</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h3 style="margin-top:26px">Progress, without accounts</h3>
+    <p class="lede">
+      There are no public logins, only the admin JWT. So progress lives in the visitor's own browser:
+      one <code>localStorage</code> key, per curso, holding completed aula slugs and the last one opened.
+    </p>
+    <pre>opensilicio-cursos-progresso
+{ "do-rtl-ao-gds": { "concluidas": ["o-que-e-um-pdk", "instalando"], "ultima": "primeiro-verilog" } }</pre>
+    <p class="lede">
+      Consequences worth accepting up front: progress does not follow the reader across devices, a
+      cleared browser wipes it, and it is invisible to you as an author (no completion analytics).
+      Everything renders correctly at zero progress, so the feature degrades to nothing rather than breaking.
+    </p>
+
+    <h3 style="margin-top:26px">Three things that need care in this codebase</h3>
+    <table>
+      <tr>
+        <th style="width:200px">Wiki links</th>
+        <td><code>content_wiki_links.content_type</code> has a CHECK constraint of <code>('blog','education')</code>.
+        Wiki terms inside an aula need a migration to widen it to <code>'curso_aula'</code>, plus the
+        matching literal in the frontend types and the WikiLinkInserter. Otherwise aulas silently cannot carry wiki terms.</td>
+      </tr>
+      <tr>
+        <th>Lexical nodes</th>
+        <td>The aula body reuses <code>LEXICAL_NODES</code> unchanged, so YouTube, WaveDrom, seven-segment
+        and equations all work in aulas on day one. The editor and the read-only renderer must register the
+        identical set, as they do today.</td>
+      </tr>
+      <tr>
+        <th>Deleting</th>
+        <td>Cascade runs curso &rarr; módulo &rarr; aula. Deleting a curso deletes every aula body under it.
+        The admin needs a typed confirmation, not a one-click delete.</td>
+      </tr>
+    </table>
+  </div>
+
+  <hr>
+
+  <!-- ============ DECISION 1 ============ -->
+  <div class="sec">
+    <h2>Decision 1: the /cursos index</h2>
+    <p class="lede">Where the new tab lands. Three courses shown, one of them partly read.</p>
+
+    <!-- A -->
+    <div class="variant">
+      <div class="vhead"><span class="vtag">A</span><h3>Card grid, parity with Educação</h3></div>
+      <p class="vnote">Exactly the pattern already on /educacao: duotone photo, tag, condensed title, description, meta line. Progress is a hairline under the photo. Zero new visual vocabulary, and the two tabs read as siblings.</p>
+      <div class="screen">
+        <div class="snav">
+          <span class="brand"><span class="mark"></span>OpenSilício</span>
+          <span class="li">Início</span><span class="li">Educação</span>
+          <span class="li new on">Cursos</span><span class="li">Blog</span>
+          <span class="li">Wiki</span><span class="li">Sobre</span>
+        </div>
+        <div class="pad">
+          <h1 style="font-size:48px;line-height:.98;margin-left:-.052em">Cursos</h1>
+          <p class="muted" style="max-width:64ch;margin:10px 0 24px">
+            Trilhas completas, do primeiro Verilog ao GDS submetido. Cada curso é uma sequência de aulas curtas.
+          </p>
+          <div class="grid3">
+            <div class="card">
+              <div class="slot" style="height:120px;border:0;border-bottom:1px solid var(--line)">Capa 16:9</div>
+              <div class="bar thin"><span style="width:47%"></span></div>
+              <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px">
+                <span class="tag acc" style="align-self:flex-start">Curso &middot; Iniciante</span>
+                <h4 style="font-size:24px;line-height:1.05">Do RTL ao GDS</h4>
+                <p class="muted" style="font-size:15px;margin:0">Escreva, verifique, sintetize e submeta um chip digital usando só ferramentas abertas.</p>
+                <p class="meta" style="margin:0">4 módulos &middot; 15 aulas &middot; 3h20</p>
+                <p class="meta" style="margin:0;color:var(--accent-ink)">47% concluído</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="slot" style="height:120px;border:0;border-bottom:1px solid var(--line)">Capa 16:9</div>
+              <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px">
+                <span class="tag acc" style="align-self:flex-start">Curso &middot; Iniciante</span>
+                <h4 style="font-size:24px;line-height:1.05">Fundamentos de CMOS</h4>
+                <p class="muted" style="font-size:15px;margin:0">Do transistor ao inversor, e do inversor à célula padrão.</p>
+                <p class="meta" style="margin:0">2 módulos &middot; 8 aulas &middot; 1h45</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="slot" style="height:120px;border:0;border-bottom:1px solid var(--line)">Capa 16:9</div>
+              <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px">
+                <span class="tag acc" style="align-self:flex-start">Curso &middot; Intermediário</span>
+                <h4 style="font-size:24px;line-height:1.05">Analógico com Xschem</h4>
+                <p class="muted" style="font-size:15px;margin:0">Esquemático, simulação com ngspice e layout no Magic.</p>
+                <p class="meta" style="margin:0">3 módulos &middot; 11 aulas &middot; 2h30</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="variant">
+      <div class="vhead"><span class="vtag">B</span><h3>Index rows, no card chrome</h3></div>
+      <p class="vnote">A drawing index rather than a shop window. One row per curso, columns aligned so nível, tamanho and progresso compare down the page. Reads as a short list of serious things, and it stays honest when there are only three courses, where a three-card grid looks thin.</p>
+      <div class="screen">
+        <div class="snav">
+          <span class="brand"><span class="mark"></span>OpenSilício</span>
+          <span class="li">Início</span><span class="li">Educação</span>
+          <span class="li new on">Cursos</span><span class="li">Blog</span>
+          <span class="li">Wiki</span><span class="li">Sobre</span>
+        </div>
+        <div class="pad">
+          <h1 style="font-size:48px;line-height:.98;margin-left:-.052em">Cursos</h1>
+          <p class="muted" style="max-width:64ch;margin:10px 0 26px">
+            Trilhas completas, do primeiro Verilog ao GDS submetido.
+          </p>
+          <div class="idxrow head">
+            <span>Curso</span><span>Nível</span><span>Aulas</span><span>Duração</span><span>Progresso</span>
+          </div>
+          <div class="idxrow">
+            <div>
+              <h4 style="font-size:26px;line-height:1.04">Do RTL ao GDS</h4>
+              <p class="muted" style="font-size:15px;margin:4px 0 0;max-width:58ch">Escreva, verifique, sintetize e submeta um chip digital usando só ferramentas abertas.</p>
+            </div>
+            <span class="muted" style="font-size:14px">Iniciante</span>
+            <span class="muted" style="font-size:14px">15 em 4 módulos</span>
+            <span class="muted" style="font-size:14px">3h20</span>
+            <div>
+              <div class="bar"><span style="width:47%"></span></div>
+              <span class="meta" style="display:block;margin-top:6px">7 de 15</span>
+            </div>
+          </div>
+          <div class="idxrow">
+            <div>
+              <h4 style="font-size:26px;line-height:1.04">Fundamentos de CMOS</h4>
+              <p class="muted" style="font-size:15px;margin:4px 0 0;max-width:58ch">Do transistor ao inversor, e do inversor à célula padrão.</p>
+            </div>
+            <span class="muted" style="font-size:14px">Iniciante</span>
+            <span class="muted" style="font-size:14px">8 em 2 módulos</span>
+            <span class="muted" style="font-size:14px">1h45</span>
+            <div><div class="bar"><span style="width:0"></span></div><span class="meta" style="display:block;margin-top:6px">não iniciado</span></div>
+          </div>
+          <div class="idxrow">
+            <div>
+              <h4 style="font-size:26px;line-height:1.04">Analógico com Xschem</h4>
+              <p class="muted" style="font-size:15px;margin:4px 0 0;max-width:58ch">Esquemático, simulação com ngspice e layout no Magic.</p>
+            </div>
+            <span class="muted" style="font-size:14px">Intermediário</span>
+            <span class="muted" style="font-size:14px">11 em 3 módulos</span>
+            <span class="muted" style="font-size:14px">2h30</span>
+            <div><div class="bar"><span style="width:100%"></span></div><span class="meta" style="display:block;margin-top:6px">concluído</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="variant">
+      <div class="vhead"><span class="vtag">C</span><h3>Continue panel, then rows</h3></div>
+      <p class="vnote">B with a resume block on top, which is the one thing progress data can buy that a static index cannot. Returning readers land one click from where they stopped. It renders only when localStorage has a course in progress, so a first visit sees plain B.</p>
+      <div class="screen">
+        <div class="snav">
+          <span class="brand"><span class="mark"></span>OpenSilício</span>
+          <span class="li">Início</span><span class="li">Educação</span>
+          <span class="li new on">Cursos</span><span class="li">Blog</span>
+          <span class="li">Wiki</span><span class="li">Sobre</span>
+        </div>
+        <div class="pad">
+          <h1 style="font-size:48px;line-height:.98;margin-left:-.052em">Cursos</h1>
+          <div class="bp" style="margin:22px 8px 30px;padding:22px 24px">
+            <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+            <span class="kicker" style="color:var(--accent)">Continuar</span>
+            <div style="display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap;margin-top:8px">
+              <div style="flex:1;min-width:280px">
+                <h3 style="font-size:30px;line-height:1.02">Do RTL ao GDS</h3>
+                <p class="muted" style="margin:6px 0 12px">Módulo 2, Frontend &middot; aula 7 de 15</p>
+                <div class="bar"><span style="width:47%"></span></div>
+                <p class="meta" style="margin:8px 0 0">7 de 15 aulas &middot; restam 1h48</p>
+              </div>
+              <span class="btn pri">Retomar: Seu primeiro Verilog</span>
+            </div>
+          </div>
+          <div class="idxrow head">
+            <span>Todos os cursos</span><span>Nível</span><span>Aulas</span><span>Duração</span><span>Progresso</span>
+          </div>
+          <div class="idxrow">
+            <div><h4 style="font-size:24px;line-height:1.04">Do RTL ao GDS</h4></div>
+            <span class="muted" style="font-size:14px">Iniciante</span>
+            <span class="muted" style="font-size:14px">15 em 4 módulos</span>
+            <span class="muted" style="font-size:14px">3h20</span>
+            <div class="bar"><span style="width:47%"></span></div>
+          </div>
+          <div class="idxrow">
+            <div><h4 style="font-size:24px;line-height:1.04">Fundamentos de CMOS</h4></div>
+            <span class="muted" style="font-size:14px">Iniciante</span>
+            <span class="muted" style="font-size:14px">8 em 2 módulos</span>
+            <span class="muted" style="font-size:14px">1h45</span>
+            <div class="bar"><span style="width:0"></span></div>
+          </div>
+          <div class="idxrow">
+            <div><h4 style="font-size:24px;line-height:1.04">Analógico com Xschem</h4></div>
+            <span class="muted" style="font-size:14px">Intermediário</span>
+            <span class="muted" style="font-size:14px">11 em 3 módulos</span>
+            <span class="muted" style="font-size:14px">2h30</span>
+            <div class="bar"><span style="width:100%"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ============ DECISION 2 ============ -->
+  <div class="sec">
+    <h2>Decision 2: the course page</h2>
+    <p class="lede">The syllabus. Where a reader decides to start, and where they see the whole shape of the thing.</p>
+
+    <!-- D -->
+    <div class="variant">
+      <div class="vhead"><span class="vtag">D</span><h3>Single column, syllabus front and centre</h3></div>
+      <p class="vnote">Header, then the módulo tree at full width. The aula list is the page. Long courses stay readable because each módulo is its own titled block with a rule above it. Metadata sits in one meta strip instead of a panel.</p>
+      <div class="screen">
+        <div class="pad">
+          <p class="crumb">Início / <b>Cursos</b> / Do RTL ao GDS</p>
+          <div style="display:flex;gap:8px;margin:18px 0 10px">
+            <span class="tag acc">Curso</span><span class="tag out">Iniciante</span>
+          </div>
+          <h1 style="font-size:52px;line-height:.98;margin-left:-.052em;max-width:22ch">Do RTL ao GDS</h1>
+          <p class="muted" style="font-size:17px;line-height:1.55;max-width:70ch;margin:12px 0 0">
+            Escreva, verifique, sintetize e submeta um chip digital usando só ferramentas abertas.
+          </p>
+          <p class="meta" style="margin:14px 0 0">4 módulos &middot; 15 aulas &middot; 3h20 &middot; atualizado em 12/08/2026</p>
+
+          <div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin:24px 0 8px">
+            <span class="btn pri">Retomar aula 7</span>
+            <div style="flex:1;min-width:240px">
+              <div class="bar"><span style="width:47%"></span></div>
+              <p class="meta" style="margin:8px 0 0">7 de 15 aulas concluídas</p>
+            </div>
+          </div>
+
+          <div class="bp" style="margin:34px 8px 30px">
+            <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+            <div class="slot" style="border:0;height:150px">Capa 21:9</div>
+          </div>
+
+          <p style="max-width:62ch;font-size:16px;line-height:1.6" class="muted">
+            O curso segue um único projeto do começo ao fim: um contador de 4 bits que sai daqui como
+            GDS pronto para o Tiny Tapeout. Não é preciso instalar nada além do container.
+          </p>
+
+          <div style="margin-top:34px">
+            <div class="modhead"><span class="n">Módulo 1</span><h4>Ambiente</h4><span class="meta" style="margin-left:auto">4 aulas &middot; 42 min</span></div>
+            <div class="aulas">
+              <div class="arow done"><span class="num">01</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">O que é um PDK</span><span class="dur">8 min</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+              <div class="arow done"><span class="num">02</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">IIC-OSIC-Tools: o que é</span><span class="dur">6 min</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+              <div class="arow done"><span class="num">03</span><svg class="g" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14M1 7h14M1 11h9" stroke="currentColor" stroke-width="1.6"/></svg><span class="tt">Instalando o container</span><span class="dur">leitura</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+              <div class="arow done"><span class="num">04</span><svg class="g" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14M1 7h14M1 11h9" stroke="currentColor" stroke-width="1.6"/></svg><span class="tt">Windows, WSL e Docker</span><span class="dur">leitura</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+            </div>
+
+            <div class="modhead" style="margin-top:22px"><span class="n">Módulo 2</span><h4>Frontend</h4><span class="meta" style="margin-left:auto">4 aulas &middot; 58 min</span></div>
+            <div class="aulas">
+              <div class="arow done"><span class="num">05</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Os quatro modos do container</span><span class="dur">11 min</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+              <div class="arow done"><span class="num">06</span><svg class="g" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14M1 7h14M1 11h9" stroke="currentColor" stroke-width="1.6"/></svg><span class="tt">Como o container funciona por dentro</span><span class="dur">leitura</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+              <div class="arow cur"><span class="num">07</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Seu primeiro Verilog</span><span class="dur">14 min</span><span></span></div>
+              <div class="arow"><span class="num">08</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Testando com cocotb</span><span class="dur">17 min</span><span></span></div>
+            </div>
+
+            <div class="modhead" style="margin-top:22px"><span class="n">Módulo 3</span><h4>Backend</h4><span class="meta" style="margin-left:auto">4 aulas &middot; 1h04</span></div>
+            <div class="aulas">
+              <div class="arow"><span class="num">09</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Lendo formas de onda</span><span class="dur">12 min</span><span></span></div>
+              <div class="arow"><span class="num">10</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Síntese com Yosys</span><span class="dur">18 min</span><span></span></div>
+              <div class="arow"><span class="num">11</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Hardening com LibreLane</span><span class="dur">21 min</span><span></span></div>
+              <div class="arow"><span class="num">12</span><svg class="g" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14M1 7h14M1 11h9" stroke="currentColor" stroke-width="1.6"/></svg><span class="tt">Lendo o GDS no KLayout</span><span class="dur">leitura</span><span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E -->
+    <div class="variant">
+      <div class="vhead"><span class="vtag">E</span><h3>Two column, sticky course panel</h3></div>
+      <p class="vnote">Ementa and tree on the left, a blueprint panel on the right that sticks while you scroll: progress, resume, nível, duração, pré-requisitos, termos da wiki. Same pattern as Recurso.tsx today, so it inherits the sidebar work already there. Costs horizontal room, and on mobile the panel drops under the tree.</p>
+      <div class="screen">
+        <div class="pad">
+          <p class="crumb">Início / <b>Cursos</b> / Do RTL ao GDS</p>
+          <div style="display:flex;gap:8px;margin:18px 0 10px"><span class="tag acc">Curso</span><span class="tag out">Iniciante</span></div>
+          <h1 style="font-size:52px;line-height:.98;margin-left:-.052em;max-width:22ch">Do RTL ao GDS</h1>
+          <p class="muted" style="font-size:17px;max-width:70ch;margin:12px 0 26px">Escreva, verifique, sintetize e submeta um chip digital usando só ferramentas abertas.</p>
+
+          <div class="layout37">
+            <div>
+              <p style="max-width:62ch;font-size:16px;line-height:1.6" class="muted">
+                O curso segue um único projeto do começo ao fim: um contador de 4 bits que sai daqui como
+                GDS pronto para o Tiny Tapeout.
+              </p>
+              <div class="modhead" style="margin-top:26px"><span class="n">Módulo 1</span><h4>Ambiente</h4><span class="meta" style="margin-left:auto">42 min</span></div>
+              <div class="aulas">
+                <div class="arow done"><span class="num">01</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">O que é um PDK</span><span class="dur">8 min</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+                <div class="arow done"><span class="num">02</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">IIC-OSIC-Tools: o que é</span><span class="dur">6 min</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+                <div class="arow done"><span class="num">03</span><svg class="g" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14M1 7h14M1 11h9" stroke="currentColor" stroke-width="1.6"/></svg><span class="tt">Instalando o container</span><span class="dur">leitura</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+                <div class="arow done"><span class="num">04</span><svg class="g" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14M1 7h14M1 11h9" stroke="currentColor" stroke-width="1.6"/></svg><span class="tt">Windows, WSL e Docker</span><span class="dur">leitura</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+              </div>
+              <div class="modhead" style="margin-top:22px"><span class="n">Módulo 2</span><h4>Frontend</h4><span class="meta" style="margin-left:auto">58 min</span></div>
+              <div class="aulas">
+                <div class="arow done"><span class="num">05</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Os quatro modos do container</span><span class="dur">11 min</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+                <div class="arow done"><span class="num">06</span><svg class="g" width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 3h14M1 7h14M1 11h9" stroke="currentColor" stroke-width="1.6"/></svg><span class="tt">Como o container funciona por dentro</span><span class="dur">leitura</span><svg class="g on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg></div>
+                <div class="arow cur"><span class="num">07</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Seu primeiro Verilog</span><span class="dur">14 min</span><span></span></div>
+                <div class="arow"><span class="num">08</span><svg class="g on" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1 L10 6 L2 11 Z" fill="currentColor"/></svg><span class="tt">Testando com cocotb</span><span class="dur">17 min</span><span></span></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="bp" style="padding:20px 20px 22px">
+                <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <span class="kicker">Seu progresso</span>
+                <div class="bar" style="margin:12px 0 8px"><span style="width:47%"></span></div>
+                <p class="meta" style="margin:0 0 16px">7 de 15 &middot; restam 1h48</p>
+                <span class="btn pri" style="width:100%">Retomar aula 7</span>
+                <div style="border-top:1px solid var(--line);margin-top:20px;padding-top:16px;display:grid;gap:10px;font-size:14px">
+                  <div style="display:flex;justify-content:space-between"><span class="faint">Nível</span><span>Iniciante</span></div>
+                  <div style="display:flex;justify-content:space-between"><span class="faint">Aulas</span><span>15 em 4 módulos</span></div>
+                  <div style="display:flex;justify-content:space-between"><span class="faint">Duração</span><span>3h20</span></div>
+                  <div style="display:flex;justify-content:space-between"><span class="faint">Atualizado</span><span>12/08/2026</span></div>
+                </div>
+              </div>
+              <div class="bp" style="padding:18px 20px;margin-top:34px">
+                <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <span class="kicker">Termos deste curso</span>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+                  <span class="tag out">PDK</span><span class="tag out">RTL</span><span class="tag out">GDSII</span>
+                  <span class="tag out">Célula padrão</span><span class="tag out">cocotb</span><span class="tag out">DRC</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ============ DECISION 3 ============ -->
+  <div class="sec">
+    <h2>Decision 3: the aula page</h2>
+    <p class="lede">Video first, notes under it. The question is whether the course tree stays on screen.</p>
+
+    <!-- F -->
+    <div class="variant">
+      <div class="vhead"><span class="vtag">F</span><h3>With a spine</h3></div>
+      <p class="vnote">A fixed left column holds the whole course: módulos, aulas, ticks, current highlighted. You always know where you are and how much is left, and moving between aulas never routes back through the syllabus. This is the option you did not pick in the questions, shown so you can judge it rather than imagine it. Cost: a new layout that no other page on the site uses, and a mobile fallback (drawer or collapsed strip).</p>
+      <div class="screen">
+        <div class="layout2">
+          <div class="spine">
+            <span class="kicker" style="font-size:12px">Curso</span>
+            <h4 style="font-size:22px;line-height:1.05;margin:4px 0 12px">Do RTL ao GDS</h4>
+            <div class="bar"><span style="width:47%"></span></div>
+            <p class="meta" style="margin:8px 0 18px;font-size:12px">7 de 15</p>
+
+            <p class="meta" style="font-size:11px;margin:0 0 4px;color:var(--accent)">Módulo 1 &middot; Ambiente</p>
+            <div style="display:grid;gap:2px;margin-bottom:14px;font-size:14px">
+              <span class="muted">01 &nbsp;O que é um PDK</span>
+              <span class="muted">02 &nbsp;IIC-OSIC-Tools</span>
+              <span class="muted">03 &nbsp;Instalando o container</span>
+              <span class="muted">04 &nbsp;Windows, WSL e Docker</span>
+            </div>
+            <p class="meta" style="font-size:11px;margin:0 0 4px;color:var(--accent)">Módulo 2 &middot; Frontend</p>
+            <div style="display:grid;gap:2px;margin-bottom:14px;font-size:14px">
+              <span class="muted">05 &nbsp;Os quatro modos</span>
+              <span class="muted">06 &nbsp;Por dentro do container</span>
+              <span style="border-left:2px solid var(--accent);margin-left:-10px;padding-left:8px;color:var(--accent-ink);font-weight:600">07 &nbsp;Seu primeiro Verilog</span>
+              <span class="muted">08 &nbsp;Testando com cocotb</span>
+            </div>
+            <p class="meta" style="font-size:11px;margin:0 0 4px;color:var(--accent)">Módulo 3 &middot; Backend</p>
+            <div style="display:grid;gap:2px;font-size:14px">
+              <span class="faint">09 &nbsp;Lendo formas de onda</span>
+              <span class="faint">10 &nbsp;Síntese com Yosys</span>
+              <span class="faint">11 &nbsp;Hardening com LibreLane</span>
+              <span class="faint">12 &nbsp;Lendo o GDS no KLayout</span>
+            </div>
+          </div>
+
+          <div style="padding:22px 28px 30px">
+            <p class="crumb">Cursos / Do RTL ao GDS / <b>Módulo 2</b></p>
+            <p class="meta" style="margin:16px 0 6px">Aula 7 de 15 &middot; 14 min</p>
+            <h1 style="font-size:40px;line-height:1;margin-left:-.052em">Seu primeiro Verilog</h1>
+            <div class="bp" style="margin:24px 8px 20px">
+              <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+              <div class="slot" style="border:0;height:230px">
+                <svg width="46" height="46" viewBox="0 0 48 48" aria-hidden="true">
+                  <rect x="1" y="1" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1"/>
+                  <path d="M19 14 L34 24 L19 34 Z" fill="currentColor"/>
+                </svg>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px">
+              <span class="btn sec">Marcar como concluída</span>
+              <span class="meta">Nada é enviado ao servidor</span>
+            </div>
+            <p class="muted" style="max-width:62ch;font-size:16px;line-height:1.65">
+              Um contador de 4 bits cabe em vinte linhas. Nesta aula escrevemos o módulo, entendemos por que
+              <code>always_ff</code> e não <code>always</code>, e rodamos o primeiro elaborate.
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;border-top:1px solid var(--line);padding-top:20px;margin-top:26px">
+              <div class="bp" style="padding:14px 16px"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <span class="kicker" style="font-size:12px">Anterior</span><p style="margin:4px 0 0">Como o container funciona por dentro</p></div>
+              <div class="bp" style="padding:14px 16px;text-align:right"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <span class="kicker" style="font-size:12px">Próxima</span><p style="margin:4px 0 0">Testando com cocotb</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G -->
+    <div class="variant">
+      <div class="vhead"><span class="vtag">G</span><h3>No spine, sidebar panels</h3></div>
+      <p class="vnote">The shape Recurso.tsx already uses: full-width header, content on the left, blueprint panels on the right (progress, nesta aula, termos), anterior/próxima at the foot. Nothing new to build structurally, and it reads identically to an Educação resource. Cost: the course tree is one click away rather than on screen.</p>
+      <div class="screen">
+        <div class="pad">
+          <p class="crumb">Início / Cursos / <b>Do RTL ao GDS</b> / Seu primeiro Verilog</p>
+          <p class="meta" style="margin:18px 0 6px">Aula 7 de 15 &middot; Módulo 2, Frontend &middot; 14 min</p>
+          <h1 style="font-size:48px;line-height:.98;margin-left:-.052em;max-width:24ch">Seu primeiro Verilog</h1>
+
+          <div class="layout37" style="margin-top:28px">
+            <div>
+              <div class="bp" style="margin:0 8px 22px">
+                <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <div class="slot" style="border:0;height:240px">
+                  <svg width="46" height="46" viewBox="0 0 48 48" aria-hidden="true">
+                    <rect x="1" y="1" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <path d="M19 14 L34 24 L19 34 Z" fill="currentColor"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="muted" style="max-width:62ch;font-size:16px;line-height:1.65">
+                Um contador de 4 bits cabe em vinte linhas. Nesta aula escrevemos o módulo, entendemos por que
+                <code>always_ff</code> e não <code>always</code>, e rodamos o primeiro elaborate.
+              </p>
+              <p class="muted" style="max-width:62ch;font-size:16px;line-height:1.65">
+                O código completo está no repositório do curso, mas escreva junto: a metade dos erros de
+                síntese aparece na primeira vez que você digita isso à mão.
+              </p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;border-top:1px solid var(--line);padding-top:20px;margin-top:26px">
+                <div class="bp" style="padding:14px 16px"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                  <span class="kicker" style="font-size:12px">Anterior</span><p style="margin:4px 0 0">Como o container funciona por dentro</p></div>
+                <div class="bp" style="padding:14px 16px;text-align:right"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                  <span class="kicker" style="font-size:12px">Próxima</span><p style="margin:4px 0 0">Testando com cocotb</p></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="bp" style="padding:18px 20px">
+                <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <span class="kicker">Progresso do curso</span>
+                <div class="bar" style="margin:12px 0 8px"><span style="width:47%"></span></div>
+                <p class="meta" style="margin:0 0 14px">7 de 15 aulas</p>
+                <span class="btn sec" style="width:100%">Marcar como concluída</span>
+                <p class="meta" style="margin:10px 0 0;text-align:center">Ver todas as aulas</p>
+              </div>
+              <div class="bp" style="padding:18px 20px;margin-top:34px">
+                <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <span class="kicker">Nesta aula</span>
+                <div style="display:grid;gap:6px;margin-top:10px;font-size:15px">
+                  <span class="muted">O módulo e suas portas</span>
+                  <span class="muted">always_ff e o reset</span>
+                  <span class="muted">Rodando o elaborate</span>
+                </div>
+              </div>
+              <div class="bp" style="padding:18px 20px;margin-top:34px">
+                <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+                <span class="kicker">Termos usados aqui</span>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+                  <span class="tag out">RTL</span><span class="tag out">Verilog</span><span class="tag out">Flip-flop</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ============ WHAT I NEED ============ -->
+  <div class="sec">
+    <h2>What to pick</h2>
+    <div class="cols two">
+      <div class="pick">
+        <h3>Three letters</h3>
+        <p>
+          Index: <b style="color:#fff">A</b>, <b style="color:#fff">B</b> or <b style="color:#fff">C</b>.<br>
+          Course page: <b style="color:#fff">D</b> or <b style="color:#fff">E</b>.<br>
+          Aula page: <b style="color:#fff">F</b> or <b style="color:#fff">G</b>.
+        </p>
+      </div>
+      <div class="pick">
+        <h3>My leaning</h3>
+        <p>
+          C, D, G. C because progress data only earns its keep if it shortens the path back in.
+          D because the syllabus is the product and a sticky panel steals width from a list that
+          wants to be wide. G because it is the layout the site already has, so the first version
+          ships without inventing a second page architecture, and the spine can be added later
+          without touching the data model.
+        </p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px">Open questions, smaller</h3>
+    <div class="q">
+      <b>How does an aula get marked done?</b>
+      <span>Manual button, or automatic when the reader reaches the foot of the page. Manual is honest and
+      predictable; automatic is friendlier but marks things done that were skimmed. Manual can be added to
+      automatic later, not the reverse.</span>
+    </div>
+    <div class="q">
+      <b>Do aulas show up in Educação, search, or the wiki backlinks?</b>
+      <span>If yes, aulas need the wiki CHECK constraint widened and a place in whatever list Educação
+      renders. If no, Cursos is a sealed section and the two libraries never mix.</span>
+    </div>
+    <div class="q">
+      <b>What happens to the existing 04 to 19 trilha?</b>
+      <span>It stays in Educação untouched, gets copied into a curso, or gets moved. Moving is the cleanest
+      result and the most work, and it changes live URLs that may already be linked.</span>
+    </div>
+    <div class="q">
+      <b>Publishing granularity</b>
+      <span>Can a curso be published with some aulas still drafts, showing them locked or hidden in the
+      syllabus? Or is a curso all or nothing? This decides whether you can release módulo 1 while writing módulo 4.</span>
+    </div>
+    <div class="q">
+      <b>Where do videos live?</b>
+      <span>YouTube embeds (free, already supported by the Lexical YouTubeNode, but off-platform) or
+      self-hosted mp4 through the existing upload path (50 MB cap today, and the VPS serves the bytes).
+      This one changes the infrastructure answer more than the design.</span>
+    </div>
+
+    <h3 style="margin-top:32px">One thing I noticed while reading the tokens</h3>
+    <p class="lede">
+      In dark mode the steel ramp is deliberately not flipped, so <code>--color-accent-ink</code> stays
+      <code>#416180</code> on the <code>#16222e</code> ground. Anywhere it carries text, such as the active
+      resource tab in Recurso.tsx, contrast lands around 1.6:1. The mocks above use a lighter step in dark
+      so they read. Not part of this feature, but worth a look sometime.
+    </p>
+  </div>
+
+</div>
+<script>
+  (function () {
+    var body = document.body;
+    var lt = document.getElementById('lt');
+    var dt = document.getElementById('dt');
+    function set(dark) {
+      body.classList.toggle('dk', dark);
+      lt.setAttribute('aria-pressed', String(!dark));
+      dt.setAttribute('aria-pressed', String(dark));
+    }
+    lt.addEventListener('click', function () { set(false); });
+    dt.addEventListener('click', function () { set(true); });
+  })();
+</script>
+</body>
+</html>

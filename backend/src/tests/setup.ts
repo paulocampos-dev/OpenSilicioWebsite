@@ -70,6 +70,8 @@ export const cleanDatabase = async () => {
   await testPool.query("DELETE FROM pending_wiki_links");
   await testPool.query("DELETE FROM wiki_entries");
   await testPool.query("DELETE FROM education_resources");
+  // Módulos e aulas caem junto pelo ON DELETE CASCADE.
+  await testPool.query("DELETE FROM cursos");
   await testPool.query("DELETE FROM blog_posts");
   await testPool.query("DELETE FROM site_settings");
   // Note: Don't delete users as we need admin user for auth tests

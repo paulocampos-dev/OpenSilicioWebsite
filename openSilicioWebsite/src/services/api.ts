@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings, PendingWikiLink, PendingWikiLinkGrouped, SeriesNavigation } from '../types';
+import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings, PendingWikiLink, PendingWikiLinkGrouped, SeriesNavigation, Curso, CursoNaListagem, CursoComArvore, CursoAula, CursoModulo, AulaComVizinhas, AparicaoDeVerbete } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -224,12 +224,17 @@ export const wikiApi = {
     return response.data;
   },
   // Wiki links
-  getLinks: async (contentType: 'blog' | 'education', contentId: string) => {
+  getLinks: async (contentType: 'blog' | 'education' | 'curso_aula', contentId: string) => {
     const response = await api.get<WikiLink[]>(`/wiki/links/${contentType}/${contentId}`);
     return response.data;
   },
+  /** Caminho inverso: onde este verbete é citado. */
+  getAparicoes: async (slug: string) => {
+    const response = await api.get<AparicaoDeVerbete[]>(`/wiki/${slug}/aparicoes`);
+    return response.data;
+  },
   createLink: async (data: {
-    contentType: 'blog' | 'education';
+    contentType: 'blog' | 'education' | 'curso_aula';
     contentId: string;
     wikiEntryId: string;
     linkText: string;
@@ -269,7 +274,7 @@ export const wikiApi = {
   },
   createPendingLink: async (data: {
     term: string;
-    contentType: 'blog' | 'education';
+    contentType: 'blog' | 'education' | 'curso_aula';
     contentId: string;
     context?: string;
   }) => {
@@ -331,6 +336,91 @@ export const settingsApi = {
   update: async (data: Partial<SiteSettings>) => {
     const response = await api.put<SiteSettings>('/settings', data);
     return response.data;
+  },
+};
+
+export const cursosApi = {
+  /** Índice público: só cursos publicados, sem token. */
+  getAll: async (page = 1, limit = 20) => {
+    const response = await api.get<PaginatedResponse<CursoNaListagem>>('/cursos', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+  /** Índice do admin: inclui rascunhos, exige token. */
+  getAllAdmin: async (published?: boolean, page = 1, limit = 100) => {
+    const response = await api.get<PaginatedResponse<CursoNaListagem>>('/cursos/admin/todos', {
+      params: {
+        ...(published !== undefined ? { published } : {}),
+        page,
+        limit,
+      },
+    });
+    return response.data;
+  },
+  getById: async (id: string) => {
+    const response = await api.get<Curso>(`/cursos/id/${id}`);
+    return response.data;
+  },
+  /** O currículo público: só o que está publicado tem endereço. */
+  getBySlug: async (slug: string) => {
+    const response = await api.get<CursoComArvore>(`/cursos/${slug}`);
+    return response.data;
+  },
+  /** A mesma árvore com os rascunhos, para a tela de estrutura do admin. */
+  getCompleto: async (slug: string) => {
+    const response = await api.get<CursoComArvore>(`/cursos/completo/${slug}`);
+    return response.data;
+  },
+  getAula: async (cursoSlug: string, aulaSlug: string) => {
+    const response = await api.get<AulaComVizinhas>(`/cursos/${cursoSlug}/aulas/${aulaSlug}`);
+    return response.data;
+  },
+  getAulaById: async (id: string) => {
+    const response = await api.get<CursoAula>(`/cursos/aulas/${id}`);
+    return response.data;
+  },
+
+  create: async (data: Partial<Curso>) => {
+    const response = await api.post<Curso>('/cursos', data);
+    return response.data;
+  },
+  update: async (id: string, data: Partial<Curso>) => {
+    const response = await api.put<Curso>(`/cursos/${id}`, data);
+    return response.data;
+  },
+  delete: async (id: string) => {
+    await api.delete(`/cursos/${id}`);
+  },
+
+  criarModulo: async (cursoId: string, data: { titulo: string; resumo?: string | null }) => {
+    const response = await api.post<CursoModulo>(`/cursos/${cursoId}/modulos`, data);
+    return response.data;
+  },
+  atualizarModulo: async (id: string, data: { titulo?: string; resumo?: string | null }) => {
+    const response = await api.put<CursoModulo>(`/cursos/modulos/${id}`, data);
+    return response.data;
+  },
+  deletarModulo: async (id: string) => {
+    await api.delete(`/cursos/modulos/${id}`);
+  },
+  reordenarModulos: async (cursoId: string, ids: string[]) => {
+    await api.put(`/cursos/${cursoId}/modulos/ordem`, { ids });
+  },
+
+  criarAula: async (cursoId: string, data: Partial<CursoAula>) => {
+    const response = await api.post<CursoAula>(`/cursos/${cursoId}/aulas`, data);
+    return response.data;
+  },
+  atualizarAula: async (id: string, data: Partial<CursoAula>) => {
+    const response = await api.put<CursoAula>(`/cursos/aulas/${id}`, data);
+    return response.data;
+  },
+  deletarAula: async (id: string) => {
+    await api.delete(`/cursos/aulas/${id}`);
+  },
+  reordenarAulas: async (moduloId: string, ids: string[]) => {
+    await api.put(`/cursos/modulos/${moduloId}/aulas/ordem`, { ids });
   },
 };
 

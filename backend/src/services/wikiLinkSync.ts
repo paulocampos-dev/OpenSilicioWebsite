@@ -27,7 +27,7 @@ import { extrairVerbetes } from '../utils/extrairVerbetes';
  * órfã derrubaria o INSERT pela chave estrangeira.
  */
 export async function sincronizarLinksDeWiki(
-  contentType: 'blog' | 'education',
+  contentType: 'blog' | 'education' | 'curso_aula',
   contentId: string,
   campos: Array<string | null | undefined>,
 ): Promise<number> {

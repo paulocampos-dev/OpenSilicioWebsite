@@ -57,6 +57,7 @@ export default function Footer() {
             <Stack spacing={1.5}>
               <span className="kicker" style={{ color: 'var(--color-steel-300)' }}>Recursos</span>
               <Link component={RouterLink} to="/educacao" sx={linkStyle}>Educação</Link>
+              <Link component={RouterLink} to="/cursos" sx={linkStyle}>Cursos</Link>
               <Link component={RouterLink} to="/blog" sx={linkStyle}>Blog</Link>
               <Link component={RouterLink} to="/wiki" sx={linkStyle}>Wiki</Link>
             </Stack>

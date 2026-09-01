@@ -18,6 +18,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import ArticleIcon from '@mui/icons-material/Article';
 import SchoolIcon from '@mui/icons-material/School';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import PlayLessonIcon from '@mui/icons-material/PlayLesson';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
 import { useAuth } from '../contexts/AuthContext';
@@ -28,6 +29,7 @@ const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin' },
   { text: 'Blog', icon: <ArticleIcon />, path: '/admin/blog' },
   { text: 'Educação', icon: <SchoolIcon />, path: '/admin/educacao' },
+  { text: 'Cursos', icon: <PlayLessonIcon />, path: '/admin/cursos' },
   { text: 'Wiki', icon: <MenuBookIcon />, path: '/admin/wiki' },
 ];
 

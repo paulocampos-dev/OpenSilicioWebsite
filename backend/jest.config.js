@@ -28,6 +28,11 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   testTimeout: 30000, // 30 seconds for integration tests
+  // Os testes de integração compartilham um único banco e cada suíte chama
+  // cleanDatabase() no beforeEach, então workers em paralelo apagam as fixtures
+  // uns dos outros e as falhas mudam a cada execução. Rodar em série é o que
+  // torna o resultado confiável; a suíte inteira leva poucos segundos.
+  maxWorkers: 1,
   setupFiles: ['<rootDir>/src/tests/jest.setup.ts'], // Runs BEFORE test files are imported
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'], // Runs AFTER test framework is installed
   moduleNameMapper: {

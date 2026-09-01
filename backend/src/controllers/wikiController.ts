@@ -111,6 +111,59 @@ export const getWikiLinksForContent = asyncHandler(async (req: AuthRequest, res:
   res.json(result.rows);
 });
 
+/**
+ * O caminho inverso de getWikiLinksForContent: dado um verbete, onde ele é
+ * citado. Alimenta a caixa "Onde aparece" da página da wiki.
+ *
+ * A consulta não sabe nada sobre cursos em particular: os três tipos de
+ * conteúdo entram pelos mesmos LEFT JOIN, e o CASE monta o endereço de cada um
+ * na forma que o React Router espera (blog por slug, educação por id, aula por
+ * curso + aula). Conteúdo despublicado, apagado, ou aula de curso despublicado
+ * sai com título ou href nulo e é descartado no filtro de fora, para a wiki
+ * nunca apontar para uma página que o visitante não pode abrir.
+ */
+export const getAparicoes = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const { slug } = req.params;
+
+  const result = await pool.query(
+    `SELECT * FROM (
+       SELECT wl.content_type,
+              wl.content_id,
+              wl.link_text,
+              CASE wl.content_type
+                WHEN 'blog'       THEN bp.title
+                WHEN 'education'  THEN er.title
+                WHEN 'curso_aula' THEN ca.titulo
+              END AS titulo,
+              CASE wl.content_type
+                WHEN 'blog'       THEN '/blog/' || bp.slug
+                WHEN 'education'  THEN '/educacao/' || er.id::text
+                WHEN 'curso_aula' THEN '/cursos/' || c.slug || '/' || ca.slug
+              END AS href,
+              CASE wl.content_type
+                WHEN 'curso_aula' THEN c.titulo
+                ELSE NULL
+              END AS contexto
+         FROM content_wiki_links wl
+         JOIN wiki_entries we ON we.id = wl.wiki_entry_id
+         LEFT JOIN blog_posts bp
+           ON wl.content_type = 'blog' AND wl.content_id = bp.id AND bp.published = true
+         LEFT JOIN education_resources er
+           ON wl.content_type = 'education' AND wl.content_id = er.id AND er.published = true
+         LEFT JOIN curso_aulas ca
+           ON wl.content_type = 'curso_aula' AND wl.content_id = ca.id AND ca.publicado = true
+         LEFT JOIN cursos c
+           ON c.id = ca.curso_id AND c.publicado = true
+        WHERE we.slug = $1
+     ) aparicoes
+     WHERE titulo IS NOT NULL AND href IS NOT NULL
+     ORDER BY content_type, titulo`,
+    [slug]
+  );
+
+  res.json(result.rows);
+});
+
 export const createWikiLink = asyncHandler(async (req: AuthRequest, res: Response) => {
   // req.body is already validated by validate(wikiLinkSchema) in the route
   const { contentType, contentId, wikiEntryId, linkText } = req.body;

@@ -30,7 +30,7 @@ interface WikiLinkInserterProps {
   onInsert: (term: string, slug: string) => void;
   onMarkPending?: (term: string) => void;
   selectedText: string;
-  contentType?: 'blog' | 'education';
+  contentType?: 'blog' | 'education' | 'curso_aula';
   contentId?: string;
 }
 
