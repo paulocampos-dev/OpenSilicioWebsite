@@ -42,10 +42,11 @@ export function resolverPartes(texto: string, partes: Parte[]): ResultadoResoluc
   const anotados: TrechoAnotado[] = []
 
   for (let i = 0; i < partes.length; i++) {
-    const { trecho, nota } = partes[i]
-    if (!trecho) {
+    const parte = partes[i]
+    if (!parte?.trecho) {
       return { ok: false, erro: `parte ${i + 1} não tem "trecho"` }
     }
+    const { trecho, nota } = parte
 
     const primeira = texto.indexOf(trecho)
     if (primeira === -1) {

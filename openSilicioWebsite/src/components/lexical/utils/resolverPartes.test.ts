@@ -24,6 +24,8 @@ describe('resolverPartes', () => {
       ['inv', 2],
       ['_1', 1],
     ])
+
+    expect(resultado.trechos.map((t) => t.trecho).join('')).toBe('sky130_fd_sc_hd__inv_1')
   })
 
   it('returns an error when a trecho does not appear in texto', () => {
