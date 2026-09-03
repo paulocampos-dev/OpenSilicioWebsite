@@ -24,12 +24,17 @@ Postgres + backend + frontend in Docker with hot reload. See `README.md` /
 and non-Docker alternatives.
 
 - Frontend: http://localhost:5173 — `npm run dev` / `npm run build` /
-  `npm run test` (Vitest) / `npm run lint` inside `openSilicioWebsite/`.
-  Note: ESLint's TS parsing is currently broken repo-wide — don't treat a
-  failing `lint` run as a signal on code you touched unless you introduced
-  the specific error.
+  `npm run typecheck` / `npm run test` (Vitest) / `npm run lint` inside
+  `openSilicioWebsite/`. `npm run build` is `vite build`, which transpiles
+  but does not typecheck — `npm run typecheck` (`tsc --noEmit`) is the only
+  command that actually catches type errors on this app; a strict-mode
+  error shipped through three code reviews before this was noticed. Note:
+  ESLint's TS parsing is currently broken repo-wide — don't treat a failing
+  `lint` run as a signal on code you touched unless you introduced the
+  specific error.
 - Backend: http://localhost:3001 — `npm run dev` / `npm run build` /
-  `npm test` (Jest) inside `backend/`.
+  `npm test` (Jest) inside `backend/`. Here `npm run build` is plain `tsc`,
+  so it does typecheck.
 
 ### Database migrations
 
@@ -61,9 +66,10 @@ like "0 pending migrations" even when your new migration hasn't run.
 - **TypeScript**: both apps run in strict mode; the frontend additionally
   enables `exactOptionalPropertyTypes`. Avoid `any`; prefer inferred/narrow
   types over hand-widened ones.
-- Verify a change with the actual build/test commands above (and the
-  browser, for UI work) before considering it done — don't rely on `lint`
-  alone given the current ESLint breakage.
+- Verify a change with the actual build/typecheck/test commands above (and
+  the browser, for UI work) before considering it done — don't rely on
+  `lint` alone given the current ESLint breakage, and on the frontend
+  don't rely on `build` alone either, since it doesn't typecheck.
 
 ## The Lexical editor and the admin panel
 

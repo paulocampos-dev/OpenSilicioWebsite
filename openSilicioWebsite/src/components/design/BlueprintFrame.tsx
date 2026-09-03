@@ -19,7 +19,7 @@ export default function BlueprintFrame({ duotone, frameless, className, children
   return (
     <Box
       className={classes}
-      sx={frameless ? { borderColor: 'transparent', ...sx } : sx}
+      sx={frameless ? { borderColor: 'transparent', ...sx } : (sx ?? {})}
       {...props}
     >
 

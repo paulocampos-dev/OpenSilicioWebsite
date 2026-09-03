@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material'
 import BlueprintFrame from './design/BlueprintFrame'
 
 interface CoverLetterDisplayProps {
-  text?: string
+  text?: string | undefined
   /** 'quote' — the heavier pull-quote treatment used on blog posts.
    *  'callout' — the boxed "before you start" note used on Educação resources. */
   variant?: 'quote' | 'callout'

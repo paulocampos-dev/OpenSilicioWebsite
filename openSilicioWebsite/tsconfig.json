@@ -40,5 +40,6 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "allowJs": false,
-  }
+  },
+  "include": ["src"]
 }

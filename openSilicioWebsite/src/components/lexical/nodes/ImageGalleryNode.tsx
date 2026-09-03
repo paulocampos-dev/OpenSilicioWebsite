@@ -81,7 +81,7 @@ const ImageGalleryComponent = ({
                 node.remove();
             } else if (newImages.length === 1) {
                 // Convert the gallery back to a plain ImageNode
-                node.replace($createImageNode({ src: newImages[0], altText: '', width: '100%', height: 'auto' }));
+                node.replace($createImageNode({ src: newImages[0]!, altText: '', width: '100%', height: 'auto' }));
             } else {
                 node.setImages(newImages);
             }
@@ -127,6 +127,7 @@ const ImageGalleryComponent = ({
         if (fromIdx === null || fromIdx === toIdx) return;
         const next = [...images];
         const [moved] = next.splice(fromIdx, 1);
+        if (moved === undefined) return;
         next.splice(toIdx, 0, moved);
         updateImages(next);
     };
@@ -338,7 +339,7 @@ const ImageGalleryComponent = ({
             <ImageLightbox
                 open={lightboxOpen}
                 onClose={() => setLightboxOpen(false)}
-                src={images[activeImageIndex]}
+                src={images[activeImageIndex] ?? ''}
                 alt={`Gallery image ${activeImageIndex + 1}`}
                 images={images}
                 currentIndex={activeImageIndex}

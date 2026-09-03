@@ -3,7 +3,7 @@ import { Box, type SxProps, type Theme } from '@mui/material'
 import { motion, useReducedMotion } from 'framer-motion'
 
 interface DuotonePhotoProps {
-  src?: string
+  src?: string | undefined
   alt?: string
   /** Shown instead of a photo when `src` is empty — this system never fakes one. */
   label: string

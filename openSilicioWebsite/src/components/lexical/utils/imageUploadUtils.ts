@@ -44,7 +44,7 @@ export function insertUploadedImages(
       selection.insertNodes([
         $createImageNode({
           altText: 'Imagem',
-          src: urls[0],
+          src: urls[0]!,
           width: '100%',
           height: 'auto',
         }),

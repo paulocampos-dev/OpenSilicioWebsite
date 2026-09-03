@@ -4,7 +4,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 interface ThumbnailUploadFieldProps {
   label?: string;
   helperText?: string;
-  imageUrl?: string;
+  imageUrl?: string | undefined;
   uploading?: boolean;
   uploadProgress?: number;
   onUpload: (file: File) => void;

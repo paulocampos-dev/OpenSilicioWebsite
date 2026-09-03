@@ -87,7 +87,7 @@ function handleImageFiles(editor: LexicalEditor, files: File[], layout: 'grid' |
     return true;
   }
 
-  insertImageWithUpload(editor, imageFiles[0]);
+  insertImageWithUpload(editor, imageFiles[0]!);
   return true;
 }
 
@@ -108,7 +108,7 @@ function mergeImagePluginCommands(editor: LexicalEditor) {
       void (async () => {
         const files = await pickImageFiles(false);
         if (files.length === 0) return;
-        insertImageWithUpload(editor, files[0]);
+        insertImageWithUpload(editor, files[0]!);
       })();
       return true;
     },
