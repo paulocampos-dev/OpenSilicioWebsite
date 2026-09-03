@@ -11,6 +11,7 @@
 import WaveDromPlugin from './plugins/WaveDromPlugin';
 import EmbedPlugin from './plugins/EmbedPlugin';
 import SevenSegmentPlugin from './plugins/SevenSegmentPlugin';
+import AnatomiaPlugin from './plugins/AnatomiaPlugin';
 
 /** Plugins de inserção. Só o editor precisa deles; o leitor não insere nada. */
 export function OsWidgetPlugins() {
@@ -19,6 +20,7 @@ export function OsWidgetPlugins() {
       <WaveDromPlugin />
       <EmbedPlugin />
       <SevenSegmentPlugin />
+      <AnatomiaPlugin />
     </>
   );
 }

@@ -62,9 +62,11 @@ import { INSERT_IMAGE_COMMAND } from './ImagePlugin';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import WebIcon from '@mui/icons-material/Web';
 import MemoryIcon from '@mui/icons-material/Memory';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { INSERT_WAVEDROM_COMMAND } from './WaveDromPlugin';
 import { INSERT_EMBED_COMMAND } from './EmbedPlugin';
 import { INSERT_SEVEN_SEGMENT_COMMAND } from './SevenSegmentPlugin';
+import { INSERT_ANATOMIA_COMMAND } from './AnatomiaPlugin';
 import { verificarUrlEmbed } from '../nodes/EmbedNode';
 
 const LowPriority = 1;
@@ -292,6 +294,10 @@ export default function ToolbarPlugin() {
 
   const inserirSeteSegmentos = useCallback(() => {
     editor.dispatchCommand(INSERT_SEVEN_SEGMENT_COMMAND, {});
+  }, [editor]);
+
+  const inserirAnatomia = useCallback(() => {
+    editor.dispatchCommand(INSERT_ANATOMIA_COMMAND, {});
   }, [editor]);
 
   return (
@@ -576,6 +582,11 @@ export default function ToolbarPlugin() {
         <Tooltip title="Inserir Decodificador de 7 Segmentos">
           <IconButton size="small" onClick={inserirSeteSegmentos}>
             <MemoryIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Inserir Diagrama Anotado">
+          <IconButton size="small" onClick={inserirAnatomia}>
+            <AccountTreeIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>

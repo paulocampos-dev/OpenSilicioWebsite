@@ -120,6 +120,67 @@
   font-weight: 600;
 }
 
+/* — diagrama anotado — */
+.os-anatomia__string {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  word-break: break-all;
+}
+
+.os-anatomia__sep { color: var(--color-text-faint); }
+
+.os-anatomia__tok {
+  color: var(--color-accent-ink);
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 1px;
+}
+
+.os-anatomia__num {
+  font-size: 11px;
+  vertical-align: super;
+  margin-left: 1px;
+  font-family: var(--font-heading, inherit);
+}
+
+.os-anatomia__legenda {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-line);
+  display: grid;
+  gap: 10px;
+}
+
+.os-anatomia__item {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.os-anatomia__badge {
+  font-family: var(--font-heading, inherit);
+  font-size: 12px;
+  color: var(--color-bg);
+  background: var(--color-accent);
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  flex: none;
+  margin-top: 2px;
+}
+
+.os-anatomia__trecho {
+  font-family: var(--font-mono);
+  color: var(--color-accent-ink);
+  font-size: 14px;
+}
+
+.os-anatomia__nota {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .os-7seg__chave { transition: none; }
 }

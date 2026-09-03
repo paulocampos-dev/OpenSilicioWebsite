@@ -11,6 +11,7 @@ import { ImageGalleryNode } from './nodes/ImageGalleryNode';
 import { WaveDromNode } from './nodes/WaveDromNode';
 import { EmbedNode } from './nodes/EmbedNode';
 import { SevenSegmentNode } from './nodes/SevenSegmentNode';
+import { AnatomiaNode } from './nodes/AnatomiaNode';
 
 /**
  * The single source of truth for which node types the editor state can
@@ -38,4 +39,5 @@ export const LEXICAL_NODES: Array<Klass<LexicalNode>> = [
   WaveDromNode,
   EmbedNode,
   SevenSegmentNode,
+  AnatomiaNode,
 ];
