@@ -36,6 +36,8 @@ export interface CursoAula {
   duracao_seg?: number | null;
   conteudo?: string | null;
   publicado: boolean;
+  /** Aula alternativa: publicada, mas fora da contagem de progresso do leitor. */
+  opcional: boolean;
   created_at: Date | string;
   updated_at: Date;
 }
@@ -51,8 +53,15 @@ export interface CursoNaListagem extends Curso {
    * índice: o título alimenta a busca da página de Educação, onde a aula não
    * tem cartão próprio, e o slug é o que o progresso guardado no navegador usa
    * como chave, então sem ele não dá para desenhar a barra sem abrir o curso.
+   * `opcional` vai junto porque a barra do índice é desenhada sem abrir o
+   * curso, e a aula alternativa não entra na conta.
    */
-  aulas_publicadas: Array<{ slug: string; titulo: string; duracao_seg: number | null }>;
+  aulas_publicadas: Array<{
+    slug: string;
+    titulo: string;
+    duracao_seg: number | null;
+    opcional: boolean;
+  }>;
 }
 
 /**
@@ -68,6 +77,7 @@ export type AulaNaArvore =
       titulo: string;
       duracao_seg: number | null;
       tem_video: boolean;
+      opcional: boolean;
     }
   | { publicado: false; id: string; titulo: string };
 
@@ -77,7 +87,11 @@ export interface ModuloNaArvore extends CursoModulo {
 
 export interface CursoComArvore extends Curso {
   modulos: ModuloNaArvore[];
-  /** Contagem de aulas publicadas: é o denominador do progresso do leitor. */
+  /**
+   * Contagem de aulas publicadas, alternativas incluídas: é o tamanho do
+   * currículo. O denominador do progresso sai daí menos as opcionais, e quem
+   * faz essa conta é o front, que já tem a árvore na mão.
+   */
   total_aulas: number;
   duracao_seg: number;
 }
@@ -99,7 +113,7 @@ export interface AulaComVizinhas {
 
 type LinhaDeAula = Pick<
   CursoAula,
-  'id' | 'modulo_id' | 'ordem' | 'slug' | 'titulo' | 'duracao_seg' | 'publicado'
+  'id' | 'modulo_id' | 'ordem' | 'slug' | 'titulo' | 'duracao_seg' | 'publicado' | 'opcional'
 > & { video_id: string | null };
 
 export class CursoService extends BaseService<Curso> {
@@ -112,8 +126,8 @@ export class CursoService extends BaseService<Curso> {
    * por curso, para a listagem continuar sendo uma ida ao banco.
    *
    * `aulas` e `duracao_seg` contam só o que está publicado, porque são o que o
-   * leitor vê e o denominador do progresso dele. `aulas_rascunho` existe para o
-   * admin saber o que falta sem precisar de outra rota.
+   * leitor vê no índice. `aulas_rascunho` existe para o admin saber o que falta
+   * sem precisar de outra rota.
    */
   async listar(
     publicado?: boolean,
@@ -151,7 +165,8 @@ export class CursoService extends BaseService<Curso> {
                    -- módulos, e aí o botão "começar" do índice aponta para a
                    -- aula errada.
                    JSON_AGG(JSON_BUILD_OBJECT('slug', au.slug, 'titulo', au.titulo,
-                                              'duracao_seg', au.duracao_seg)
+                                              'duracao_seg', au.duracao_seg,
+                                              'opcional', au.opcional)
                             ORDER BY mo.ordem, au.ordem, au.id)
                      FILTER (WHERE au.publicado) AS publicadas_json
               FROM curso_aulas au
@@ -223,7 +238,8 @@ export class CursoService extends BaseService<Curso> {
         [curso.id],
       ),
       this.pool.query<LinhaDeAula>(
-        `SELECT a.id, a.modulo_id, a.ordem, a.slug, a.titulo, a.duracao_seg, a.publicado, a.video_id
+        `SELECT a.id, a.modulo_id, a.ordem, a.slug, a.titulo, a.duracao_seg, a.publicado,
+                a.opcional, a.video_id
            FROM curso_aulas a
           WHERE a.curso_id = $1
           ORDER BY a.ordem, a.id`,
@@ -247,6 +263,7 @@ export class CursoService extends BaseService<Curso> {
           titulo: aula.titulo,
           duracao_seg: aula.duracao_seg ?? null,
           tem_video: Boolean(aula.video_id),
+          opcional: aula.opcional,
         });
       } else {
         lista.push({ publicado: false, id: aula.id, titulo: aula.titulo });
@@ -404,11 +421,12 @@ export class CursoService extends BaseService<Curso> {
     duracao_seg?: number | null;
     conteudo?: string | null;
     publicado?: boolean;
+    opcional?: boolean;
   }): Promise<CursoAula> {
     const { rows } = await this.pool.query<CursoAula>(
       `INSERT INTO curso_aulas
-         (curso_id, modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado, ordem)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8,
+         (curso_id, modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado, opcional, ordem)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,
          COALESCE((SELECT MAX(ordem) + 1 FROM curso_aulas WHERE modulo_id = $2), 0))
        RETURNING *`,
       [
@@ -420,6 +438,7 @@ export class CursoService extends BaseService<Curso> {
         dados.duracao_seg ?? null,
         dados.conteudo ?? null,
         dados.publicado ?? false,
+        dados.opcional ?? false,
       ],
     );
     return rows[0];
@@ -439,6 +458,7 @@ export class CursoService extends BaseService<Curso> {
       'duracao_seg',
       'conteudo',
       'publicado',
+      'opcional',
     ] as const;
 
     const campos = permitidos.filter((c) => dados[c] !== undefined);

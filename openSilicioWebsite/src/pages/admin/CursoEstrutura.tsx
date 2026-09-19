@@ -250,6 +250,12 @@ export default function CursoEstrutura() {
                         · {duracaoPorExtenso(aula.duracao_seg)}
                       </Typography>
                     ) : null}
+                    {aula.publicado && aula.opcional ? (
+                      <Typography component="span" variant="caption" color="text.secondary">
+                        {' '}
+                        · opcional
+                      </Typography>
+                    ) : null}
                   </Typography>
                   <Chip
                     size="small"

@@ -12,6 +12,7 @@ import BarraDeProgresso from '../components/design/BarraDeProgresso'
 import ListaDeAulas from '../components/design/ListaDeAulas'
 import { useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { duracaoPorExtenso } from '../utils/duracao'
+import { contaveis } from '../utils/progressoDeCurso'
 
 export default function Curso() {
   const { cursoSlug } = useParams<{ cursoSlug: string }>()
@@ -62,11 +63,8 @@ export default function Curso() {
     }
   }, [curso])
 
-  const slugsPublicados = useMemo(
-    () =>
-      curso
-        ? curso.modulos.flatMap((m) => m.aulas.filter((a) => a.publicado).map((a) => a.slug))
-        : [],
+  const publicadas = useMemo(
+    () => (curso ? curso.modulos.flatMap((m) => m.aulas.filter((a) => a.publicado)) : []),
     [curso],
   )
 
@@ -83,15 +81,16 @@ export default function Curso() {
     )
   }
 
-  const feitas = concluidas(curso.slug, slugsPublicados)
-  const proxima = retomarEm(curso.slug, slugsPublicados)
+  // O progresso ignora as aulas opcionais, que são alternativas entre si.
+  const total = contaveis(publicadas).length
+  const feitas = concluidas(curso.slug, publicadas)
+  const proxima = retomarEm(curso.slug, publicadas)
   const comecou = feitas > 0
   // Soma o que falta aula a aula: proporção sobre a duração total erra sempre
   // que as aulas têm tamanhos diferentes.
-  const restante = curso.modulos
-    .flatMap((m) => m.aulas)
-    .filter((a) => a.publicado && !concluida(curso.slug, a.slug))
-    .reduce((soma, a) => soma + (a.publicado ? a.duracao_seg ?? 0 : 0), 0)
+  const restante = contaveis(publicadas)
+    .filter((a) => !concluida(curso.slug, a.slug))
+    .reduce((soma, a) => soma + (a.duracao_seg ?? 0), 0)
 
   // A numeração corre no curso inteiro e conta só aula publicada, então cada
   // módulo precisa saber quantas publicadas vieram antes dele.
@@ -197,11 +196,11 @@ export default function Curso() {
                 <BlueprintFrame sx={{ p: 2.5 }}>
                   <span className="kicker">Seu progresso</span>
                   <Box sx={{ my: 1.5 }}>
-                    <BarraDeProgresso concluidas={feitas} total={slugsPublicados.length} />
+                    <BarraDeProgresso concluidas={feitas} total={total} />
                   </Box>
                   <Typography sx={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', mb: 2 }}>
-                    {feitas} de {slugsPublicados.length}
-                    {restante > 0 && feitas < slugsPublicados.length ? ` · restam ${duracaoPorExtenso(restante)}` : ''}
+                    {feitas} de {total}
+                    {restante > 0 && feitas < total ? ` · restam ${duracaoPorExtenso(restante)}` : ''}
                   </Typography>
 
                   {proxima && (

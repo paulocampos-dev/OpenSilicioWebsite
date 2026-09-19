@@ -111,6 +111,13 @@ export default function ListaDeAulas({
               }}
             >
               {aula.titulo}
+              {aula.opcional && (
+                // Alternativa às irmãs (Windows/Linux/macOS): o leitor faz uma
+                // só, e ela fica fora da conta do progresso.
+                <span style={{ marginLeft: 8, fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)' }}>
+                  opcional
+                </span>
+              )}
             </Typography>
             <span style={{ fontSize: 13, color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}>
               {aula.duracao_seg ? duracaoPorExtenso(aula.duracao_seg) : 'leitura'}

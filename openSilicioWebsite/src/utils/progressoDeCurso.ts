@@ -21,7 +21,24 @@ export interface ProgressoCurso {
 
 export type Progresso = Record<string, ProgressoCurso>;
 
+/** O mínimo que as contas precisam saber de uma aula publicada. */
+export interface AulaPublicada {
+  slug: string;
+  opcional: boolean;
+}
+
 export const CHAVE_DE_ARMAZENAMENTO = 'opensilicio-cursos-progresso';
+
+/**
+ * As aulas que entram na conta do progresso.
+ *
+ * A aula opcional é uma alternativa às irmãs — instalar no Windows, no Linux ou
+ * no macOS — e o leitor faz uma só. Contando todas, ninguém chegaria a 100%.
+ * Esta é a única função que conhece a regra: quem precisa de um total, de um
+ * tempo restante ou de uma lista de pendentes filtra por aqui, e não na página.
+ */
+export const contaveis = <T extends AulaPublicada>(publicadas: readonly T[]): T[] =>
+  publicadas.filter((aula) => !aula.opcional);
 
 const cursoVazio = (): ProgressoCurso => ({ aulas: {}, ultima: null });
 
@@ -109,40 +126,50 @@ export function estaConcluida(progresso: Progresso, curso: string, aula: string)
 }
 
 /**
- * Quantas das aulas publicadas foram concluídas.
+ * Quantas das aulas que contam foram concluídas.
  *
- * O denominador é a lista de aulas publicadas que a página passa, e não o que
- * está gravado: uma aula que saiu do ar não pode continuar contando, e uma que
- * entrou tem que aumentar o total. Publicar uma aula nova baixa a porcentagem
- * de todo mundo, o que é honesto: o curso cresceu.
+ * O denominador é a lista de aulas publicadas que a página passa, menos as
+ * opcionais, e não o que está gravado: uma aula que saiu do ar não pode
+ * continuar contando, e uma que entrou tem que aumentar o total. Publicar uma
+ * aula nova baixa a porcentagem de todo mundo, o que é honesto: o curso cresceu.
+ *
+ * A aula opcional concluída continua gravada e continua mostrando o tique no
+ * currículo; ela só não mexe na porcentagem.
  */
 export function contarConcluidas(
   progresso: Progresso,
   curso: string,
-  slugsPublicados: string[],
+  publicadas: readonly AulaPublicada[],
 ): number {
   const doCurso = progresso[curso];
   if (!doCurso) return 0;
 
-  return slugsPublicados.filter((slug) => doCurso.aulas[slug] === 'concluida').length;
+  return contaveis(publicadas).filter((aula) => doCurso.aulas[aula.slug] === 'concluida').length;
 }
 
 /**
  * Por onde retomar: a última aula aberta, se ainda estiver publicada, senão a
  * primeira que falta concluir, senão a primeira do curso.
+ *
+ * A última aberta vale mesmo sendo opcional — quem parou no meio da aula de
+ * instalar no Windows quer voltar para lá. Já a busca pela pendente pula as
+ * opcionais, senão o botão mandaria o leitor para a alternativa que ele não
+ * escolheu.
  */
 export function proximaAula(
   progresso: Progresso,
   curso: string,
-  slugsPublicados: string[],
+  publicadas: readonly AulaPublicada[],
 ): string | null {
-  if (slugsPublicados.length === 0) return null;
+  if (publicadas.length === 0) return null;
 
   const doCurso = progresso[curso];
-  if (!doCurso) return slugsPublicados[0]!;
+  if (!doCurso) return publicadas[0]!.slug;
 
-  if (doCurso.ultima && slugsPublicados.includes(doCurso.ultima)) return doCurso.ultima;
+  if (doCurso.ultima && publicadas.some((aula) => aula.slug === doCurso.ultima)) {
+    return doCurso.ultima;
+  }
 
-  const pendente = slugsPublicados.find((slug) => doCurso.aulas[slug] !== 'concluida');
-  return pendente ?? slugsPublicados[0]!;
+  const pendente = contaveis(publicadas).find((aula) => doCurso.aulas[aula.slug] !== 'concluida');
+  return pendente?.slug ?? publicadas[0]!.slug;
 }

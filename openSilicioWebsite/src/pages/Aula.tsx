@@ -13,6 +13,7 @@ import WikiPopover from '../components/design/WikiPopover'
 import useWikiGlossary from '../components/design/useWikiGlossary'
 import { useAoChegarAoFim, useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { duracaoPorExtenso } from '../utils/duracao'
+import { contaveis } from '../utils/progressoDeCurso'
 
 /** A espinha: o curso inteiro, com a aula corrente marcada. */
 function Espinha({
@@ -183,11 +184,8 @@ export default function Aula() {
     if (cursoSlug && aulaSlug && dados) visitar(cursoSlug, aulaSlug)
   }, [cursoSlug, aulaSlug, dados, visitar])
 
-  const slugsPublicados = useMemo(
-    () =>
-      curso
-        ? curso.modulos.flatMap((m) => m.aulas.filter((a) => a.publicado).map((a) => a.slug))
-        : [],
+  const publicadas = useMemo(
+    () => (curso ? curso.modulos.flatMap((m) => m.aulas.filter((a) => a.publicado)) : []),
     [curso],
   )
 
@@ -220,7 +218,7 @@ export default function Aula() {
   }
 
   const { aula, modulo, posicao, total, anterior, proxima } = dados
-  const feitas = concluidas(cursoSlug, slugsPublicados)
+  const feitas = concluidas(cursoSlug, publicadas)
   const estaFeita = concluida(cursoSlug, aulaSlug)
 
   const espinha = curso ? (
@@ -228,7 +226,7 @@ export default function Aula() {
       curso={curso}
       aulaAtual={aulaSlug}
       feitas={feitas}
-      total={slugsPublicados.length}
+      total={contaveis(publicadas).length}
       concluida={(slug) => concluida(cursoSlug, slug)}
       aoNavegar={() => setGavetaAberta(false)}
     />

@@ -6,11 +6,15 @@ import {
   registrarVisita,
   estaConcluida,
   contarConcluidas,
+  contaveis,
   proximaAula,
   type Progresso,
 } from './progressoDeCurso';
 
 const CURSO = 'do-rtl-ao-gds';
+
+/** Atalho para montar a lista de publicadas que as contas recebem. */
+const aula = (slug: string, opcional = false) => ({ slug, opcional });
 
 describe('lerProgresso', () => {
   it('lê o que a própria página gravou', () => {
@@ -80,7 +84,7 @@ describe('marcação automática e manual', () => {
 });
 
 describe('contarConcluidas', () => {
-  const publicadas = ['pdk', 'verilog', 'cocotb'];
+  const publicadas = [aula('pdk'), aula('verilog'), aula('cocotb')];
 
   it('conta só o que está publicado', () => {
     let progresso = marcarAutomaticamente({}, CURSO, 'pdk');
@@ -92,10 +96,21 @@ describe('contarConcluidas', () => {
   it('é zero para curso nunca aberto', () => {
     expect(contarConcluidas({}, CURSO, publicadas)).toBe(0);
   });
+
+  it('não conta a aula opcional, nem quando ela está concluída', () => {
+    // O ponto do sinalizador: com as três alternativas de instalação no total,
+    // quem faz uma delas nunca chega aos 100%.
+    const comAlternativas = [aula('windows', true), aula('linux', true), ...publicadas];
+    let progresso = definirEstado({}, CURSO, 'linux', 'concluida');
+    for (const cada of publicadas) progresso = definirEstado(progresso, CURSO, cada.slug, 'concluida');
+
+    expect(contarConcluidas(progresso, CURSO, comAlternativas)).toBe(3);
+    expect(contaveis(comAlternativas)).toEqual(publicadas);
+  });
 });
 
 describe('proximaAula', () => {
-  const publicadas = ['pdk', 'verilog', 'cocotb'];
+  const publicadas = [aula('pdk'), aula('verilog'), aula('cocotb')];
 
   it('retoma na última aberta', () => {
     const progresso = registrarVisita({}, CURSO, 'verilog');
@@ -115,10 +130,19 @@ describe('proximaAula', () => {
 
   it('volta ao início quando tudo está concluído', () => {
     let progresso: Progresso = {};
-    for (const slug of publicadas) progresso = definirEstado(progresso, CURSO, slug, 'concluida');
+    for (const cada of publicadas) progresso = definirEstado(progresso, CURSO, cada.slug, 'concluida');
     progresso = { ...progresso, [CURSO]: { ...progresso[CURSO]!, ultima: null } };
 
     expect(proximaAula(progresso, CURSO, publicadas)).toBe('pdk');
+  });
+
+  it('honra a última aberta mesmo sendo opcional, mas não a oferece como pendente', () => {
+    const comAlternativa = [aula('windows', true), ...publicadas];
+
+    expect(proximaAula(registrarVisita({}, CURSO, 'windows'), CURSO, comAlternativa)).toBe(
+      'windows',
+    );
+    expect(proximaAula(registrarVisita({}, CURSO, 'saiu-do-ar'), CURSO, comAlternativa)).toBe('pdk');
   });
 
   it('devolve null para curso sem aula publicada', () => {

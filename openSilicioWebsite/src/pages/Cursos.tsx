@@ -9,6 +9,7 @@ import RevealOnLoad from '../components/design/RevealOnLoad'
 import SkeletonBlock from '../components/design/SkeletonBlock'
 import { useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { duracaoPorExtenso } from '../utils/duracao'
+import { contaveis } from '../utils/progressoDeCurso'
 
 const colunas = { xs: '1fr', md: '1fr 110px 130px 84px 150px' }
 
@@ -63,25 +64,31 @@ export default function Cursos() {
    */
   const emAndamento = useMemo(() => {
     for (const curso of cursos) {
-      const slugs = curso.aulas_publicadas.map((a) => a.slug)
-      const feitas = concluidas(curso.slug, slugs)
-      if (feitas > 0 && feitas < slugs.length) {
-        const proxima = retomarEm(curso.slug, slugs)
-        const posicao = slugs.indexOf(proxima ?? '')
-        const aula = curso.aulas_publicadas[posicao]
+      const publicadas = curso.aulas_publicadas
+      const total = contaveis(publicadas).length
+      const feitas = concluidas(curso.slug, publicadas)
+      if (feitas > 0 && feitas < total) {
+        const proxima = retomarEm(curso.slug, publicadas)
+        const indice = publicadas.findIndex((a) => a.slug === proxima)
+        const aula = publicadas[indice]
         if (aula) {
           // A posição é a da aula que o botão abre, não a contagem de
           // concluídas: quem terminou a 1 e a 3 e vai retomar a 2 tem que ler
-          // "aula 2", e não "aula 3".
+          // "aula 2", e não "aula 3". Conta só as que valem progresso, para
+          // bater com o total ao lado; retomar numa opcional mostra a posição
+          // da última que conta antes dela.
           //
           // O tempo restante soma a duração das aulas que faltam de verdade,
-          // uma a uma. Uma regra de três sobre a duração total erraria sempre
-          // que as aulas tivessem tamanhos diferentes, que é o caso normal.
-          const restante = curso.aulas_publicadas
+          // uma a uma, e só as que contam. Uma regra de três sobre a duração
+          // total erraria sempre que as aulas tivessem tamanhos diferentes, que
+          // é o caso normal.
+          const restante = contaveis(publicadas)
             .filter((a) => !concluida(curso.slug, a.slug))
             .reduce((soma, a) => soma + (a.duracao_seg ?? 0), 0)
 
-          return { curso, aula, feitas, posicao: posicao + 1, total: slugs.length, restante }
+          const posicao = Math.max(1, contaveis(publicadas.slice(0, indice + 1)).length)
+
+          return { curso, aula, feitas, posicao, total, restante }
         }
       }
     }
@@ -171,8 +178,10 @@ export default function Cursos() {
         <RevealOnLoad>
           <Cabecalho />
           {cursos.map((curso) => {
-            const slugs = curso.aulas_publicadas.map((a) => a.slug)
-            const feitas = concluidas(curso.slug, slugs)
+            // O total do progresso deixa as opcionais de fora; a coluna "Aulas"
+            // continua mostrando o currículo inteiro.
+            const total = contaveis(curso.aulas_publicadas).length
+            const feitas = concluidas(curso.slug, curso.aulas_publicadas)
 
             return (
               <Box
@@ -221,15 +230,15 @@ export default function Cursos() {
                 </Typography>
 
                 <Box>
-                  <BarraDeProgresso concluidas={feitas} total={slugs.length} rotulo={`Progresso em ${curso.titulo}`} />
+                  <BarraDeProgresso concluidas={feitas} total={total} rotulo={`Progresso em ${curso.titulo}`} />
                   <Typography sx={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', mt: 0.75 }}>
-                    {slugs.length === 0
+                    {total === 0
                       ? 'sem aulas'
                       : feitas === 0
                         ? 'não iniciado'
-                        : feitas === slugs.length
+                        : feitas === total
                           ? 'concluído'
-                          : `${feitas} de ${slugs.length}`}
+                          : `${feitas} de ${total}`}
                   </Typography>
                 </Box>
               </Box>

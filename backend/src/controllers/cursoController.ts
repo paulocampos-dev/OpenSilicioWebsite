@@ -122,7 +122,7 @@ type CorpoDeCursoNovo = Pick<Curso, 'slug' | 'titulo' | 'descricao'> &
   Partial<Pick<Curso, 'ementa' | 'image_url' | 'nivel' | 'publicado'>>;
 
 type CorpoDeAulaNova = Pick<CursoAula, 'modulo_id' | 'slug' | 'titulo'> &
-  Partial<Pick<CursoAula, 'video_id' | 'duracao_seg' | 'conteudo' | 'publicado'>>;
+  Partial<Pick<CursoAula, 'video_id' | 'duracao_seg' | 'conteudo' | 'publicado' | 'opcional'>>;
 
 /**
  * Só os campos presentes no corpo vão para o UPDATE.
@@ -190,7 +190,7 @@ export const deletarModulo = asyncHandler(async (req: AuthRequest, res: Response
 });
 
 export const criarAula = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado } =
+  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado, opcional } =
     req.body as CorpoDeAulaNova;
 
   const aula = await cursoService.criarAula({
@@ -202,6 +202,7 @@ export const criarAula = asyncHandler(async (req: AuthRequest, res: Response) =>
     duracao_seg: duracao_seg ?? null,
     conteudo: conteudo ?? null,
     publicado: publicado ?? false,
+    opcional: opcional ?? false,
   });
 
   await sincronizarSilencioso(aula.id, aula.conteudo);
@@ -210,7 +211,7 @@ export const criarAula = asyncHandler(async (req: AuthRequest, res: Response) =>
 });
 
 export const atualizarAula = asyncHandler(async (req: AuthRequest, res: Response) => {
-  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado } =
+  const { modulo_id, slug, titulo, video_id, duracao_seg, conteudo, publicado, opcional } =
     req.body as Partial<CursoAula>;
 
   const dados = somenteDefinidos({
@@ -221,6 +222,7 @@ export const atualizarAula = asyncHandler(async (req: AuthRequest, res: Response
     duracao_seg,
     conteudo,
     publicado,
+    opcional,
   } satisfies Partial<CursoAula>);
 
   const aula = await cursoService.atualizarAula(req.params.id, dados);

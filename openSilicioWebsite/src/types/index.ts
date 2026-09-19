@@ -73,8 +73,14 @@ export interface CursoNaListagem extends Curso {
    * Aulas publicadas em ordem. O título alimenta a busca da página de Educação,
    * onde a aula não tem cartão próprio; o slug é a chave do progresso guardado
    * no navegador, e sem ele a barra do índice não teria como ser desenhada.
+   * `opcional` vem junto porque a barra é desenhada sem abrir o curso.
    */
-  aulas_publicadas: Array<{ slug: string; titulo: string; duracao_seg: number | null }>;
+  aulas_publicadas: Array<{
+    slug: string;
+    titulo: string;
+    duracao_seg: number | null;
+    opcional: boolean;
+  }>;
 }
 
 /**
@@ -89,6 +95,8 @@ export type AulaNaArvore =
       titulo: string;
       duracao_seg: number | null;
       tem_video: boolean;
+      /** Aula alternativa: aparece no currículo, mas fora da conta do progresso. */
+      opcional: boolean;
     }
   | { publicado: false; id: string; titulo: string };
 
@@ -103,7 +111,7 @@ export interface ModuloNaArvore {
 
 export interface CursoComArvore extends Curso {
   modulos: ModuloNaArvore[];
-  /** Aulas publicadas: é o denominador do progresso do leitor. */
+  /** Aulas publicadas, alternativas incluídas: é o tamanho do currículo. */
   total_aulas: number;
   duracao_seg: number;
 }
@@ -119,6 +127,8 @@ export interface CursoAula {
   duracao_seg?: number | null;
   conteudo?: string | null;
   publicado: boolean;
+  /** Aula alternativa: publicada, mas fora da contagem de progresso do leitor. */
+  opcional: boolean;
   created_at: string;
   updated_at: string;
 }

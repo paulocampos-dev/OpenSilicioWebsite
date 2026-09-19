@@ -347,6 +347,10 @@ export const aulaSchema = z.object({
     .nullish(),
   conteudo: z.string().max(50000000, 'Conteúdo longo demais').nullish(),
   publicado: z.boolean().optional(),
+  // Aula alternativa (Windows/Linux/macOS): publicada, mas fora da contagem de
+  // progresso. O padrão fica no controller e no DEFAULT da coluna, porque um
+  // .default() aqui seria descartado pelo validate().
+  opcional: z.boolean().optional(),
 });
 
 export const aulaUpdateSchema = aulaSchema.partial().strip();

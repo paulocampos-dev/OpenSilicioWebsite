@@ -35,6 +35,7 @@ export default function AulaForm() {
     video_id: '',
     conteudo: '',
     publicado: false,
+    opcional: false,
   });
   const [duracao, setDuracao] = useState('');
   const [slugTocado, setSlugTocado] = useState(false);
@@ -105,6 +106,7 @@ export default function AulaForm() {
         duracao_seg: segundos,
         conteudo: aula.conteudo || null,
         publicado: aula.publicado ?? false,
+        opcional: aula.opcional ?? false,
       };
 
       if (editando && aulaId) {
@@ -248,6 +250,20 @@ export default function AulaForm() {
           <Typography variant="caption" color="text.secondary">
             Em rascunho, a aula aparece no currículo como "em breve", sem endereço, e fica fora da
             contagem de progresso.
+          </Typography>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={aula.opcional ?? false}
+                onChange={(e) => setAula({ ...aula, opcional: e.target.checked })}
+              />
+            }
+            label="Aula opcional (alternativa, fora da contagem de progresso)"
+          />
+          <Typography variant="caption" color="text.secondary">
+            Para aulas que são alternativas entre si, como instalar no Windows, no Linux ou no
+            macOS: o leitor faz uma e ainda chega a 100%.
           </Typography>
         </Stack>
       </Paper>

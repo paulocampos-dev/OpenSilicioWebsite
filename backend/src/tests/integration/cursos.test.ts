@@ -67,8 +67,8 @@ describe('Cursos API', () => {
       // O rascunho não entra na soma: é o denominador do progresso do leitor.
       expect(curso.duracao_seg).toBe(1320);
       expect(curso.aulas_publicadas).toEqual([
-        { slug: 'pdk', titulo: 'O que é um PDK', duracao_seg: 480 },
-        { slug: 'verilog', titulo: 'Seu primeiro Verilog', duracao_seg: 840 },
+        { slug: 'pdk', titulo: 'O que é um PDK', duracao_seg: 480, opcional: false },
+        { slug: 'verilog', titulo: 'Seu primeiro Verilog', duracao_seg: 840, opcional: false },
       ]);
     });
 
@@ -325,6 +325,44 @@ describe('Cursos API', () => {
 
       expect(resposta.status).toBe(201);
       expect(resposta.body.video_id).toBe('dQw4w9WgXcQ');
+    });
+
+    it('a aula criada como opcional volta marcada na árvore e no índice', async () => {
+      // É por esses dois caminhos que o leitor recebe a marca: sem ela, a aula
+      // alternativa volta a entrar no denominador do progresso.
+      const token = await getAuthToken();
+      const { curso, modulo } = await criarCurso();
+
+      const criada = await request(app)
+        .post(`/api/cursos/${curso.id}/aulas`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          modulo_id: modulo.id,
+          slug: 'instalar-no-windows',
+          titulo: 'Instalar no Windows',
+          publicado: true,
+          opcional: true,
+        });
+
+      expect(criada.status).toBe(201);
+      expect(criada.body.opcional).toBe(true);
+
+      const arvore = await request(app).get(`/api/cursos/${curso.slug}`);
+      expect(arvore.body.modulos[0].aulas[0]).toMatchObject({
+        slug: 'instalar-no-windows',
+        opcional: true,
+      });
+
+      const indice = await request(app).get('/api/cursos').query({ published: true });
+      const naListagem = indice.body.data.find((c: { slug: string }) => c.slug === curso.slug);
+      expect(naListagem.aulas_publicadas).toEqual([
+        {
+          slug: 'instalar-no-windows',
+          titulo: 'Instalar no Windows',
+          duracao_seg: null,
+          opcional: true,
+        },
+      ]);
     });
 
     it('reordena as aulas numa tacada e mantém a ordem pedida', async () => {

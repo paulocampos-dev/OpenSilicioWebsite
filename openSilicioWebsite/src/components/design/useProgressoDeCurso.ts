@@ -8,6 +8,7 @@ import {
   marcarAutomaticamente,
   proximaAula,
   registrarVisita,
+  type AulaPublicada,
   type Progresso,
 } from '../../utils/progressoDeCurso'
 
@@ -64,12 +65,14 @@ export function useProgressoDeCurso() {
   )
 
   const concluidas = useCallback(
-    (curso: string, publicadas: string[]) => contarConcluidas(progresso, curso, publicadas),
+    (curso: string, publicadas: readonly AulaPublicada[]) =>
+      contarConcluidas(progresso, curso, publicadas),
     [progresso],
   )
 
   const retomarEm = useCallback(
-    (curso: string, publicadas: string[]) => proximaAula(progresso, curso, publicadas),
+    (curso: string, publicadas: readonly AulaPublicada[]) =>
+      proximaAula(progresso, curso, publicadas),
     [progresso],
   )
 

@@ -161,6 +161,13 @@ built from are beside it in `2026-09-01-cursos-mocks.html`.
   storage. Marking is automatic on reaching the foot of an aula *and* manual;
   un-marking stores `'nao-concluida'`, which is what stops the next scroll from
   re-marking it.
+- **An `opcional` aula is published but outside the progress count** (migration
+  016). It is for alternatives the reader picks one of — install on Windows,
+  Linux or macOS — which otherwise make 100% unreachable. `contaveis()` in
+  `utils/progressoDeCurso.ts` is the only place that knows the rule: it drops
+  the optional aulas, and every total, remaining time and "first pending" search
+  goes through it. An optional aula can still be marked and still shows its
+  check; `total_aulas` and the syllabus numbering keep counting it.
 - **Reordering rewrites the whole list** in one `unnest ... WITH ORDINALITY`
   update, so there is no half-reordered state. `ordem` has no unique constraint.
 
