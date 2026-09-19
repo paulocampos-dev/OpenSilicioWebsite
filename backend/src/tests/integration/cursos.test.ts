@@ -446,6 +446,47 @@ describe('Cursos API', () => {
       expect(resposta.body.resumo).toBeNull();
     });
 
+    it('publicar o módulo publica só as aulas dele', async () => {
+      const token = await getAuthToken();
+      const { curso, modulo } = await criarCurso({
+        slug: 'publicar-o-modulo',
+        aulas: [
+          { slug: 'a1', titulo: 'A1', publicado: false },
+          { slug: 'a2', titulo: 'A2', publicado: false },
+        ],
+      });
+
+      const { rows: outros } = await testPool.query(
+        `INSERT INTO curso_modulos (curso_id, titulo, ordem) VALUES ($1, 'Frontend', 1) RETURNING *`,
+        [curso.id],
+      );
+      await testPool.query(
+        `INSERT INTO curso_aulas (curso_id, modulo_id, slug, titulo, publicado, ordem)
+         VALUES ($1, $2, 'b1', 'B1', false, 0)`,
+        [curso.id, outros[0].id],
+      );
+
+      const resposta = await request(app)
+        .put(`/api/cursos/modulos/${modulo.id}/publicar`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(resposta.status).toBe(200);
+      expect(resposta.body.publicadas).toBe(2);
+
+      const arvore = await request(app).get(`/api/cursos/${curso.slug}`);
+      expect(arvore.body.modulos[0].aulas.map((a: { slug?: string }) => a.slug)).toEqual([
+        'a1',
+        'a2',
+      ]);
+      // O escopo é o módulo: a aula do módulo vizinho continua rascunho, e a
+      // aula em rascunho volta da árvore sem slug.
+      expect(arvore.body.modulos[1].aulas[0]).toEqual({
+        publicado: false,
+        id: expect.any(String),
+        titulo: 'B1',
+      });
+    });
+
     it('apagar o curso leva módulos e aulas junto', async () => {
       const token = await getAuthToken();
       const { curso } = await criarCurso({

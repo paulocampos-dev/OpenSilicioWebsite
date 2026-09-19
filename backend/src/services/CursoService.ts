@@ -402,6 +402,27 @@ export class CursoService extends BaseService<Curso> {
     return rows[0];
   }
 
+  /**
+   * Publica de uma vez as aulas do módulo que ainda são rascunho. Devolve
+   * quantas mudaram.
+   *
+   * O `publicado = false` no WHERE deixa de fora o que já estava no ar, então
+   * `updated_at` só se mexe em quem de fato foi publicado. A existência do
+   * módulo é conferida antes porque um UPDATE que não pega nada é ambíguo:
+   * módulo inexistente e módulo sem rascunho dariam o mesmo zero.
+   */
+  async publicarAulasDoModulo(id: string): Promise<number> {
+    const { rows } = await this.pool.query('SELECT id FROM curso_modulos WHERE id = $1', [id]);
+    if (rows.length === 0) throw new NotFoundError('Módulo');
+
+    const { rowCount } = await this.pool.query(
+      `UPDATE curso_aulas SET publicado = true, updated_at = NOW()
+        WHERE modulo_id = $1 AND publicado = false`,
+      [id],
+    );
+    return rowCount ?? 0;
+  }
+
   async deletarModulo(id: string): Promise<void> {
     const { rows } = await this.pool.query(
       'DELETE FROM curso_modulos WHERE id = $1 RETURNING id',

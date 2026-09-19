@@ -233,7 +233,7 @@ export default function Cursos() {
                   <BarraDeProgresso concluidas={feitas} total={total} rotulo={`Progresso em ${curso.titulo}`} />
                   <Typography sx={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', mt: 0.75 }}>
                     {total === 0
-                      ? 'sem aulas'
+                      ? 'em breve'
                       : feitas === 0
                         ? 'não iniciado'
                         : feitas === total

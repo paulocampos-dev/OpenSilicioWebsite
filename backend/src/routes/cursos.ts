@@ -12,6 +12,7 @@ import {
   deletarCurso,
   criarModulo,
   atualizarModulo,
+  publicarModulo,
   deletarModulo,
   criarAula,
   atualizarAula,
@@ -72,6 +73,7 @@ router.delete('/:id', authMiddleware, exigirUuid('id'), deletarCurso);
 // — escrita: módulos —
 router.post('/:cursoId/modulos', authMiddleware, exigirUuid('cursoId'), validate(moduloSchema), criarModulo);
 router.put('/:cursoId/modulos/ordem', authMiddleware, exigirUuid('cursoId'), validate(reordenarSchema), reordenarModulos);
+router.put('/modulos/:id/publicar', authMiddleware, exigirUuid('id', 'Módulo'), publicarModulo);
 router.put('/modulos/:id', authMiddleware, exigirUuid('id', 'Módulo'), validate(moduloUpdateSchema), atualizarModulo);
 router.delete('/modulos/:id', authMiddleware, exigirUuid('id', 'Módulo'), deletarModulo);
 

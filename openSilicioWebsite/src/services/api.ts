@@ -401,6 +401,11 @@ export const cursosApi = {
     const response = await api.put<CursoModulo>(`/cursos/modulos/${id}`, data);
     return response.data;
   },
+  /** Publica as aulas em rascunho do módulo de uma vez; devolve quantas mudaram. */
+  publicarModulo: async (id: string) => {
+    const response = await api.put<{ publicadas: number }>(`/cursos/modulos/${id}/publicar`);
+    return response.data.publicadas;
+  },
   deletarModulo: async (id: string) => {
     await api.delete(`/cursos/modulos/${id}`);
   },

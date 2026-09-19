@@ -206,8 +206,12 @@ disagree, ours wins (on Windows the `.sh` scripts inside WSL, and our own pinned
 - **A módulo shows "em breve" only through a draft aula.** An empty módulo
   renders "0 aulas", so each future módulo carries one draft placeholder aula,
   "Aulas em preparação", whose title is public.
-- **Publishing is per record.** The curso's "Publicado" switch sits at the foot
-  of "Dados do curso", below the ementa; each aula has its own.
+- **Publishing is per record, except on the estrutura screen.** The curso's
+  "Publicado" switch still sits at the foot of "Dados do curso", below the
+  ementa, and each aula has its own. But "Estrutura" also carries a "Publicar
+  curso"/"Despublicar curso" button in the header, beside the state chip, and a
+  "Publicar módulo" button on every módulo that still has a rascunho, which
+  publishes all of its draft aulas at once.
 - **Check every internal link before saving.** Public routes are `/`, `/blog`,
   `/educacao`, `/cursos`, `/wiki` and `/sobre`; `GET /api/wiki?limit=200` lists
   the wiki slugs that exist.

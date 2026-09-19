@@ -183,6 +183,20 @@ export const atualizarModulo = asyncHandler(async (req: AuthRequest, res: Respon
   res.json(modulo);
 });
 
+/**
+ * Publica todas as aulas em rascunho do módulo de uma vez.
+ *
+ * Só limpa o cache, diferente de atualizarAula: o que muda aqui é a bandeira
+ * `publicado`, e as ligações com a wiki são derivadas do texto da aula, que
+ * continua o mesmo (ver services/wikiLinkSync.ts).
+ */
+export const publicarModulo = asyncHandler(async (req: AuthRequest, res: Response) => {
+  const publicadas = await cursoService.publicarAulasDoModulo(req.params.id);
+
+  limparCache();
+  res.json({ publicadas });
+});
+
 export const deletarModulo = asyncHandler(async (req: AuthRequest, res: Response) => {
   await cursoService.deletarModulo(req.params.id);
   limparCache();

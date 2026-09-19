@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import PublishIcon from '@mui/icons-material/Publish';
 import { cursosApi } from '../../services/api';
 import type { CursoComArvore } from '../../types';
 import { duracaoPorExtenso } from '../../utils/duracao';
@@ -85,6 +86,41 @@ export default function CursoEstrutura() {
       await carregar();
     } catch (erro) {
       falhar('Erro ao salvar o módulo', erro);
+    }
+  };
+
+  const publicarModulo = async (id: string) => {
+    try {
+      const publicadas = await cursosApi.publicarModulo(id);
+      setAviso({
+        open: true,
+        message: `${publicadas} ${publicadas === 1 ? 'aula publicada' : 'aulas publicadas'}`,
+        severity: 'success',
+      });
+      await carregar();
+    } catch (erro) {
+      falhar('Erro ao publicar o módulo', erro);
+    }
+  };
+
+  /**
+   * O corpo leva só `publicado`: a atualização do curso é parcial, e mandar o
+   * resto do que a árvore tem na mão sobrescreveria com dados antigos o que o
+   * formulário "Dados do curso" tiver gravado nesse meio tempo.
+   */
+  const alternarPublicacaoDoCurso = async () => {
+    if (!curso) return;
+
+    try {
+      await cursosApi.update(curso.id, { publicado: !curso.publicado });
+      setAviso({
+        open: true,
+        message: curso.publicado ? 'Curso despublicado' : 'Curso publicado',
+        severity: 'success',
+      });
+      await carregar();
+    } catch (erro) {
+      falhar('Erro ao mudar a publicação do curso', erro);
     }
   };
 
@@ -156,7 +192,14 @@ export default function CursoEstrutura() {
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
         <Box>
-          <Typography variant="h4">{curso.titulo}</Typography>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography variant="h4">{curso.titulo}</Typography>
+            <Chip
+              size="small"
+              label={curso.publicado ? 'Publicado' : 'Rascunho'}
+              color={curso.publicado ? 'success' : 'default'}
+            />
+          </Stack>
           <Typography variant="body2" color="text.secondary">
             {curso.modulos.length} {curso.modulos.length === 1 ? 'módulo' : 'módulos'}, {curso.total_aulas}{' '}
             {curso.total_aulas === 1 ? 'aula publicada' : 'aulas publicadas'}
@@ -166,6 +209,9 @@ export default function CursoEstrutura() {
         <Stack direction="row" spacing={1}>
           <Button component={RouterLink} to={`/admin/cursos/editar/${curso.id}`}>
             Dados do curso
+          </Button>
+          <Button variant="outlined" onClick={alternarPublicacaoDoCurso}>
+            {curso.publicado ? 'Despublicar curso' : 'Publicar curso'}
           </Button>
           <Button
             variant="outlined"
@@ -223,6 +269,16 @@ export default function CursoEstrutura() {
               >
                 <EditIcon fontSize="small" />
               </IconButton>
+              {modulo.aulas.some((aula) => !aula.publicado) && (
+                <IconButton
+                  size="small"
+                  color="success"
+                  onClick={() => publicarModulo(modulo.id)}
+                  title="Publicar módulo"
+                >
+                  <PublishIcon fontSize="small" />
+                </IconButton>
+              )}
               <IconButton
                 size="small"
                 color="error"
