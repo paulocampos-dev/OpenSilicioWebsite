@@ -18,10 +18,24 @@ of technical terms, plus an admin panel for authoring all of it.
 
 ## Local development
 
-Use `scripts/development/start.sh` (or `.bat` on Windows) to bring up
-Postgres + backend + frontend in Docker with hot reload. See `README.md` /
+Use `scripts/dev/start.sh` (or `.bat` on Windows) to bring up Postgres +
+backend + frontend in Docker with hot reload. The READMEs still say
+`scripts/development/`; the folder is `scripts/dev/`. See `README.md` /
 `README/DEVELOPMENT_GUIDE.md` for the full setup, local admin credentials,
 and non-Docker alternatives.
+
+- **It needs a `.env` at the repo root**, which is gitignored; copy
+  `.env.example`. Without it neither the script nor the compose file starts.
+- **`start.sh` begins with `down -v`, so every run wipes the local database**
+  and reseeds the admin and settings. Local content does not survive a
+  restart; use plain `docker-compose ... up -d` to keep it.
+- **To look at a branch against real content without the stack**, run Vite
+  with a temporary config that proxies `/api` and `/uploads` to the public
+  site (`services/api.ts` uses `baseURL: '/api'`, so nothing else changes).
+  Read-only GETs, a few page loads, and delete the config afterwards.
+- **The backend Jest suite needs a Postgres** (`TEST_DATABASE_URL` or
+  `DATABASE_URL`). A throwaway `postgres:16-alpine` container on a spare port,
+  migrated with `npx ts-node src/migrations/migrate.ts`, is enough.
 
 - Frontend: http://localhost:5173 — `npm run dev` / `npm run build` /
   `npm run typecheck` / `npm run test` (Vitest) / `npm run lint` inside
@@ -161,6 +175,26 @@ built from are beside it in `2026-09-01-cursos-mocks.html`.
   storage. Marking is automatic on reaching the foot of an aula *and* manual;
   un-marking stores `'nao-concluida'`, which is what stops the next scroll from
   re-marking it.
+- **Auto-marking requires a scroll since the aula opened.** The sentinel sits
+  under the Lexical body, which lays out a few frames late, so on a tall
+  viewport it is briefly on screen and every aula used to be stored as
+  concluída half a second after opening. `useAoChegarAoFim` records `scrollY`
+  when the sentinel mounts and ignores intersections until the page has moved
+  past it. It compares against the mount position, not zero, because **the app
+  never resets scroll on a route change**: "Próxima" lands on the next aula
+  already scrolled. An aula short enough to fit on screen therefore never
+  auto-marks and uses the button, the same deal as a video-only aula. The bug
+  only shows in real time; `--virtual-time-budget` skips the layout race.
+- **"Zerar progresso" deletes the curso's whole key** (`zerarCurso`), `ultima`
+  included, so `proximaAula` has no half-empty state to handle. The control
+  shows only when `temProgressoGravado` finds an entry in `aulas`: opening an
+  aula stores `ultima`, and that alone is nothing to erase. It lives in the
+  espinha of the aula page and in the "Seu progresso" card.
+- **The espinha folds per módulo** with native `<details>` whose `open` comes
+  from a set in React state. Opening only ever adds to the set: navigating
+  opens the current aula's módulo and leaves the reader's other choices alone.
+  The módulo count includes `opcional` aulas, since it mirrors the list beneath
+  it; the curso total above it goes through `contaveis()` and does not.
 - **An `opcional` aula is published but outside the progress count** (migration
   016). It is for alternatives the reader picks one of — install on Windows,
   Linux or macOS — which otherwise make 100% unreachable. `contaveis()` in
@@ -224,3 +258,22 @@ rebuilds and restarts the Docker containers, then runs pending migrations.
 This is a real, immediate production deploy with no staging step — treat a
 push to `main` accordingly (verify the change locally first, watch the
 Action run, and check the live site after).
+
+- **The production site is https://opensilicio.com.br.** The deploy log's
+  backup line is the quick health check: the dump has been about 2.4M, and a
+  sudden drop means data went missing before the deploy, not because of it.
+- **An "empty" site is usually the API failing, not data loss.** On
+  2026-09-19 every `/api` route answered 429 and the list pages drew that as
+  "nenhum ... encontrado". Public list pages now render `ErroAoCarregar`
+  (`components/design/`) when the load fails; a new list page should do the
+  same and keep its empty state for a genuinely empty response.
+- **The rate limit is per visitor only because of `trust proxy`.** The host
+  nginx proxies `/api` to the backend, so without it every request carries the
+  proxy's IP and all visitors share one bucket. `server.ts` trusts
+  `TRUST_PROXY_HOPS` hops, default 1; the host nginx config is not in this
+  repo, so if one heavy reader locks everyone out again, try 2. Never `true`,
+  which accepts a forged `X-Forwarded-For`. `apiLimiter` is 1000 per 15
+  minutes because one curso page already fires a wiki request per aula;
+  `createLimiter` (20 per hour) covers only `POST` on `/api/blog`,
+  `/api/education`, `/api/wiki` and `/api/cursos`, not aulas or módulos. The
+  counters live in memory, so restarting the backend clears a lockout.
