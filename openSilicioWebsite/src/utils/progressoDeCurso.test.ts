@@ -4,6 +4,8 @@ import {
   marcarAutomaticamente,
   definirEstado,
   registrarVisita,
+  zerarCurso,
+  temProgressoGravado,
   estaConcluida,
   contarConcluidas,
   contaveis,
@@ -80,6 +82,35 @@ describe('marcação automática e manual', () => {
 
     expect(estaConcluida(depois, 'outro-curso', 'aula')).toBe(true);
     expect(estaConcluida(depois, CURSO, 'pdk')).toBe(true);
+  });
+});
+
+describe('zerarCurso', () => {
+  it('apaga concluídas, desmarcadas e última aula, só do curso pedido', () => {
+    let progresso = definirEstado({}, CURSO, 'pdk', 'concluida');
+    progresso = definirEstado(progresso, CURSO, 'verilog', 'nao-concluida');
+    progresso = registrarVisita(progresso, CURSO, 'verilog');
+    progresso = definirEstado(progresso, 'outro-curso', 'aula', 'concluida');
+
+    const depois = zerarCurso(progresso, CURSO);
+
+    expect(depois[CURSO]).toBeUndefined();
+    expect(proximaAula(depois, CURSO, [aula('pdk'), aula('verilog')])).toBe('pdk');
+    expect(estaConcluida(depois, 'outro-curso', 'aula')).toBe(true);
+  });
+
+  it('devolve o mesmo objeto quando não há nada gravado do curso', () => {
+    const progresso = definirEstado({}, 'outro-curso', 'aula', 'concluida');
+    expect(zerarCurso(progresso, CURSO)).toBe(progresso);
+  });
+
+  it('ter aberto uma aula não é progresso; marcar ou desmarcar é', () => {
+    // É o que decide se o botão de zerar aparece: sem isto, quem só abriu a
+    // primeira aula veria "zerar progresso" ainda em 0 de N.
+    expect(temProgressoGravado(registrarVisita({}, CURSO, 'pdk'), CURSO)).toBe(false);
+    expect(temProgressoGravado(definirEstado({}, CURSO, 'pdk', 'nao-concluida'), CURSO)).toBe(true);
+    expect(temProgressoGravado(marcarAutomaticamente({}, CURSO, 'pdk'), CURSO)).toBe(true);
+    expect(temProgressoGravado({}, CURSO)).toBe(false);
   });
 });
 

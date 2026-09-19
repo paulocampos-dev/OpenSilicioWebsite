@@ -43,6 +43,13 @@ const observadorAtivo = () => {
   return ligados.length > 0 ? ligados[ligados.length - 1] : undefined
 }
 
+/**
+ * A rolagem da janela, que o gancho consulta para separar o leitor que chegou
+ * ao pé da página do sentinela que subiu sozinho enquanto o texto não estava
+ * desenhado. `window.scrollY` é só leitura no jsdom, daí o stub.
+ */
+const rolarPara = (y: number) => vi.stubGlobal('scrollY', y)
+
 function Sentinela({ aoChegar, ativo, chave }: { aoChegar: () => void; ativo?: boolean; chave: string }) {
   const referencia = useAoChegarAoFim(aoChegar, ativo)
   // A chave troca o nó do DOM, que é o que a navegação entre aulas faz.
@@ -52,6 +59,7 @@ function Sentinela({ aoChegar, ativo, chave }: { aoChegar: () => void; ativo?: b
 beforeEach(() => {
   observadores.length = 0
   vi.stubGlobal('IntersectionObserver', ObservadorFalso)
+  rolarPara(0)
 })
 
 afterEach(() => {
@@ -63,8 +71,25 @@ describe('useAoChegarAoFim', () => {
     const aoChegar = vi.fn()
     render(<Sentinela aoChegar={aoChegar} chave="aula-1" />)
 
+    rolarPara(400)
     observadorAtivo()!.gatilho([{ isIntersecting: true }])
 
+    expect(aoChegar).toHaveBeenCalledTimes(1)
+  })
+
+  it('não marca o que o leitor não rolou, e continua valendo quando ele rolar', () => {
+    // O corpo em Lexical demora alguns quadros para ser desenhado. Até lá o
+    // sentinela fica no alto, dentro da tela, e numa janela alta o observador
+    // marcava a aula meio segundo depois de abrir, com a página no topo.
+    const aoChegar = vi.fn()
+    render(<Sentinela aoChegar={aoChegar} chave="aula-1" />)
+
+    observadorAtivo()!.gatilho([{ isIntersecting: true }])
+    expect(aoChegar).not.toHaveBeenCalled()
+
+    // E não trancou: quem lê até o fim continua sendo marcado.
+    rolarPara(400)
+    observadorAtivo()!.gatilho([{ isIntersecting: true }])
     expect(aoChegar).toHaveBeenCalledTimes(1)
   })
 
@@ -72,6 +97,7 @@ describe('useAoChegarAoFim', () => {
     const aoChegar = vi.fn()
     render(<Sentinela aoChegar={aoChegar} chave="aula-1" />)
 
+    rolarPara(400)
     const observador = observadorAtivo()!
     observador.gatilho([{ isIntersecting: true }])
     observador.gatilho([{ isIntersecting: true }])
@@ -83,11 +109,15 @@ describe('useAoChegarAoFim', () => {
     const aoChegar = vi.fn()
     const { rerender } = render(<Sentinela aoChegar={aoChegar} chave="aula-1" />)
 
+    rolarPara(400)
     observadorAtivo()!.gatilho([{ isIntersecting: true }])
     expect(aoChegar).toHaveBeenCalledTimes(1)
 
-    // Mesma página, aula nova: era aqui que a marcação automática morria.
+    // Mesma página, aula nova: era aqui que a marcação automática morria. A
+    // navegação não rebobina a rolagem, então a aula nova nasce onde o leitor
+    // parou e é a rolagem daí para baixo que conta.
     rerender(<Sentinela aoChegar={aoChegar} chave="aula-2" />)
+    rolarPara(900)
     observadorAtivo()!.gatilho([{ isIntersecting: true }])
 
     expect(aoChegar).toHaveBeenCalledTimes(2)
