@@ -3,10 +3,13 @@ import rateLimit from 'express-rate-limit';
 // Check if we're in production
 const isProduction = process.env.NODE_ENV === 'production';
 
-// General API rate limiter - 100 requests per 15 minutes
+// General API rate limiter - 1000 requests per 15 minutes
+// Este é um SPA: uma única página de curso já dispara uma requisição de wiki
+// por aula, então o teto antigo de 100 estourava com um visitante só navegando.
+// Só vale por IP se o app confiar no proxy (ver `trust proxy` em server.ts).
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 1000, // Limit each IP to 1000 requests per windowMs
   message: {
     error: 'Muitas requisições deste IP, por favor tente novamente após 15 minutos',
   },

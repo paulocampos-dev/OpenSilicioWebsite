@@ -6,6 +6,7 @@ import { cursosApi, educationApi } from '../services/api'
 import type { CursoNaListagem, EducationResource } from '../types'
 import DuotonePhoto from '../components/design/DuotonePhoto'
 import CardGridSkeleton from '../components/design/CardGridSkeleton'
+import ErroAoCarregar from '../components/design/ErroAoCarregar'
 import RevealOnLoad from '../components/design/RevealOnLoad'
 import Pager from '../components/design/Pager'
 import { usePagedFilter } from '../components/design/usePagedFilter'
@@ -95,6 +96,7 @@ export default function Educacao() {
   const [query, setQuery] = useState<string>('')
   const [cartoes, setCartoes] = useState<CartaoEducacao[]>([])
   const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState(false)
   const pageSize = 6
 
   useEffect(() => {
@@ -102,12 +104,18 @@ export default function Educacao() {
   }, [])
 
   const carregar = async () => {
+    setLoading(true)
+    setErro(false)
     try {
       // As duas origens em paralelo: uma falhar não pode esvaziar a página toda.
       const [recursos, cursos] = await Promise.all([
         educationApi.getAll(true, 1, 100).catch(() => null),
         cursosApi.getAll(1, 100).catch(() => null),
       ])
+
+      // Só as duas falharem é falha de verdade; com uma viva a grade ainda tem
+      // o que mostrar.
+      setErro(recursos === null && cursos === null)
 
       const lista = [
         ...(cursos?.data ?? []).map(cartaoDeCurso),
@@ -116,6 +124,7 @@ export default function Educacao() {
 
       setCartoes(lista)
     } catch (error) {
+      setErro(true)
       if (import.meta.env.DEV) {
         console.error('Erro ao carregar recursos:', error)
       }
@@ -216,6 +225,8 @@ export default function Educacao() {
 
       {loading ? (
         <CardGridSkeleton count={6} columns={{ xs: 12, md: 6, lg: 4 }} />
+      ) : erro ? (
+        <ErroAoCarregar aoTentarDeNovo={carregar} />
       ) : pageItems.length === 0 ? (
         <Typography sx={{ textAlign: 'center', py: 4 }}>Nenhum recurso encontrado</Typography>
       ) : (

@@ -27,6 +27,16 @@ import { monitoringMiddleware, getMetricsSummary } from './middleware/monitoring
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// O backend só é alcançado através do nginx do host, que repassa /api para
+// localhost:3001. Sem confiar no proxy, req.ip é o endereço do nginx em toda
+// requisição e o mundo inteiro divide um único balde do rate limit — foi o que
+// fez a produção responder 429 em tudo. O número de saltos é configurável
+// porque o nginx do host não vive neste repositório: 1 é só ele, 2 se o nginx
+// do container também estiver no caminho. `true` não serve: aceitaria qualquer
+// X-Forwarded-For forjado.
+const trustProxyHops = Number.parseInt(process.env.TRUST_PROXY_HOPS ?? '', 10);
+app.set('trust proxy', Number.isInteger(trustProxyHops) ? trustProxyHops : 1);
+
 // Request ID middleware - must be first to be available in all subsequent middleware
 app.use(requestIdMiddleware);
 

@@ -6,6 +6,7 @@ import { blogApi } from '../services/api'
 import type { BlogPost } from '../types'
 import DuotonePhoto from '../components/design/DuotonePhoto'
 import CardGridSkeleton from '../components/design/CardGridSkeleton'
+import ErroAoCarregar from '../components/design/ErroAoCarregar'
 import RevealOnLoad from '../components/design/RevealOnLoad'
 import Pager from '../components/design/Pager'
 import { usePagedFilter } from '../components/design/usePagedFilter'
@@ -19,19 +20,27 @@ export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [categories, setCategories] = useState<string[]>(['Todos'])
   const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState(false)
   const pageSize = 6
 
   useEffect(() => {
-    loadPosts()
-    loadCategories()
+    carregar()
   }, [])
 
+  const carregar = () => {
+    loadPosts()
+    loadCategories()
+  }
+
   const loadPosts = async () => {
+    setLoading(true)
+    setErro(false)
     try {
       // Load all published posts with high limit for client-side filtering
       const response = await blogApi.getAll(true, 1, 100)
       setPosts(response.data)
     } catch (error) {
+      setErro(true)
       if (import.meta.env.DEV) {
         console.error('Erro ao carregar posts:', error)
       }
@@ -99,6 +108,8 @@ export default function Blog() {
 
       {loading ? (
         <CardGridSkeleton count={6} columns={{ xs: 12, sm: 6, lg: 4 }} />
+      ) : erro ? (
+        <ErroAoCarregar aoTentarDeNovo={carregar} />
       ) : postsOnPage.length === 0 ? (
         <Typography sx={{ textAlign: 'center', py: 4 }}>Nenhum post encontrado</Typography>
       ) : (

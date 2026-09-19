@@ -5,6 +5,7 @@ import { cursosApi } from '../services/api'
 import type { CursoNaListagem } from '../types'
 import BarraDeProgresso from '../components/design/BarraDeProgresso'
 import BlueprintFrame from '../components/design/BlueprintFrame'
+import ErroAoCarregar from '../components/design/ErroAoCarregar'
 import RevealOnLoad from '../components/design/RevealOnLoad'
 import SkeletonBlock from '../components/design/SkeletonBlock'
 import { useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
@@ -45,17 +46,25 @@ function Cabecalho() {
 export default function Cursos() {
   const [cursos, setCursos] = useState<CursoNaListagem[]>([])
   const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState(false)
   const { concluida, concluidas, retomarEm } = useProgressoDeCurso()
 
   useEffect(() => {
+    carregar()
+  }, [])
+
+  const carregar = () => {
+    setCarregando(true)
+    setErro(false)
     cursosApi
       .getAll(1, 50)
       .then((resposta) => setCursos(resposta.data))
-      .catch((erro) => {
-        if (import.meta.env.DEV) console.error('Erro ao carregar cursos:', erro)
+      .catch((motivo) => {
+        setErro(true)
+        if (import.meta.env.DEV) console.error('Erro ao carregar cursos:', motivo)
       })
       .finally(() => setCarregando(false))
-  }, [])
+  }
 
   /**
    * O curso a retomar é o mais recente que já foi começado e ainda não acabou.
@@ -170,6 +179,8 @@ export default function Cursos() {
             <SkeletonBlock key={i} height={72} />
           ))}
         </Stack>
+      ) : erro ? (
+        <ErroAoCarregar aoTentarDeNovo={carregar} />
       ) : cursos.length === 0 ? (
         <Typography sx={{ textAlign: 'center', py: 4, color: 'var(--color-text-muted)' }}>
           Nenhum curso publicado ainda.

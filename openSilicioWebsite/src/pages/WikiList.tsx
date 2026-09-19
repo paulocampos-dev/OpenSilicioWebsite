@@ -5,11 +5,13 @@ import { wikiApi } from '../services/api'
 import type { WikiEntry, PendingWikiLinkGrouped } from '../types'
 import BlankSheet from '../components/design/BlankSheet'
 import CardGridSkeleton from '../components/design/CardGridSkeleton'
+import ErroAoCarregar from '../components/design/ErroAoCarregar'
 import RevealOnLoad from '../components/design/RevealOnLoad'
 
 export default function WikiList() {
   const [entries, setEntries] = useState<WikiEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [pendingGrouped, setPendingGrouped] = useState<PendingWikiLinkGrouped[]>([])
 
@@ -18,6 +20,8 @@ export default function WikiList() {
   }, [])
 
   const loadEntries = async () => {
+    setLoading(true)
+    setErro(false)
     try {
       const response = await wikiApi.getAll(true, 1, 100)
       setEntries(response.data)
@@ -25,6 +29,7 @@ export default function WikiList() {
         wikiApi.getPendingGrouped().then(setPendingGrouped).catch(() => {})
       }
     } catch (error) {
+      setErro(true)
       if (import.meta.env.DEV) {
         console.error('Erro ao carregar entradas da wiki:', error)
       }
@@ -69,6 +74,8 @@ export default function WikiList() {
 
       {loading ? (
         <CardGridSkeleton count={6} columns={{ xs: 12, sm: 6 }} withPhoto={false} spacing={3} />
+      ) : erro ? (
+        <ErroAoCarregar aoTentarDeNovo={loadEntries} />
       ) : entries.length === 0 ? (
         <BlankSheet
           title="A wiki começa agora"

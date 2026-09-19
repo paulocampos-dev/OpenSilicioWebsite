@@ -24,6 +24,7 @@ NODE_ENV=production
 PORT=3001
 JWT_SECRET=<secret_aleatorio_32_chars>
 CORS_ORIGINS=http://localhost
+TRUST_PROXY_HOPS=1
 
 # Admin
 ADMIN_PASSWORD=<senha_admin_forte>
@@ -40,6 +41,7 @@ FRONTEND_PORT=80
 
 **Notas:**
 - `DATABASE_URL` é construído automaticamente pelo `docker-compose` a partir das variáveis `POSTGRES_*`
+- `TRUST_PROXY_HOPS` é opcional (padrão `1`): quantos proxies há na frente do backend, para que o rate limit enxergue o IP do visitante e não o do proxy. `1` cobre só o nginx do host; use `2` se o nginx do container também estiver no caminho da API
 - Para desenvolvimento local, o backend busca o `.env` **na raiz do projeto** (não em `/backend/`)
 - Em Docker, as variáveis são passadas diretamente pelos arquivos `docker-compose`
 
