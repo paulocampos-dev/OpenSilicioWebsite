@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import ArticleIcon from '@mui/icons-material/Article';
 import SchoolIcon from '@mui/icons-material/School';
+import PlayLessonIcon from '@mui/icons-material/PlayLesson';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useAuth } from '../../contexts/AuthContext';
@@ -31,6 +32,13 @@ export default function Dashboard() {
       icon: <SchoolIcon sx={{ fontSize: 48 }} />,
       path: '/admin/educacao',
       createPath: '/admin/educacao/new',
+    },
+    {
+      title: 'Cursos',
+      description: 'Gerenciar cursos, módulos e aulas',
+      icon: <PlayLessonIcon sx={{ fontSize: 48 }} />,
+      path: '/admin/cursos',
+      createPath: '/admin/cursos/novo',
     },
     {
       title: 'Wiki',
