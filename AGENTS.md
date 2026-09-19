@@ -171,6 +171,47 @@ built from are beside it in `2026-09-01-cursos-mocks.html`.
 - **Reordering rewrites the whole list** in one `unnest ... WITH ORDINALITY`
   update, so there is no half-reordered state. `ordem` has no unique constraint.
 
+### Authoring course material
+
+The first curso, "Projeto Digital" (`projeto-digital`), is the Portuguese version
+of Matt Venn's Zero to ASIC, made with his permission. Paulo sends notes and
+screenshots of the original one módulo at a time; we reconstruct each aula in
+our own words and structure, and where the original and our Educação trilha
+disagree, ours wins (on Windows the `.sh` scripts inside WSL, and our own pinned
+`DOCKER_TAG`).
+
+- **Sources live in `conteudo/cursos/<curso-slug>/`**, which is gitignored: one
+  `.md` per aula, front matter `ordem`, `modulo`, `titulo`, `slug`, `video`,
+  `opcional`, `termos_wiki`. `node build.js` in `conteudo/` writes the `.html`
+  body beside each one and a card per aula in `conteudo/index.html`; a new curso
+  needs its own entry in `SECOES`. Edit the `.md` first and rebuild, so the
+  source always matches what is live.
+- **Content goes in through the real admin UI in the browser**: `/admin/cursos`,
+  then "Dados do curso" for título, slug, descrição, nível and the ementa,
+  `/admin/cursos/<slug>/estrutura` for módulos, and "Nova aula" inside a módulo.
+  Set text fields with the native value setter plus an `input` event. Put a body
+  in by dispatching a `ClipboardEvent('paste')` carrying the generated HTML as
+  `text/html` on the empty editor. To replace a body, first call
+  `setEditorState` with an empty root on the element's `__lexicalEditor`, then
+  paste: the paste is what fires `OnChangePlugin`.
+- **Click Salvar by position from a fresh screenshot, after scrolling to the
+  top.** A paste scrolls the form, element refs taken before it go stale, and
+  the curso edit form has an "Estrutura" button right beside Salvar. A form with
+  no pasted body saves with a scripted `.click()`.
+- **Confirm every save against stored state.** A create form redirects to the
+  new record's URL, and that redirect is the proof. The curso edit form gives no
+  signal at all, so reload it in a second tab and read the editor back.
+- **Módulos are numbered from 1 by `ordem`**, so name a módulo in prose ("o
+  módulo de LibreLane") and the text survives a reorder.
+- **A módulo shows "em breve" only through a draft aula.** An empty módulo
+  renders "0 aulas", so each future módulo carries one draft placeholder aula,
+  "Aulas em preparação", whose title is public.
+- **Publishing is per record.** The curso's "Publicado" switch sits at the foot
+  of "Dados do curso", below the ementa; each aula has its own.
+- **Check every internal link before saving.** Public routes are `/`, `/blog`,
+  `/educacao`, `/cursos`, `/wiki` and `/sobre`; `GET /api/wiki?limit=200` lists
+  the wiki slugs that exist.
+
 ## Deployment
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`, which SSHes into
