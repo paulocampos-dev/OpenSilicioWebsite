@@ -8,6 +8,8 @@ import {
   marcarAutomaticamente,
   proximaAula,
   registrarVisita,
+  temProgressoGravado,
+  zerarCurso,
   type AulaPublicada,
   type Progresso,
 } from '../../utils/progressoDeCurso'
@@ -59,8 +61,17 @@ export function useProgressoDeCurso() {
     setProgresso((anterior) => registrarVisita(anterior, curso, aula))
   }, [])
 
+  const zerar = useCallback((curso: string) => {
+    setProgresso((anterior) => zerarCurso(anterior, curso))
+  }, [])
+
   const concluida = useCallback(
     (curso: string, aula: string) => estaConcluida(progresso, curso, aula),
+    [progresso],
+  )
+
+  const temProgresso = useCallback(
+    (curso: string) => temProgressoGravado(progresso, curso),
     [progresso],
   )
 
@@ -76,7 +87,17 @@ export function useProgressoDeCurso() {
     [progresso],
   )
 
-  return { progresso, marcarAutomatico, alternar, visitar, concluida, concluidas, retomarEm }
+  return {
+    progresso,
+    marcarAutomatico,
+    alternar,
+    visitar,
+    zerar,
+    concluida,
+    concluidas,
+    temProgresso,
+    retomarEm,
+  }
 }
 
 /**

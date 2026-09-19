@@ -1,4 +1,5 @@
 import { Box, Drawer, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import { cursosApi, wikiApi } from '../services/api'
@@ -11,9 +12,35 @@ import RevealOnLoad from '../components/design/RevealOnLoad'
 import BarraDeProgresso from '../components/design/BarraDeProgresso'
 import WikiPopover from '../components/design/WikiPopover'
 import useWikiGlossary from '../components/design/useWikiGlossary'
+import ZerarProgresso from '../components/design/ZerarProgresso'
 import { useAoChegarAoFim, useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { duracaoPorExtenso } from '../utils/duracao'
 import { contaveis } from '../utils/progressoDeCurso'
+
+/** O galho que gira ao abrir o módulo. */
+function Seta({ aberto, imovel }: { aberto: boolean; imovel: boolean }) {
+  return (
+    <motion.span
+      initial={false}
+      animate={{ rotate: aberto ? 90 : 0 }}
+      transition={{ duration: imovel ? 0 : 0.18, ease: 'easeOut' }}
+      style={{ display: 'flex', color: 'var(--color-text-faint)' }}
+    >
+      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" style={{ display: 'block' }}>
+        <path d="M3 1 L7 5 L3 9" fill="none" stroke="currentColor" strokeWidth={1.6} />
+      </svg>
+    </motion.span>
+  )
+}
+
+/** Uma linha de aula da espinha: número (ou tique) e título. */
+const linhaDeAula = {
+  display: 'grid',
+  gridTemplateColumns: '30px 1fr',
+  alignItems: 'baseline',
+  py: '8px',
+  minHeight: { xs: 44, md: 0 },
+} as const
 
 /** A espinha: o curso inteiro, com a aula corrente marcada. */
 function Espinha({
@@ -22,6 +49,8 @@ function Espinha({
   feitas,
   total,
   concluida,
+  podeZerar,
+  aoZerar,
   aoNavegar,
 }: {
   curso: CursoComArvore
@@ -29,10 +58,39 @@ function Espinha({
   feitas: number
   total: number
   concluida: (slug: string) => boolean
+  podeZerar: boolean
+  aoZerar: () => void
   aoNavegar?: () => void
 }) {
+  const imovel = useReducedMotion() ?? false
+
+  const moduloDaAtual = curso.modulos.find((m) =>
+    m.aulas.some((a) => a.publicado && a.slug === aulaAtual),
+  )?.id
+
+  // Começa com tudo fechado e o efeito abre o módulo da aula: assim a abertura
+  // na navegação e a do primeiro desenho são a mesma regra. Abrir só acrescenta
+  // ao conjunto, para não fechar na cara de quem abriu outro módulo para olhar.
+  const [abertos, setAbertos] = useState<ReadonlySet<string>>(() => new Set())
+
+  useEffect(() => {
+    if (moduloDaAtual === undefined) return
+    setAbertos((anteriores) =>
+      anteriores.has(moduloDaAtual) ? anteriores : new Set(anteriores).add(moduloDaAtual),
+    )
+  }, [moduloDaAtual])
+
+  const alternarModulo = (id: string, aberto: boolean) => {
+    setAbertos((anteriores) => {
+      const proximos = new Set(anteriores)
+      if (aberto) proximos.add(id)
+      else proximos.delete(id)
+      return proximos
+    })
+  }
+
   return (
-    <Box sx={{ p: 2.25 }}>
+    <Box sx={{ pt: '28px', px: '24px', pb: '24px' }}>
       <span className="kicker" style={{ fontSize: 12 }}>Curso</span>
       <Typography
         component={RouterLink}
@@ -41,23 +99,34 @@ function Espinha({
           display: 'block',
           fontFamily: 'var(--font-heading)',
           fontWeight: 600,
-          fontSize: 22,
-          lineHeight: '23px',
+          fontSize: 26,
+          lineHeight: '28px',
           textTransform: 'uppercase',
           letterSpacing: '.02em',
           textDecoration: 'none',
           color: 'var(--color-text)',
           mt: 0.5,
-          mb: 1.5,
+          mb: 2,
         }}
       >
         {curso.titulo}
       </Typography>
 
-      <BarraDeProgresso concluidas={feitas} total={total} />
-      <Typography sx={{ fontSize: 12, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', mt: 1, mb: 2.5 }}>
-        {feitas} de {total}
-      </Typography>
+      <BarraDeProgresso concluidas={feitas} total={total} altura={6} />
+      <Stack
+        direction="row"
+        spacing={1.5}
+        alignItems="center"
+        justifyContent="space-between"
+        flexWrap="wrap"
+        useFlexGap
+        sx={{ mt: 1.25, mb: 1 }}
+      >
+        <Typography sx={{ fontSize: 12, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)' }}>
+          {feitas} de {total}
+        </Typography>
+        {podeZerar && <ZerarProgresso aoZerar={aoZerar} />}
+      </Stack>
 
       {curso.modulos.map((modulo, indice) => {
         // Mesma regra do currículo: numeração corrida pelo curso, contando só
@@ -68,48 +137,109 @@ function Espinha({
             .reduce((soma, m) => soma + m.aulas.filter((a) => a.publicado).length, 0) + 1
         let publicadasAntes = 0
 
+        // A conta do módulo é sobre as publicadas dele, opcionais incluídas: é
+        // o que o leitor vê na lista logo abaixo. O total do curso, lá em cima,
+        // é o outro: aquele tira as opcionais.
+        const publicadas = modulo.aulas.filter((a) => a.publicado)
+        const feitasNoModulo = publicadas.filter((a) => concluida(a.slug)).length
+        const aberto = abertos.has(modulo.id)
+
         return (
-        <Box key={modulo.id} sx={{ mb: 2 }}>
-          <Typography sx={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent)', fontWeight: 600, mb: 0.5 }}>
-            Módulo {indice + 1} · {modulo.titulo}
-          </Typography>
-          <Stack spacing={0.25}>
-            {modulo.aulas.map((aula) => {
-              if (!aula.publicado) {
-                return (
-                  <Typography key={aula.id} sx={{ fontSize: 14, color: 'var(--color-text-faint)', opacity: 0.7 }}>
-                    {aula.titulo}
-                  </Typography>
-                )
-              }
-
-              const numero = String(numeroInicial + publicadasAntes++).padStart(2, '0')
-
-              const atual = aula.slug === aulaAtual
-              return (
-                <Typography
-                  key={aula.id}
-                  component={RouterLink}
-                  to={`/cursos/${curso.slug}/${aula.slug}`}
-                  onClick={aoNavegar}
-                  aria-current={atual ? 'page' : undefined}
-                  sx={{
-                    fontSize: 14,
-                    textDecoration: 'none',
-                    color: atual ? 'var(--color-steel-800)' : concluida(aula.slug) ? 'var(--color-text-muted)' : 'var(--color-text)',
-                    fontWeight: atual ? 600 : 400,
-                    borderLeft: atual ? '2px solid var(--color-accent)' : '2px solid transparent',
-                    ml: atual ? '-10px' : 0,
-                    pl: atual ? '8px' : 0,
-                    '&:hover': { color: 'var(--color-accent-ink)' },
-                  }}
-                >
-                  {numero}  {aula.titulo}
+          <Box
+            key={modulo.id}
+            component="details"
+            open={aberto}
+            onToggle={(evento) => alternarModulo(modulo.id, evento.currentTarget.open)}
+            sx={{ borderTop: '1px solid var(--color-line)' }}
+          >
+            <Box
+              component="summary"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.25,
+                py: '14px',
+                minHeight: { xs: 44, md: 0 },
+                cursor: 'pointer',
+                listStyle: 'none',
+                '&::-webkit-details-marker': { display: 'none' },
+                '&:focus-visible': { outline: '2px solid var(--color-accent)', outlineOffset: '2px' },
+              }}
+            >
+              <Seta aberto={aberto} imovel={imovel} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: 11, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--color-accent)', fontWeight: 600 }}>
+                  Módulo {indice + 1}
                 </Typography>
-              )
-            })}
-          </Stack>
-        </Box>
+                <Typography sx={{ fontSize: 14, letterSpacing: '.04em', textTransform: 'uppercase', fontWeight: 600, color: 'var(--color-text)' }}>
+                  {modulo.titulo}
+                </Typography>
+              </Box>
+              <Typography sx={{ fontSize: 12, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', fontVariantNumeric: 'tabular-nums' }}>
+                {publicadas.length === 0 ? 'em breve' : `${feitasNoModulo}/${publicadas.length}`}
+              </Typography>
+            </Box>
+
+            <Box sx={{ pb: '10px' }}>
+              {modulo.aulas.map((aula) => {
+                if (!aula.publicado) {
+                  return (
+                    <Box key={aula.id} sx={{ ...linhaDeAula, opacity: 0.7 }}>
+                      <span />
+                      <Typography sx={{ fontSize: 16, lineHeight: '22px', color: 'var(--color-text-faint)' }}>
+                        {aula.titulo}
+                      </Typography>
+                    </Box>
+                  )
+                }
+
+                const numero = String(numeroInicial + publicadasAntes++).padStart(2, '0')
+                const atual = aula.slug === aulaAtual
+                const feita = concluida(aula.slug)
+
+                return (
+                  <Box
+                    key={aula.id}
+                    component={RouterLink}
+                    to={`/cursos/${curso.slug}/${aula.slug}`}
+                    onClick={aoNavegar}
+                    aria-current={atual ? 'page' : undefined}
+                    sx={{
+                      ...linhaDeAula,
+                      textDecoration: 'none',
+                      // A borda ocupa lugar nas duas situações, senão a linha da
+                      // aula corrente andaria três pixels para o lado.
+                      borderLeft: `3px solid ${atual ? 'var(--color-accent)' : 'transparent'}`,
+                      ml: '-12px',
+                      pl: '9px',
+                      // A corrente fica na cor cheia do texto: o steel-800 de
+                      // antes sumia no fundo do modo escuro.
+                      color: !atual && feita ? 'var(--color-text-muted)' : 'var(--color-text)',
+                      '&:hover': { color: 'var(--color-accent)' },
+                      '&:focus-visible': { outline: '2px solid var(--color-accent)', outlineOffset: '-2px' },
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        fontSize: 13,
+                        fontVariantNumeric: 'tabular-nums',
+                        color: feita ? 'var(--color-accent)' : 'var(--color-text-faint)',
+                      }}
+                      aria-label={feita ? 'Concluída' : undefined}
+                    >
+                      {feita ? '✓' : numero}
+                    </Box>
+                    <Typography
+                      sx={{ fontSize: 16, lineHeight: '22px', fontWeight: atual ? 600 : 400, color: 'inherit' }}
+                    >
+                      {aula.titulo}
+                    </Typography>
+                  </Box>
+                )
+              })}
+            </Box>
+          </Box>
         )
       })}
     </Box>
@@ -127,7 +257,8 @@ export default function Aula() {
   const [verbetes, setVerbetes] = useState<WikiLink[]>([])
   const [gavetaAberta, setGavetaAberta] = useState(false)
 
-  const { concluida, concluidas, alternar, marcarAutomatico, visitar } = useProgressoDeCurso()
+  const { concluida, concluidas, temProgresso, alternar, marcarAutomatico, visitar, zerar } =
+    useProgressoDeCurso()
   const { popoverProps, containerHandlers } = useWikiGlossary(verbetes)
 
   useEffect(() => {
@@ -228,13 +359,15 @@ export default function Aula() {
       feitas={feitas}
       total={contaveis(publicadas).length}
       concluida={(slug) => concluida(cursoSlug, slug)}
+      podeZerar={temProgresso(cursoSlug)}
+      aoZerar={() => zerar(cursoSlug)}
       aoNavegar={() => setGavetaAberta(false)}
     />
   ) : null
 
   return (
     <RevealOnLoad>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '280px 1fr' } }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '340px 1fr' } }}>
         {!noCelular && espinha && (
           <Box
             component="aside"
@@ -253,7 +386,14 @@ export default function Aula() {
 
         {noCelular && (
           <Drawer anchor="left" open={gavetaAberta} onClose={() => setGavetaAberta(false)}>
-            <Box sx={{ width: 288 }}>{espinha}</Box>
+            <Box sx={{ width: 'min(340px, 88vw)' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: '12px', px: '12px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setGavetaAberta(false)}>
+                  Fechar
+                </button>
+              </Box>
+              {espinha}
+            </Box>
           </Drawer>
         )}
 

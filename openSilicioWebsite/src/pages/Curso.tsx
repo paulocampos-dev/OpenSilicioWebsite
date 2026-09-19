@@ -10,6 +10,7 @@ import DetailPageSkeleton from '../components/design/DetailPageSkeleton'
 import RevealOnLoad from '../components/design/RevealOnLoad'
 import BarraDeProgresso from '../components/design/BarraDeProgresso'
 import ListaDeAulas from '../components/design/ListaDeAulas'
+import ZerarProgresso from '../components/design/ZerarProgresso'
 import { useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { duracaoPorExtenso } from '../utils/duracao'
 import { contaveis } from '../utils/progressoDeCurso'
@@ -19,7 +20,7 @@ export default function Curso() {
   const [curso, setCurso] = useState<CursoComArvore | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [verbetes, setVerbetes] = useState<WikiLink[]>([])
-  const { concluida, concluidas, retomarEm } = useProgressoDeCurso()
+  const { concluida, concluidas, temProgresso, retomarEm, zerar } = useProgressoDeCurso()
 
   useEffect(() => {
     if (!cursoSlug) return
@@ -211,6 +212,12 @@ export default function Curso() {
                     >
                       {comecou ? 'Retomar' : 'Começar o curso'}
                     </RouterLink>
+                  )}
+
+                  {temProgresso(curso.slug) && (
+                    <Box sx={{ mt: 2 }}>
+                      <ZerarProgresso aoZerar={() => zerar(curso.slug)} />
+                    </Box>
                   )}
 
                   <Stack spacing={1.25} sx={{ mt: 2.5, pt: 2, borderTop: '1px solid var(--color-line)', fontSize: 14 }}>

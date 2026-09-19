@@ -121,6 +121,35 @@ export function registrarVisita(progresso: Progresso, curso: string, aula: strin
   return { ...progresso, [curso]: { ...atual, ultima: aula } };
 }
 
+/**
+ * Apaga tudo o que está gravado de um curso: as concluídas, os
+ * 'nao-concluida' explícitos e a última aula aberta.
+ *
+ * Tira a chave inteira em vez de zerar os campos, senão o curso continuaria
+ * com um `ultima` e um mapa vazios, e `proximaAula` teria que tratar esse
+ * meio-termo. Sem nada gravado devolve o mesmo objeto, para o hook não
+ * regravar o armazenamento à toa.
+ */
+export function zerarCurso(progresso: Progresso, curso: string): Progresso {
+  if (!(curso in progresso)) return progresso;
+
+  const { [curso]: _apagado, ...resto } = progresso;
+  return resto;
+}
+
+/**
+ * Há o que zerar neste curso?
+ *
+ * Só abrir uma aula já grava a `ultima`, e isso não é progresso: quem ainda
+ * não marcou nem desmarcou nada não tem o que apagar, e o botão de zerar não
+ * teria por que aparecer. Por isso a pergunta é sobre o mapa de aulas, onde
+ * entram as duas decisões do leitor e mais nada.
+ */
+export function temProgressoGravado(progresso: Progresso, curso: string): boolean {
+  const doCurso = progresso[curso];
+  return doCurso !== undefined && Object.keys(doCurso.aulas).length > 0;
+}
+
 export function estaConcluida(progresso: Progresso, curso: string, aula: string): boolean {
   return progresso[curso]?.aulas[aula] === 'concluida';
 }
