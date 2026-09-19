@@ -101,7 +101,7 @@ export function useProgressoDeCurso() {
 }
 
 /**
- * Dispara uma vez quando o leitor alcança o elemento observado. Devolve a ref
+ * Dispara uma vez quando o leitor rola até o elemento observado. Devolve a ref
  * que deve ser presa nesse elemento.
  *
  * É uma ref de callback, e não um objeto de ref com um efeito, porque a página
@@ -111,6 +111,13 @@ export function useProgressoDeCurso() {
  * carregamento já tirou do DOM) e só a primeira aula da sessão seria marcada. A
  * ref de callback é chamada exatamente quando o nó entra e sai do DOM, então
  * cada aula recebe o seu observador e o seu "ainda não disparei".
+ *
+ * Exigir a rolagem não é firula: o corpo em Lexical leva alguns quadros para
+ * ser desenhado, e nesse meio-tempo o sentinela fica logo abaixo do título,
+ * dentro da tela. Numa janela alta o observador via isso e marcava a aula como
+ * concluída meio segundo depois de abrir, sem ninguém ler nada. A conta que
+ * fica: aula curta demais para rolar não se marca sozinha, e o leitor usa o
+ * botão — a mesma troca que a aula só de vídeo já fazia.
  */
 export function useAoChegarAoFim(aoChegar: () => void, ativo = true) {
   const callback = useRef(aoChegar)
@@ -118,6 +125,7 @@ export function useAoChegarAoFim(aoChegar: () => void, ativo = true) {
 
   const observador = useRef<IntersectionObserver | null>(null)
   const jaDisparou = useRef(false)
+  const rolagemAoAbrir = useRef(0)
 
   const referencia = useCallback(
     (elemento: HTMLElement | null) => {
@@ -128,13 +136,23 @@ export function useAoChegarAoFim(aoChegar: () => void, ativo = true) {
 
       // Nó novo é aula nova: o disparo recomeça do zero.
       jaDisparou.current = false
+      // Onde a página estava quando esta aula entrou. Numa carga nova é o topo;
+      // vindo de outra aula é onde o leitor parou, porque a navegação entre
+      // aulas não rebobina a rolagem.
+      rolagemAoAbrir.current = window.scrollY
 
       const observando = new IntersectionObserver(
         (entradas) => {
-          if (entradas.some((e) => e.isIntersecting) && !jaDisparou.current) {
-            jaDisparou.current = true
-            callback.current()
-          }
+          if (jaDisparou.current || !entradas.some((e) => e.isIntersecting)) return
+
+          // Ninguém rolou desde que a aula abriu: quem cruzou a tela foi o
+          // sentinela, empurrado para baixo pelo texto que acabou de ser
+          // desenhado, e não o leitor chegando ao pé da página. Sai sem
+          // trancar, para a chegada de verdade ainda valer.
+          if (window.scrollY <= rolagemAoAbrir.current) return
+
+          jaDisparou.current = true
+          callback.current()
         },
         { rootMargin: '0px 0px -10% 0px' },
       )

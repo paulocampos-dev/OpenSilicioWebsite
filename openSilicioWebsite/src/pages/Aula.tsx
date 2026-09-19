@@ -321,12 +321,14 @@ export default function Aula() {
   )
 
   /**
-   * A marcação automática só vale para aula com texto.
+   * A marcação automática só vale para aula com texto, e só depois de rolar.
    *
    * O sentinela fica no pé do conteúdo, então numa aula só de vídeo ele já
    * nasce dentro da tela e a aula seria dada como concluída antes de o leitor
    * apertar o play. Saber que o vídeo acabou exigiria a iframe API do YouTube;
-   * até lá, aula sem texto se marca no botão.
+   * até lá, aula sem texto se marca no botão. Pelo mesmo motivo o gancho exige
+   * que a página tenha rolado desde que a aula abriu: nos primeiros quadros o
+   * corpo em Lexical ainda não está desenhado e o sentinela está no alto.
    */
   const fimDoTexto = useAoChegarAoFim(
     () => {
@@ -465,7 +467,7 @@ export default function Aula() {
             </Box>
 
             {/* O sentinela da marcação automática. Fica depois do texto, então
-                só cruza a tela quando o leitor chega ao fim. */}
+                o leitor que rolar até aqui chegou ao fim da aula. */}
             <div ref={fimDoTexto} aria-hidden="true" />
 
             <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
