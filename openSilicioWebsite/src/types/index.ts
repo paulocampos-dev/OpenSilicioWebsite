@@ -78,12 +78,15 @@ export interface CursoNaListagem extends Curso {
    * `opcional` vem junto porque a barra é desenhada sem abrir o curso.
    */
   aulas_publicadas: Array<{
+    id: string;
+    modulo_id: string;
     slug: string;
     titulo: string;
     duracao_seg: number | null;
     opcional: boolean;
   }>;
   quizzes_publicados: Array<{
+    modulo_id: string;
     slug: string;
     titulo: string;
     aula_id: string | null;

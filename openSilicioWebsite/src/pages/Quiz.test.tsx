@@ -7,16 +7,26 @@ import Quiz from './Quiz'
 
 const mocks = vi.hoisted(() => ({
   getQuiz: vi.fn(),
+  getBySlug: vi.fn(),
   registrarResultado: vi.fn(),
   visitarAtividade: vi.fn(),
   notaDoQuiz: vi.fn(() => 80),
   tentativasDoQuiz: vi.fn(() => 2),
   quizEstaConcluido: vi.fn(() => true),
+  concluida: vi.fn(() => false),
+  temProgresso: vi.fn(() => false),
+  zerar: vi.fn(),
 }))
 
-vi.mock('../services/api', () => ({ cursosApi: { getQuiz: mocks.getQuiz } }))
+vi.mock('../services/api', () => ({
+  cursosApi: { getQuiz: mocks.getQuiz, getBySlug: mocks.getBySlug },
+}))
 vi.mock('../components/design/useProgressoDeCurso', () => ({
   useProgressoDeCurso: () => ({
+    progresso: {},
+    concluida: mocks.concluida,
+    temProgresso: mocks.temProgresso,
+    zerar: mocks.zerar,
     registrarResultado: mocks.registrarResultado,
     visitarAtividade: mocks.visitarAtividade,
     notaDoQuiz: mocks.notaDoQuiz,
@@ -71,6 +81,7 @@ describe('Quiz público', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.getQuiz.mockResolvedValue(dados)
+    mocks.getBySlug.mockRejectedValue(new Error('espinha indisponível'))
     mocks.notaDoQuiz.mockReturnValue(80)
     mocks.tentativasDoQuiz.mockReturnValue(2)
     mocks.quizEstaConcluido.mockReturnValue(true)

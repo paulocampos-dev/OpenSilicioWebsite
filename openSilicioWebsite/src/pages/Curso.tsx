@@ -9,18 +9,26 @@ import DuotonePhoto from '../components/design/DuotonePhoto'
 import DetailPageSkeleton from '../components/design/DetailPageSkeleton'
 import RevealOnLoad from '../components/design/RevealOnLoad'
 import BarraDeProgresso from '../components/design/BarraDeProgresso'
-import ListaDeAulas from '../components/design/ListaDeAulas'
+import ListaDeAtividades from '../components/design/ListaDeAtividades'
 import ZerarProgresso from '../components/design/ZerarProgresso'
 import { useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { duracaoPorExtenso } from '../utils/duracao'
-import { contaveis } from '../utils/progressoDeCurso'
+import { atividadesDoModulo, hrefDaAtividade } from '../utils/atividadesDeCurso'
+import { contarAtividadesConcluidas, proximaAtividade } from '../utils/progressoDeCurso'
 
 export default function Curso() {
   const { cursoSlug } = useParams<{ cursoSlug: string }>()
   const [curso, setCurso] = useState<CursoComArvore | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [verbetes, setVerbetes] = useState<WikiLink[]>([])
-  const { concluida, concluidas, temProgresso, retomarEm, zerar } = useProgressoDeCurso()
+  const {
+    progresso,
+    concluida,
+    temProgresso,
+    zerar,
+    notaDoQuiz,
+    quizEstaConcluido,
+  } = useProgressoDeCurso()
 
   useEffect(() => {
     if (!cursoSlug) return
@@ -64,8 +72,8 @@ export default function Curso() {
     }
   }, [curso])
 
-  const publicadas = useMemo(
-    () => (curso ? curso.modulos.flatMap((m) => m.aulas.filter((a) => a.publicado)) : []),
+  const atividades = useMemo(
+    () => (curso ? curso.modulos.flatMap(atividadesDoModulo) : []),
     [curso],
   )
 
@@ -82,16 +90,25 @@ export default function Curso() {
     )
   }
 
-  // O progresso ignora as aulas opcionais, que são alternativas entre si.
-  const total = contaveis(publicadas).length
-  const feitas = concluidas(curso.slug, publicadas)
-  const proxima = retomarEm(curso.slug, publicadas)
-  const comecou = feitas > 0
+  const total = atividades.filter(
+    (atividade) => atividade.tipo === 'quiz' || !atividade.opcional,
+  ).length
+  const feitas = contarAtividadesConcluidas(progresso, curso.slug, atividades)
+  const proxima = proximaAtividade(progresso, curso.slug, atividades)
+  const comecou = temProgresso(curso.slug)
   // Soma o que falta aula a aula: proporção sobre a duração total erra sempre
   // que as aulas têm tamanhos diferentes.
-  const restante = contaveis(publicadas)
-    .filter((a) => !concluida(curso.slug, a.slug))
-    .reduce((soma, a) => soma + (a.duracao_seg ?? 0), 0)
+  const restante = atividades
+    .filter(
+      (atividade) =>
+        atividade.tipo === 'aula' &&
+        !atividade.opcional &&
+        !concluida(curso.slug, atividade.slug),
+    )
+    .reduce(
+      (soma, atividade) => soma + (atividade.tipo === 'aula' ? atividade.duracao_seg ?? 0 : 0),
+      0,
+    )
 
   // A numeração corre no curso inteiro e conta só aula publicada, então cada
   // módulo precisa saber quantas publicadas vieram antes dele.
@@ -172,7 +189,8 @@ export default function Curso() {
                       {modulo.titulo}
                     </Typography>
                     <Typography sx={{ ml: 'auto', fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)' }}>
-                      {modulo.aulas.length} {modulo.aulas.length === 1 ? 'aula' : 'aulas'}
+                      {modulo.aulas.length + modulo.quizzes.length}{' '}
+                      {modulo.aulas.length + modulo.quizzes.length === 1 ? 'atividade' : 'atividades'}
                     </Typography>
                   </Stack>
                   {modulo.resumo && (
@@ -180,11 +198,15 @@ export default function Curso() {
                       {modulo.resumo}
                     </Typography>
                   )}
-                  <ListaDeAulas
-                    aulas={modulo.aulas}
+                  <ListaDeAtividades
+                    modulo={modulo}
                     cursoSlug={curso.slug}
                     numeroInicial={numeroInicialPorModulo[indice]!}
-                    concluida={(slug) => concluida(curso.slug, slug)}
+                    aulaConcluida={(slug) => concluida(curso.slug, slug)}
+                    notaDoQuiz={(slug) => notaDoQuiz(curso.slug, slug)}
+                    quizConcluido={(slug, notaMinima) =>
+                      quizEstaConcluido(curso.slug, slug, notaMinima)
+                    }
                   />
                 </Box>
               ))
@@ -200,13 +222,13 @@ export default function Curso() {
                     <BarraDeProgresso concluidas={feitas} total={total} />
                   </Box>
                   <Typography sx={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', mb: 2 }}>
-                    {feitas} de {total}
+                    {feitas} de {total} atividades
                     {restante > 0 && feitas < total ? ` · restam ${duracaoPorExtenso(restante)}` : ''}
                   </Typography>
 
                   {proxima && (
                     <RouterLink
-                      to={`/cursos/${curso.slug}/${proxima}`}
+                      to={hrefDaAtividade(curso.slug, proxima)}
                       className="btn btn-primary"
                       style={{ width: '100%', textDecoration: 'none' }}
                     >

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ModuloNaArvore } from '../types'
-import { atividadesDoModulo, hrefDaAtividade } from './atividadesDeCurso'
+import { atividadesDaListagem, atividadesDoModulo, hrefDaAtividade } from './atividadesDeCurso'
 
 const modulo: ModuloNaArvore = {
   id: 'modulo-1',
@@ -95,5 +95,42 @@ describe('hrefDaAtividade', () => {
         duracao_seg: null,
       }),
     ).toBe('/cursos/projeto-digital/mosfet')
+  })
+})
+
+describe('atividadesDaListagem', () => {
+  it('intercala quiz de aula e quiz final entre módulos', () => {
+    const curso = {
+      id: 'curso',
+      slug: 'curso',
+      titulo: 'Curso',
+      descricao: 'Descrição',
+      publicado: true,
+      created_at: '',
+      updated_at: '',
+      modulos: 2,
+      aulas: 3,
+      aulas_rascunho: 0,
+      quizzes: 2,
+      quizzes_rascunho: 0,
+      duracao_seg: 0,
+      aulas_publicadas: [
+        { id: 'a1', modulo_id: 'm1', slug: 'a1', titulo: 'A1', duracao_seg: null, opcional: false },
+        { id: 'a2', modulo_id: 'm1', slug: 'a2', titulo: 'A2', duracao_seg: null, opcional: false },
+        { id: 'a3', modulo_id: 'm2', slug: 'a3', titulo: 'A3', duracao_seg: null, opcional: false },
+      ],
+      quizzes_publicados: [
+        { modulo_id: 'm1', aula_id: 'a1', slug: 'q1', titulo: 'Q1', nota_minima: 70 },
+        { modulo_id: 'm1', aula_id: null, slug: 'final', titulo: 'Final', nota_minima: 70 },
+      ],
+    }
+
+    expect(atividadesDaListagem(curso).map(({ tipo, slug }) => [tipo, slug])).toEqual([
+      ['aula', 'a1'],
+      ['quiz', 'q1'],
+      ['aula', 'a2'],
+      ['quiz', 'final'],
+      ['aula', 'a3'],
+    ])
   })
 })

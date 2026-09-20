@@ -10,7 +10,11 @@ import RevealOnLoad from '../components/design/RevealOnLoad'
 import SkeletonBlock from '../components/design/SkeletonBlock'
 import { useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { duracaoPorExtenso } from '../utils/duracao'
-import { contaveis } from '../utils/progressoDeCurso'
+import { atividadesDaListagem, hrefDaAtividade } from '../utils/atividadesDeCurso'
+import {
+  contarAtividadesConcluidas,
+  proximaAtividade,
+} from '../utils/progressoDeCurso'
 
 const colunas = { xs: '1fr', md: '1fr 110px 130px 84px 150px' }
 
@@ -36,7 +40,7 @@ function Cabecalho() {
     >
       <span style={celula}>Curso</span>
       <span style={celula}>Nível</span>
-      <span style={celula}>Aulas</span>
+      <span style={celula}>Atividades</span>
       <span style={celula}>Duração</span>
       <span style={celula}>Progresso</span>
     </Box>
@@ -47,7 +51,7 @@ export default function Cursos() {
   const [cursos, setCursos] = useState<CursoNaListagem[]>([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState(false)
-  const { concluida, concluidas, retomarEm } = useProgressoDeCurso()
+  const { progresso, concluida, temProgresso } = useProgressoDeCurso()
 
   useEffect(() => {
     carregar()
@@ -73,14 +77,15 @@ export default function Cursos() {
    */
   const emAndamento = useMemo(() => {
     for (const curso of cursos) {
-      const publicadas = curso.aulas_publicadas
-      const total = contaveis(publicadas).length
-      const feitas = concluidas(curso.slug, publicadas)
-      if (feitas > 0 && feitas < total) {
-        const proxima = retomarEm(curso.slug, publicadas)
-        const indice = publicadas.findIndex((a) => a.slug === proxima)
-        const aula = publicadas[indice]
-        if (aula) {
+      const atividades = atividadesDaListagem(curso)
+      const total = atividades.filter(
+        (atividade) => atividade.tipo === 'quiz' || !atividade.opcional,
+      ).length
+      const feitas = contarAtividadesConcluidas(progresso, curso.slug, atividades)
+      if (temProgresso(curso.slug) && feitas < total) {
+        const proxima = proximaAtividade(progresso, curso.slug, atividades)
+        const indice = proxima ? atividades.findIndex((atividade) => atividade.tipo === proxima.tipo && atividade.slug === proxima.slug) : -1
+        if (proxima) {
           // A posição é a da aula que o botão abre, não a contagem de
           // concluídas: quem terminou a 1 e a 3 e vai retomar a 2 tem que ler
           // "aula 2", e não "aula 3". Conta só as que valem progresso, para
@@ -91,18 +96,32 @@ export default function Cursos() {
           // uma a uma, e só as que contam. Uma regra de três sobre a duração
           // total erraria sempre que as aulas tivessem tamanhos diferentes, que
           // é o caso normal.
-          const restante = contaveis(publicadas)
-            .filter((a) => !concluida(curso.slug, a.slug))
-            .reduce((soma, a) => soma + (a.duracao_seg ?? 0), 0)
+          const restante = atividades
+            .filter(
+              (atividade) =>
+                atividade.tipo === 'aula' &&
+                !atividade.opcional &&
+                !concluida(curso.slug, atividade.slug),
+            )
+            .reduce(
+              (soma, atividade) =>
+                soma + (atividade.tipo === 'aula' ? atividade.duracao_seg ?? 0 : 0),
+              0,
+            )
 
-          const posicao = Math.max(1, contaveis(publicadas.slice(0, indice + 1)).length)
+          const posicao = Math.max(
+            1,
+            atividades.slice(0, indice + 1).filter(
+              (atividade) => atividade.tipo === 'quiz' || !atividade.opcional,
+            ).length,
+          )
 
-          return { curso, aula, feitas, posicao, total, restante }
+          return { curso, proxima, feitas, posicao, total, restante }
         }
       }
     }
     return null
-  }, [cursos, concluida, concluidas, retomarEm])
+  }, [cursos, concluida, progresso, temProgresso])
 
   return (
     <Stack spacing={5}>
@@ -150,12 +169,12 @@ export default function Cursos() {
                 {emAndamento.curso.titulo}
               </Typography>
               <Typography sx={{ color: 'var(--color-text-muted)', mt: 0.75, mb: 1.5 }}>
-                Aula {emAndamento.posicao} de {emAndamento.total}
+                Atividade {emAndamento.posicao} de {emAndamento.total}
               </Typography>
               <BarraDeProgresso concluidas={emAndamento.feitas} total={emAndamento.total} />
               <Typography sx={{ fontSize: 13, letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--color-text-faint)', mt: 1 }}>
                 {[
-                  `${emAndamento.feitas} de ${emAndamento.total} aulas concluídas`,
+                  `${emAndamento.feitas} de ${emAndamento.total} atividades concluídas`,
                   emAndamento.restante > 0 ? `restam ${duracaoPorExtenso(emAndamento.restante)}` : null,
                 ]
                   .filter(Boolean)
@@ -163,11 +182,11 @@ export default function Cursos() {
               </Typography>
             </Box>
             <RouterLink
-              to={`/cursos/${emAndamento.curso.slug}/${emAndamento.aula.slug}`}
+              to={hrefDaAtividade(emAndamento.curso.slug, emAndamento.proxima)}
               className="btn btn-primary"
               style={{ textDecoration: 'none', flex: 'none' }}
             >
-              Retomar: {emAndamento.aula.titulo}
+              Retomar: {emAndamento.proxima.titulo}
             </RouterLink>
           </Stack>
         </BlueprintFrame>
@@ -189,10 +208,11 @@ export default function Cursos() {
         <RevealOnLoad>
           <Cabecalho />
           {cursos.map((curso) => {
-            // O total do progresso deixa as opcionais de fora; a coluna "Aulas"
-            // continua mostrando o currículo inteiro.
-            const total = contaveis(curso.aulas_publicadas).length
-            const feitas = concluidas(curso.slug, curso.aulas_publicadas)
+            const atividades = atividadesDaListagem(curso)
+            const total = atividades.filter(
+              (atividade) => atividade.tipo === 'quiz' || !atividade.opcional,
+            ).length
+            const feitas = contarAtividadesConcluidas(progresso, curso.slug, atividades)
 
             return (
               <Box
@@ -234,7 +254,8 @@ export default function Cursos() {
 
                 <Typography sx={{ fontSize: 14, color: 'var(--color-text-muted)' }}>{curso.nivel ?? ''}</Typography>
                 <Typography sx={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
-                  {curso.aulas} em {curso.modulos} {curso.modulos === 1 ? 'módulo' : 'módulos'}
+                  {curso.aulas + curso.quizzes} ({curso.aulas} aulas) em {curso.modulos}{' '}
+                  {curso.modulos === 1 ? 'módulo' : 'módulos'}
                 </Typography>
                 <Typography sx={{ fontSize: 14, color: 'var(--color-text-muted)' }}>
                   {duracaoPorExtenso(curso.duracao_seg) || '—'}

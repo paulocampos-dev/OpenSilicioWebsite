@@ -1,19 +1,24 @@
-import { Box, Dialog, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
+import { Box, Dialog, DialogActions, DialogContent, Drawer, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link as RouterLink, useParams } from 'react-router-dom'
 import IndiceDoQuiz from '../components/quiz/IndiceDoQuiz'
 import QuestaoDoQuiz from '../components/quiz/QuestaoDoQuiz'
 import DetailPageSkeleton from '../components/design/DetailPageSkeleton'
 import ErroAoCarregar from '../components/design/ErroAoCarregar'
+import EspinhaDoCurso from '../components/design/EspinhaDoCurso'
 import { useProgressoDeCurso } from '../components/design/useProgressoDeCurso'
 import { cursosApi } from '../services/api'
-import type { QuizComVizinhas } from '../types'
-import { hrefDaAtividade } from '../utils/atividadesDeCurso'
+import type { CursoComArvore, QuizComVizinhas } from '../types'
+import { atividadesDoModulo, hrefDaAtividade } from '../utils/atividadesDeCurso'
 import { corrigirQuiz, type CorrecaoDoQuiz } from '../utils/correcaoDeQuiz'
+import { contarAtividadesConcluidas } from '../utils/progressoDeCurso'
 
 export default function Quiz() {
   const { cursoSlug, quizSlug } = useParams<{ cursoSlug: string; quizSlug: string }>()
+  const tema = useTheme()
+  const noCelular = useMediaQuery(tema.breakpoints.down('md'))
   const [dados, setDados] = useState<QuizComVizinhas | null>(null)
+  const [arvore, setArvore] = useState<CursoComArvore | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [falhou, setFalhou] = useState(false)
   const [recarregar, setRecarregar] = useState(0)
@@ -21,9 +26,14 @@ export default function Quiz() {
   const [indice, setIndice] = useState(0)
   const [confirmando, setConfirmando] = useState(false)
   const [correcao, setCorrecao] = useState<CorrecaoDoQuiz | null>(null)
+  const [gavetaAberta, setGavetaAberta] = useState(false)
   const tituloDaQuestao = useRef<HTMLHeadingElement>(null)
   const tituloDoResultado = useRef<HTMLHeadingElement>(null)
   const {
+    progresso,
+    concluida,
+    temProgresso,
+    zerar,
     registrarResultado,
     visitarAtividade,
     notaDoQuiz,
@@ -52,6 +62,15 @@ export default function Quiz() {
         if (!cancelado) setCarregando(false)
       })
 
+    cursosApi
+      .getBySlug(cursoSlug)
+      .then((curso) => {
+        if (!cancelado) setArvore(curso)
+      })
+      .catch(() => {
+        if (!cancelado) setArvore(null)
+      })
+
     return () => {
       cancelado = true
     }
@@ -72,6 +91,10 @@ export default function Quiz() {
   }, [correcao])
 
   const respondidas = useMemo(() => new Set(Object.keys(respostas)), [respostas])
+  const atividades = useMemo(
+    () => (arvore ? arvore.modulos.flatMap(atividadesDoModulo) : []),
+    [arvore],
+  )
 
   if (carregando) return <DetailPageSkeleton withHeroImage={false} />
   if (falhou || !dados || !cursoSlug || !quizSlug) {
@@ -115,7 +138,26 @@ export default function Quiz() {
     setCorrecao(null)
   }
 
-  return (
+  const feitas = contarAtividadesConcluidas(progresso, cursoSlug, atividades)
+  const totalDeAtividades = atividades.filter(
+    (atividade) => atividade.tipo === 'quiz' || !atividade.opcional,
+  ).length
+  const espinha = arvore ? (
+    <EspinhaDoCurso
+      curso={arvore}
+      atividadeAtual={{ tipo: 'quiz', slug: quizSlug }}
+      feitas={feitas}
+      total={totalDeAtividades}
+      aulaConcluida={(slug) => concluida(cursoSlug, slug)}
+      notaDoQuiz={(slug) => notaDoQuiz(cursoSlug, slug)}
+      quizConcluido={(slug, notaMinima) => quizEstaConcluido(cursoSlug, slug, notaMinima)}
+      podeZerar={temProgresso(cursoSlug)}
+      aoZerar={() => zerar(cursoSlug)}
+      aoNavegar={() => setGavetaAberta(false)}
+    />
+  ) : null
+
+  const conteudo = (
     <Box sx={{ maxWidth: 920, mx: 'auto' }}>
       <Typography
         component={RouterLink}
@@ -124,6 +166,16 @@ export default function Quiz() {
       >
         {curso.titulo} / {modulo.titulo}
       </Typography>
+      {noCelular && espinha && (
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setGavetaAberta(true)}
+          style={{ marginTop: 12 }}
+        >
+          Atividades
+        </button>
+      )}
 
       <Box sx={{ mt: 2, pb: 3, borderBottom: '1px solid var(--color-line)' }}>
         <Typography
@@ -234,7 +286,7 @@ export default function Quiz() {
                 to={hrefDaAtividade(curso.slug, dados.proxima)}
                 style={{ textDecoration: 'none' }}
               >
-                Próxima aula
+                {dados.proxima.tipo === 'quiz' ? 'Próximo quiz' : 'Próxima aula'}
               </RouterLink>
             )}
           </Stack>
@@ -270,6 +322,39 @@ export default function Quiz() {
           </button>
         </DialogActions>
       </Dialog>
+    </Box>
+  )
+
+  return (
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '340px 1fr' } }}>
+      {!noCelular && espinha && (
+        <Box
+          component="aside"
+          sx={{
+            borderRight: '1px solid var(--color-line)',
+            position: 'sticky',
+            top: 88,
+            alignSelf: 'start',
+            maxHeight: 'calc(100vh - 120px)',
+            overflowY: 'auto',
+          }}
+        >
+          {espinha}
+        </Box>
+      )}
+      {noCelular && (
+        <Drawer anchor="left" open={gavetaAberta} onClose={() => setGavetaAberta(false)}>
+          <Box sx={{ width: 'min(340px, 88vw)' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: '12px', px: '12px' }}>
+              <button type="button" className="btn btn-secondary" onClick={() => setGavetaAberta(false)}>
+                Fechar
+              </button>
+            </Box>
+            {espinha}
+          </Box>
+        </Drawer>
+      )}
+      <Box sx={{ pl: { md: 4 }, minWidth: 0 }}>{conteudo}</Box>
     </Box>
   )
 }

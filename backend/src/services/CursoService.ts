@@ -59,12 +59,15 @@ export interface CursoNaListagem extends Curso {
    * curso, e a aula alternativa não entra na conta.
    */
   aulas_publicadas: Array<{
+    id: string;
+    modulo_id: string;
     slug: string;
     titulo: string;
     duracao_seg: number | null;
     opcional: boolean;
   }>;
   quizzes_publicados: Array<{
+    modulo_id: string;
     slug: string;
     titulo: string;
     aula_id: string | null;
@@ -243,7 +246,8 @@ export class CursoService extends BaseService<Curso> {
                    -- depois da aula). Ordenar só por au.ordem intercala os
                    -- módulos, e aí o botão "começar" do índice aponta para a
                    -- aula errada.
-                   JSON_AGG(JSON_BUILD_OBJECT('slug', au.slug, 'titulo', au.titulo,
+                   JSON_AGG(JSON_BUILD_OBJECT('id', au.id, 'modulo_id', au.modulo_id,
+                                              'slug', au.slug, 'titulo', au.titulo,
                                               'duracao_seg', au.duracao_seg,
                                               'opcional', au.opcional)
                             ORDER BY mo.ordem, au.ordem, au.id)
@@ -255,7 +259,8 @@ export class CursoService extends BaseService<Curso> {
           LEFT JOIN LATERAL (
             SELECT (COUNT(*) FILTER (WHERE qu.publicado))::int     AS publicados,
                    (COUNT(*) FILTER (WHERE NOT qu.publicado))::int AS rascunhos,
-                   JSON_AGG(JSON_BUILD_OBJECT('slug', qu.slug, 'titulo', qu.titulo,
+                   JSON_AGG(JSON_BUILD_OBJECT('modulo_id', qu.modulo_id,
+                                              'slug', qu.slug, 'titulo', qu.titulo,
                                               'aula_id', qu.aula_id,
                                               'nota_minima', qu.nota_minima)
                             ORDER BY qm.ordem,

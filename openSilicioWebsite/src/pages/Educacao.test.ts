@@ -36,8 +36,8 @@ const curso: CursoNaListagem = {
   quizzes_rascunho: 0,
   duracao_seg: 1320,
   aulas_publicadas: [
-    { slug: 'pdk', titulo: 'O que é um PDK', duracao_seg: 480, opcional: false },
-    { slug: 'yosys', titulo: 'Síntese com Yosys', duracao_seg: 840, opcional: false },
+    { id: 'a1', modulo_id: 'm1', slug: 'pdk', titulo: 'O que é um PDK', duracao_seg: 480, opcional: false },
+    { id: 'a2', modulo_id: 'm1', slug: 'yosys', titulo: 'Síntese com Yosys', duracao_seg: 840, opcional: false },
   ],
   quizzes_publicados: [],
 }

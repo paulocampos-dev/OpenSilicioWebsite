@@ -120,6 +120,7 @@ describe('Cursos API', () => {
       expect(encontrado.quizzes_rascunho).toBe(1);
       expect(encontrado.quizzes_publicados).toEqual([
         {
+          modulo_id: modulo.id,
           slug: 'depois-a2',
           titulo: 'Depois da A2',
           aula_id: aulas[1].id,
@@ -129,7 +130,7 @@ describe('Cursos API', () => {
     });
 
     it('soma módulos, aulas e duração publicadas', async () => {
-      await criarCurso({
+      const { modulo, aulas } = await criarCurso({
         aulas: [
           { slug: 'pdk', titulo: 'O que é um PDK', publicado: true, duracao_seg: 480 },
           { slug: 'verilog', titulo: 'Seu primeiro Verilog', publicado: true, duracao_seg: 840 },
@@ -147,8 +148,22 @@ describe('Cursos API', () => {
       // O rascunho não entra na soma: é o denominador do progresso do leitor.
       expect(curso.duracao_seg).toBe(1320);
       expect(curso.aulas_publicadas).toEqual([
-        { slug: 'pdk', titulo: 'O que é um PDK', duracao_seg: 480, opcional: false },
-        { slug: 'verilog', titulo: 'Seu primeiro Verilog', duracao_seg: 840, opcional: false },
+        {
+          id: aulas[0].id,
+          modulo_id: modulo.id,
+          slug: 'pdk',
+          titulo: 'O que é um PDK',
+          duracao_seg: 480,
+          opcional: false,
+        },
+        {
+          id: aulas[1].id,
+          modulo_id: modulo.id,
+          slug: 'verilog',
+          titulo: 'Seu primeiro Verilog',
+          duracao_seg: 840,
+          opcional: false,
+        },
       ]);
     });
 
@@ -564,6 +579,8 @@ describe('Cursos API', () => {
       const naListagem = indice.body.data.find((c: { slug: string }) => c.slug === curso.slug);
       expect(naListagem.aulas_publicadas).toEqual([
         {
+          id: criada.body.id,
+          modulo_id: modulo.id,
           slug: 'instalar-no-windows',
           titulo: 'Instalar no Windows',
           duracao_seg: null,
