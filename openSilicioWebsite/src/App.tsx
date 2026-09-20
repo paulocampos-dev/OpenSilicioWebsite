@@ -19,6 +19,7 @@ import Recurso from './pages/Recurso'
 import Cursos from './pages/Cursos'
 import Curso from './pages/Curso'
 import Aula from './pages/Aula'
+import Quiz from './pages/Quiz'
 import WikiList from './pages/WikiList'
 import WikiDetail from './pages/WikiDetail'
 import About from './pages/About'
@@ -283,6 +284,7 @@ function AppContent() {
               <Route path="/educacao/:id" element={<Container sx={{ py: 4 }}><Recurso /></Container>} />
               <Route path="/cursos" element={<Container sx={{ py: 4 }}><Cursos /></Container>} />
               <Route path="/cursos/:cursoSlug" element={<Container sx={{ py: 4 }}><Curso /></Container>} />
+              <Route path="/cursos/:cursoSlug/quizzes/:quizSlug" element={<Container sx={{ py: 4 }}><Quiz /></Container>} />
               <Route path="/cursos/:cursoSlug/:aulaSlug" element={<Container sx={{ py: 4 }}><Aula /></Container>} />
               <Route path="/wiki" element={<Container sx={{ py: 4 }}><WikiList /></Container>} />
               <Route path="/wiki/:slug" element={<Container sx={{ py: 4 }}><WikiDetail /></Container>} />
@@ -424,5 +426,4 @@ export default function App() {
     </BrowserRouter>
   )
 }
-
 
