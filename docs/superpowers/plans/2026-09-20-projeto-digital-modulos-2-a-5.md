@@ -35,7 +35,7 @@
 - O placeholder precisa manter sua posição ao virar aula. A conferência do painel compara a primeira atividade de cada módulo antes e depois da edição.
 - A colagem no Lexical pode perder conteúdo ou manter estado antigo. Cada aula será recarregada em uma segunda leitura e comparada ao Markdown.
 - Um quiz pode salvar com posição, alternativa correta ou publicação incorreta. Cada cadastro será reaberto e todos esses campos serão conferidos.
-- Fatos sujeitos a mudança podem tornar aula e quiz incoerentes. Cada módulo técnico registra a URL oficial e a data da consulta em `conteudo/cursos/projeto-digital/REFERENCIAS.md`.
+- Fatos sujeitos a mudança podem tornar aula e quiz incoerentes. Cada módulo técnico registra a URL oficial e a data da consulta em `conteudo/REFERENCIAS-PROJETO-DIGITAL.md`.
 
 ---
 
@@ -43,7 +43,7 @@
 
 **Arquivos:**
 - Criar: `docs/course-authoring-improvements.md`
-- Criar: `conteudo/cursos/projeto-digital/REFERENCIAS.md`
+- Criar: `conteudo/REFERENCIAS-PROJETO-DIGITAL.md`
 
 **Interfaces:**
 - Consome: observações feitas durante o cadastro das aulas e quizzes.
@@ -95,7 +95,7 @@ Esperado: apenas o cabeçalho e o separador. Novas linhas só entram depois de u
 
 - [ ] **Passo 4: Criar o registro local de fontes técnicas**
 
-Use este conteúdo inicial em `conteudo/cursos/projeto-digital/REFERENCIAS.md`:
+Use este conteúdo inicial em `conteudo/REFERENCIAS-PROJETO-DIGITAL.md`:
 
 ```markdown
 # Referências externas do Projeto Digital
@@ -516,7 +516,7 @@ Registre qualquer dificuldade concreta de autoria ou revisão. Não registre mud
 - Verificar: `conteudo/cursos/projeto-digital/04-*.md`
 - Verificar: `conteudo/cursos/projeto-digital/05-*.md`
 - Verificar: `conteudo/cursos/projeto-digital/quiz-0[2-5]-*.json`
-- Verificar: `conteudo/cursos/projeto-digital/REFERENCIAS.md`
+- Verificar: `conteudo/REFERENCIAS-PROJETO-DIGITAL.md`
 - Verificar: `docs/course-authoring-improvements.md`
 
 **Interfaces:**
