@@ -2,7 +2,7 @@
 
 **Data:** 2026-09-20
 
-**Status:** aguardando revisão
+**Status:** aprovado
 
 **Mock escolhido:** opção A, "Bancada compacta"
 
@@ -324,4 +324,3 @@ mais promissoras são:
 - botão "copiar estado" que gera um link ou trecho de configuração;
 - eventos locais de interação para estudos de usabilidade, somente com
   consentimento e sem registrar respostas pessoais.
-
