@@ -70,6 +70,9 @@ function validarConfiguracao(valor: unknown): ResultadoConfiguracaoPwm {
   if (typeof titulo !== 'string') return erroDeCampo('titulo')
   if (typeof pergunta !== 'string') return erroDeCampo('pergunta')
   if (!Array.isArray(alternativas)) return erroDeCampo('alternativas')
+  if (alternativas.length < 2 || alternativas.length > 4) {
+    return { ok: false, erro: 'O campo "alternativas" deve ter entre 2 e 4 alternativas.' }
+  }
 
   const alternativasValidadas: AlternativaPwm[] = []
   for (let indice = 0; indice < alternativas.length; indice += 1) {
@@ -81,9 +84,15 @@ function validarConfiguracao(valor: unknown): ResultadoConfiguracaoPwm {
   if (alternativasValidadas.filter((alternativa) => alternativa.correta).length !== 1) {
     return { ok: false, erro: 'Deve haver exatamente uma alternativa correta.' }
   }
-  if (!estaNoIntervalo(dutyInicial, 5, 95)) return erroDeCampo('dutyInicial')
-  if (!estaNoIntervalo(frequenciaHz, 1, 100_000)) return erroDeCampo('frequenciaHz')
-  if (!estaNoIntervalo(tensaoVolts, 0, 24)) return erroDeCampo('tensaoVolts')
+  if (!estaNoIntervalo(dutyInicial, 5, 95) || !Number.isInteger(dutyInicial)) {
+    return erroDeCampo('dutyInicial')
+  }
+  if (!ehNumeroFinito(frequenciaHz) || frequenciaHz <= 0 || frequenciaHz > 100_000) {
+    return erroDeCampo('frequenciaHz')
+  }
+  if (!ehNumeroFinito(tensaoVolts) || tensaoVolts <= 0 || tensaoVolts > 24) {
+    return erroDeCampo('tensaoVolts')
+  }
 
   return {
     ok: true,
@@ -121,7 +130,11 @@ function ehRegistro(valor: unknown): valor is Record<string, unknown> {
 }
 
 function estaNoIntervalo(valor: unknown, minimo: number, maximo: number): valor is number {
-  return typeof valor === 'number' && Number.isFinite(valor) && valor >= minimo && valor <= maximo
+  return ehNumeroFinito(valor) && valor >= minimo && valor <= maximo
+}
+
+function ehNumeroFinito(valor: unknown): valor is number {
+  return typeof valor === 'number' && Number.isFinite(valor)
 }
 
 function erroDeCampo(campo: string): { ok: false; erro: string } {

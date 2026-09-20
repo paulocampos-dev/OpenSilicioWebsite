@@ -58,6 +58,54 @@ describe('parsearConfiguracaoPwm', () => {
     expect(resultado.config.alternativas.filter((a) => a.correta)).toHaveLength(1)
   })
 
+  it('rejeita uma única alternativa, mesmo quando há uma correta', async () => {
+    const fonte = fonteValida
+      .replace('correta: false', 'correta: true')
+      .replace("    { texto: 'Brilho', correta: true, explicacao: 'Aumenta.' },\n", '')
+
+    const resultado = await parsearConfiguracaoPwm(fonte)
+
+    expect(resultado).toMatchObject({ ok: false, erro: expect.stringContaining('entre 2 e 4 alternativas') })
+  })
+
+  it('rejeita mais de quatro alternativas, mesmo quando há uma correta', async () => {
+    const fonte = fonteValida.replace(
+      '  ],',
+      `    { texto: 'Tensão', correta: false, explicacao: 'Permanece igual.' },
+    { texto: 'Corrente', correta: false, explicacao: 'Permanece igual.' },
+    { texto: 'Potência', correta: false, explicacao: 'Permanece igual.' },
+  ],`,
+    )
+
+    const resultado = await parsearConfiguracaoPwm(fonte)
+
+    expect(resultado).toMatchObject({ ok: false, erro: expect.stringContaining('entre 2 e 4 alternativas') })
+  })
+
+  it('rejeita dutyInicial fracionário', async () => {
+    const resultado = await parsearConfiguracaoPwm(
+      fonteValida.replace('dutyInicial: 25', 'dutyInicial: 25.5'),
+    )
+
+    expect(resultado).toMatchObject({ ok: false, erro: expect.stringContaining('dutyInicial') })
+  })
+
+  it('aceita frequenciaHz positiva fracionária', async () => {
+    const resultado = await parsearConfiguracaoPwm(
+      fonteValida.replace('frequenciaHz: 100', 'frequenciaHz: 0.5'),
+    )
+
+    expect(resultado).toMatchObject({ ok: true, config: { frequenciaHz: 0.5 } })
+  })
+
+  it('rejeita tensaoVolts igual a zero', async () => {
+    const resultado = await parsearConfiguracaoPwm(
+      fonteValida.replace('tensaoVolts: 3.3', 'tensaoVolts: 0'),
+    )
+
+    expect(resultado).toMatchObject({ ok: false, erro: expect.stringContaining('tensaoVolts') })
+  })
+
   it.each([
     ['{', 'JSON5 inválido'],
     ['{}', 'campo "titulo"'],
