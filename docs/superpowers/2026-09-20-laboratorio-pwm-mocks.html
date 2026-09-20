@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSilício · Mocks do laboratório PWM</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #000;
+      --surface: #0a0b0c;
+      --surface-2: #111315;
+      --ink: #f5f5f8;
+      --muted: #a9adb2;
+      --faint: #777d83;
+      --line: #34383c;
+      --line-strong: #626971;
+      --steel: #5980a6;
+      --steel-light: #b5d9fd;
+      --steel-deep: #1d2d3d;
+      --good: #a8d2b5;
+      --bad: #e7a5a2;
+      --heading: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+      --body: "Barlow", system-ui, sans-serif;
+      --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    :focus-visible { outline: 2px solid var(--steel-light); outline-offset: 3px; }
+
+    .page {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: 0 28px 80px;
+    }
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 32px;
+      align-items: end;
+      padding: 48px 0 26px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    .eyebrow, .variant-label, .instrument-label, .step-index, .meta {
+      font-family: var(--heading);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .eyebrow { color: var(--steel-light); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 780px;
+      margin-bottom: 12px;
+      font-family: var(--heading);
+      font-size: clamp(42px, 6vw, 78px);
+      font-weight: 600;
+      letter-spacing: .01em;
+      line-height: .96;
+      text-transform: uppercase;
+    }
+    .lede { max-width: 760px; margin: 0; color: var(--muted); font-size: 17px; }
+    .scope {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }
+    .scope span { padding: 9px 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .scope b { display: block; font: 600 12px/1 var(--heading); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .scope strong { display: block; margin-top: 7px; font: 500 16px/1 var(--mono); }
+
+    .jump {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 0;
+      padding: 0;
+      background: rgba(0, 0, 0, .94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+    .jump a {
+      min-width: 156px;
+      padding: 13px 16px;
+      border-right: 1px solid var(--line);
+      color: var(--muted);
+      font-family: var(--heading);
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .jump a:hover { color: var(--ink); background: var(--surface-2); }
+
+    .variant { scroll-margin-top: 52px; padding: 64px 0 20px; }
+    .variant-head {
+      display: grid;
+      grid-template-columns: 84px minmax(0, 1fr) minmax(260px, 440px);
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+    .variant-letter {
+      font: 600 74px/.8 var(--heading);
+      color: var(--steel-light);
+    }
+    .variant h2 {
+      margin-bottom: 6px;
+      font: 600 clamp(30px, 4vw, 48px)/1 var(--heading);
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+    .variant-head p { margin: 0; color: var(--muted); }
+    .tradeoff { padding-left: 16px; border-left: 3px solid var(--steel); font-size: 14px; }
+
+    .blueprint {
+      position: relative;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+    }
+    .corner { position: absolute; width: 15px; height: 15px; color: #99a0a7; pointer-events: none; }
+    .corner::before, .corner::after { content: ""; position: absolute; background: currentColor; }
+    .corner::before { left: 7px; top: 0; width: 1px; height: 100%; }
+    .corner::after { left: 0; top: 7px; width: 100%; height: 1px; }
+    .corner.tl { top: -8px; left: -8px; }
+    .corner.tr { top: -8px; right: -8px; }
+    .corner.bl { bottom: -8px; left: -8px; }
+    .corner.br { right: -8px; bottom: -8px; }
+    .title-block {
+      display: flex;
+      align-items: stretch;
+      border-bottom: 1px solid var(--line);
+      font: 700 12px/1 var(--heading);
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    .title-block span { padding: 11px 13px; }
+    .title-block .grow { flex: 1; }
+    .title-block .cell { border-left: 1px solid var(--line); color: var(--muted); }
+
+    .prompt h3, .panel h3, .free-copy h3 {
+      margin-bottom: 10px;
+      font: 600 24px/1.08 var(--heading);
+      text-transform: uppercase;
+    }
+    .prompt p, .panel p, .free-copy p { color: var(--muted); }
+    .answer-grid { display: grid; gap: 8px; }
+    .choice, .plain-button, .primary-button, .step-tab {
+      min-height: 43px;
+      border: 1px solid var(--line-strong);
+      border-radius: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .choice {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      align-items: center;
+      width: 100%;
+      padding: 0 12px 0 0;
+      text-align: left;
+    }
+    .choice .key { display: grid; place-items: center; align-self: stretch; margin-right: 12px; border-right: 1px solid var(--line); font: 600 13px var(--mono); color: var(--muted); }
+    .choice:hover, .choice[aria-pressed="true"] { border-color: var(--steel-light); background: var(--steel-deep); }
+    .choice[aria-pressed="true"] .key { color: var(--steel-light); }
+    .primary-button { padding: 10px 18px; border-color: var(--steel); background: var(--steel); font-weight: 700; }
+    .primary-button:hover { background: #6c92b7; }
+    .plain-button { padding: 10px 15px; }
+    .plain-button:hover { border-color: var(--steel-light); color: var(--steel-light); }
+    .feedback { display: none; margin-top: 12px; padding: 12px; border-left: 3px solid var(--steel); background: var(--surface-2); font-size: 14px; }
+    .feedback.show { display: block; animation: enter 180ms ease-out both; }
+    .feedback b { color: var(--steel-light); }
+
+    .instrument {
+      background-color: #030506;
+      background-image: linear-gradient(rgba(89,128,166,.11) 1px, transparent 1px), linear-gradient(90deg, rgba(89,128,166,.11) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .scope-screen { min-height: 230px; padding: 18px; overflow: hidden; }
+    .scope-screen svg { display: block; width: 100%; height: 190px; }
+    .axis { stroke: #495057; stroke-width: 1; }
+    .wave { fill: none; stroke: var(--steel-light); stroke-width: 3; vector-effect: non-scaling-stroke; }
+    .wave-secondary { fill: none; stroke: #f5f5f8; stroke-width: 2; opacity: .8; vector-effect: non-scaling-stroke; }
+    .wave-fill { fill: rgba(89,128,166,.22); }
+    .scope-note { fill: #a9adb2; font: 12px var(--mono); }
+    .readout {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line);
+    }
+    .readout div { padding: 11px 13px; border-right: 1px solid var(--line); }
+    .readout div:last-child { border-right: 0; }
+    .readout span { display: block; color: var(--muted); font: 700 11px var(--heading); letter-spacing: .08em; text-transform: uppercase; }
+    .readout strong { font: 500 17px var(--mono); }
+
+    .control-row { display: grid; grid-template-columns: minmax(110px, .7fr) minmax(220px, 1.6fr) minmax(130px, .7fr); gap: 18px; align-items: center; padding: 16px; border-top: 1px solid var(--line); }
+    .control-row output { font: 600 24px var(--mono); color: var(--steel-light); }
+    input[type="range"] { width: 100%; accent-color: var(--steel); }
+    .lamp-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+    .lamp {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--steel-light);
+      background: rgb(89 128 166 / var(--lamp, .5));
+      transition: opacity 140ms ease, transform 140ms ease;
+    }
+    .lamp.pulse { transform: scale(.88); }
+    .lamp-label { font: 12px var(--mono); color: var(--muted); }
+
+    /* A: compact bench */
+    .bench { display: grid; grid-template-columns: minmax(300px, .78fr) minmax(520px, 1.52fr); }
+    .bench .prompt { padding: 24px; border-right: 1px solid var(--line); }
+
+    /* B: guided sequence */
+    .guided-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); min-height: 520px; }
+    .step-rail { border-right: 1px solid var(--line); }
+    .step-tab {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      width: 100%;
+      padding: 0;
+      border-width: 0 0 1px;
+      color: var(--muted);
+      text-align: left;
+    }
+    .step-tab span { display: grid; align-items: center; min-height: 64px; padding: 0 12px; }
+    .step-tab .step-index { place-items: center; border-right: 1px solid var(--line); }
+    .step-tab[aria-selected="true"] { color: var(--ink); background: var(--steel-deep); }
+    .step-tab[aria-selected="true"] .step-index { color: var(--steel-light); }
+    .guided-stage { display: grid; align-content: start; padding: 28px; }
+    .stage { display: none; }
+    .stage.active { display: block; animation: enter 180ms ease-out both; }
+    .stage .answer-grid { max-width: 680px; }
+    .stage-actions { display: flex; gap: 8px; margin-top: 18px; }
+    .mini-wave { margin-top: 24px; border: 1px solid var(--line); }
+
+    /* C: open instrument */
+    .free-layout { display: grid; grid-template-columns: minmax(250px, .54fr) minmax(560px, 1.46fr); min-height: 560px; }
+    .free-controls { padding: 24px; border-right: 1px solid var(--line); }
+    .free-controls label { display: flex; justify-content: space-between; gap: 16px; margin: 19px 0 7px; color: var(--muted); font-size: 14px; }
+    .free-controls label output { color: var(--ink); font-family: var(--mono); }
+    .mode-switch { display: grid; grid-template-columns: repeat(3, 1fr); margin: 18px 0; }
+    .mode-switch button { min-height: 38px; border: 1px solid var(--line); border-right-width: 0; background: transparent; cursor: pointer; }
+    .mode-switch button:last-child { border-right-width: 1px; }
+    .mode-switch button[aria-pressed="true"] { background: var(--steel); border-color: var(--steel); }
+    .probe { margin-top: 24px; padding-top: 17px; border-top: 1px solid var(--line); }
+    .probe div { display: flex; justify-content: space-between; padding: 5px 0; font: 13px var(--mono); }
+    .probe span { color: var(--muted); }
+    .free-screen { display: grid; grid-template-rows: auto 1fr auto; }
+    .free-screen .scope-screen { min-height: 410px; }
+    .question-strip { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; padding: 15px 18px; border-top: 1px solid var(--line); background: var(--surface-2); }
+    .question-strip p { margin: 0; }
+
+    .decision {
+      margin-top: 72px;
+      padding: 24px;
+      border-top: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+    }
+    .decision h2 { font: 600 30px/1 var(--heading); text-transform: uppercase; }
+    .decision-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+    .decision-grid article { padding: 18px; background: var(--bg); }
+    .decision-grid b { color: var(--steel-light); }
+    .decision-grid p { margin: 7px 0 0; color: var(--muted); font-size: 14px; }
+
+    @keyframes enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+    }
+    @media (max-width: 920px) {
+      .masthead, .variant-head { grid-template-columns: 1fr; }
+      .scope { justify-self: start; }
+      .variant-letter { font-size: 48px; }
+      .bench, .free-layout { grid-template-columns: 1fr; }
+      .bench .prompt, .free-controls { border-right: 0; border-bottom: 1px solid var(--line); }
+      .guided-layout { grid-template-columns: 1fr; }
+      .step-rail { display: grid; grid-template-columns: repeat(3, 1fr); border-right: 0; border-bottom: 1px solid var(--line); }
+      .step-tab { border-bottom: 0; border-right: 1px solid var(--line); }
+      .step-tab:last-child { border-right: 0; }
+      .step-tab span:last-child { display: none; }
+      .decision-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .page { padding: 0 16px 56px; }
+      .masthead { padding-top: 32px; }
+      .jump { overflow-x: auto; }
+      .jump a { min-width: 124px; }
+      .variant { padding-top: 44px; }
+      .variant-head { gap: 10px; }
+      .title-block .cell:nth-last-child(1) { display: none; }
+      .control-row { grid-template-columns: 1fr; }
+      .lamp-wrap { justify-content: flex-start; }
+      .readout { grid-template-columns: 1fr; }
+      .readout div { border-right: 0; border-bottom: 1px solid var(--line); }
+      .guided-stage { padding: 20px; }
+      .question-strip { grid-template-columns: 1fr; }
+      .free-screen .scope-screen { min-height: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">OpenSilício · Projeto Digital</p>
+        <h1>Laboratório PWM na própria aula</h1>
+        <p class="lede">Três maneiras de ensinar a relação entre duty cycle, forma de onda e brilho percebido. O aluno prevê, manipula e compara sem sair do conteúdo.</p>
+      </div>
+      <div class="scope" aria-label="Escopo do mock">
+        <span><b>Aula piloto</b><strong>RGB / PWM</strong></span>
+        <span><b>Progresso</b><strong>não bloqueia</strong></span>
+        <span><b>Tentativas</b><strong>ilimitadas</strong></span>
+        <span><b>Estado</b><strong>local</strong></span>
+      </div>
+    </header>
+
+    <nav class="jump" aria-label="Ir para uma opção">
+      <a href="#opcao-a">A · Bancada</a>
+      <a href="#opcao-b">B · Sequência</a>
+      <a href="#opcao-c">C · Livre</a>
+    </nav>
+
+    <section class="variant" id="opcao-a">
+      <header class="variant-head">
+        <div class="variant-letter">A</div>
+        <div>
+          <p class="variant-label">Opção recomendada</p>
+          <h2>Bancada compacta</h2>
+          <p>Pergunta e experimento dividem a mesma tela. A comparação acontece sem trocar de contexto.</p>
+        </div>
+        <p class="tradeoff">Boa para inserir no meio da aula. Mantém o texto curto e deixa visível a relação entre hipótese, sinal e resultado.</p>
+      </header>
+
+      <div class="blueprint" data-lab="a">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="title-block"><span class="grow">Experimento 01 · Brilho por PWM</span><span class="cell">5 min</span><span class="cell">interativo</span></div>
+        <div class="bench">
+          <section class="prompt">
+            <p class="instrument-label">Preveja antes de testar</p>
+            <h3>O que muda quando o duty cycle passa de 25% para 75%?</h3>
+            <p>Escolha uma hipótese. Você poderá tentar de novo.</p>
+            <div class="answer-grid" role="group" aria-label="Hipóteses">
+              <button class="choice" data-answer="wrong" aria-pressed="false"><span class="key">A</span><span>A frequência triplica.</span></button>
+              <button class="choice" data-answer="right" aria-pressed="false"><span class="key">B</span><span>O LED parece mais brilhante.</span></button>
+              <button class="choice" data-answer="wrong" aria-pressed="false"><span class="key">C</span><span>A tensão alta passa de 3,3 V.</span></button>
+            </div>
+            <div class="feedback" role="status"></div>
+          </section>
+          <section>
+            <div class="instrument scope-screen" aria-label="Forma de onda PWM">
+              <svg viewBox="0 0 760 190" preserveAspectRatio="none" aria-hidden="true">
+                <line class="axis" x1="0" y1="150" x2="760" y2="150"></line>
+                <line class="axis" x1="0" y1="35" x2="760" y2="35"></line>
+                <path class="wave-fill" data-fill d="M0 150V35H38V150H190V35H228V150H380V35H418V150H570V35H608V150H760V190H0Z"></path>
+                <path class="wave" data-wave d="M0 150V35H38V150H190V35H228V150H380V35H418V150H570V35H608V150H760"></path>
+                <text class="scope-note" x="8" y="26">3,3 V</text><text class="scope-note" x="8" y="175">0 V</text>
+              </svg>
+            </div>
+            <div class="readout"><div><span>Período</span><strong>10 ms</strong></div><div><span>Frequência</span><strong>100 Hz</strong></div><div><span>Tempo alto</span><strong data-high>2,5 ms</strong></div></div>
+            <div class="control-row">
+              <div><span class="instrument-label">Duty cycle</span><br><output data-duty>25%</output></div>
+              <input data-slider type="range" min="5" max="95" value="25" aria-label="Duty cycle">
+              <div class="lamp-wrap"><span class="lamp-label">LED<br>percebido</span><span class="lamp" aria-hidden="true"></span></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="variant" id="opcao-b">
+      <header class="variant-head">
+        <div class="variant-letter">B</div>
+        <div>
+          <p class="variant-label">Mais guiada</p>
+          <h2>Descoberta em sequência</h2>
+          <p>Uma tarefa por vez. O gráfico só aparece depois que o aluno registra a hipótese.</p>
+        </div>
+        <p class="tradeoff">Melhor para o primeiro contato com PWM. Exige mais cliques e ocupa mais altura na aula.</p>
+      </header>
+
+      <div class="blueprint" data-guided>
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="title-block"><span class="grow">Roteiro de bancada · PWM</span><span class="cell">passo <b data-step-count>1</b>/3</span></div>
+        <div class="guided-layout">
+          <nav class="step-rail" aria-label="Etapas do experimento">
+            <button class="step-tab" data-step="1" aria-selected="true"><span class="step-index">01</span><span>Prever</span></button>
+            <button class="step-tab" data-step="2" aria-selected="false"><span class="step-index">02</span><span>Manipular</span></button>
+            <button class="step-tab" data-step="3" aria-selected="false"><span class="step-index">03</span><span>Explicar</span></button>
+          </nav>
+          <div class="guided-stage">
+            <section class="stage active" data-stage="1">
+              <p class="instrument-label">01 · Faça sua previsão</p>
+              <h3>Em um período de 10 ms, quanto tempo o sinal fica alto com duty cycle de 70%?</h3>
+              <div class="answer-grid" role="group" aria-label="Tempos possíveis">
+                <button class="choice" data-pick="3"><span class="key">A</span><span>3 ms</span></button>
+                <button class="choice" data-pick="7"><span class="key">B</span><span>7 ms</span></button>
+                <button class="choice" data-pick="10"><span class="key">C</span><span>10 ms</span></button>
+              </div>
+              <div class="stage-actions"><button class="primary-button" data-next="2">Registrar e testar</button></div>
+            </section>
+            <section class="stage" data-stage="2">
+              <p class="instrument-label">02 · Ajuste e observe</p>
+              <h3>Varie o duty cycle. A frequência permanece em 100 Hz.</h3>
+              <div class="mini-wave instrument scope-screen">
+                <svg viewBox="0 0 760 190" preserveAspectRatio="none" aria-hidden="true">
+                  <line class="axis" x1="0" y1="150" x2="760" y2="150"></line><line class="axis" x1="0" y1="35" x2="760" y2="35"></line>
+                  <path class="wave" data-wave d="M0 150V35H133V150H190V35H323V150H380V35H513V150H570V35H703V150H760"></path>
+                </svg>
+              </div>
+              <div class="control-row"><output data-duty>70%</output><input data-slider type="range" min="5" max="95" value="70" aria-label="Duty cycle"><span class="lamp" aria-hidden="true"></span></div>
+              <div class="stage-actions"><button class="plain-button" data-next="1">Voltar</button><button class="primary-button" data-next="3">Comparar</button></div>
+            </section>
+            <section class="stage" data-stage="3">
+              <p class="instrument-label">03 · Feche o raciocínio</p>
+              <h3 data-guided-result>70% de 10 ms são 7 ms em nível alto.</h3>
+              <p>O período não mudou. A largura do pulso aumentou, então a energia média entregue ao LED também aumentou.</p>
+              <div class="feedback show"><b>Resultado:</b> sua previsão fica ao lado da medida, sem nota e sem limite de tentativas.</div>
+              <div class="stage-actions"><button class="plain-button" data-next="1">Tentar outra vez</button></div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="variant" id="opcao-c">
+      <header class="variant-head">
+        <div class="variant-letter">C</div>
+        <div>
+          <p class="variant-label">Mais exploratória</p>
+          <h2>Osciloscópio livre</h2>
+          <p>Controles e medidas ficam expostos ao mesmo tempo. A pergunta vira um desafio lateral.</p>
+        </div>
+        <p class="tradeoff">Boa para revisitar o conceito e comparar canais RGB. Pode distrair quem ainda não conhece período e frequência.</p>
+      </header>
+
+      <div class="blueprint" data-free>
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="title-block"><span class="grow">Instrumento virtual · Mixer RGB</span><span class="cell">CH1</span><span class="cell">100 Hz</span></div>
+        <div class="free-layout">
+          <aside class="free-controls">
+            <p class="instrument-label">Gerador PWM</p>
+            <h3>Monte a saída</h3>
+            <div class="mode-switch" aria-label="Canal ativo"><button aria-pressed="true" data-mode="R">R</button><button aria-pressed="false" data-mode="G">G</button><button aria-pressed="false" data-mode="B">B</button></div>
+            <label>Duty cycle <output data-duty>40%</output></label>
+            <input data-slider type="range" min="5" max="95" value="40" aria-label="Duty cycle">
+            <label>Frequência <output data-frequency>100 Hz</output></label>
+            <input data-frequency-slider type="range" min="50" max="500" step="50" value="100" aria-label="Frequência">
+            <div class="probe"><div><span>Período</span><strong data-period>10,0 ms</strong></div><div><span>Tempo alto</span><strong data-high>4,0 ms</strong></div><div><span>Tensão média</span><strong data-average>1,32 V</strong></div></div>
+          </aside>
+          <section class="free-screen">
+            <div class="instrument scope-screen">
+              <svg viewBox="0 0 760 320" preserveAspectRatio="none" aria-hidden="true">
+                <line class="axis" x1="0" y1="260" x2="760" y2="260"></line><line class="axis" x1="0" y1="50" x2="760" y2="50"></line>
+                <path class="wave" data-wave d="M0 260V50H76V260H190V50H266V260H380V50H456V260H570V50H646V260H760"></path>
+                <path class="wave-secondary" d="M0 292 C80 292 90 226 170 226 S260 292 340 292 S430 226 510 226 S600 292 680 292 S730 226 760 226"></path>
+                <text class="scope-note" x="9" y="39">PWM</text><text class="scope-note" x="9" y="312">média percebida</text>
+              </svg>
+            </div>
+            <div class="readout"><div><span>Canal ativo</span><strong data-channel>R</strong></div><div><span>Escala X</span><strong>5 ms/div</strong></div><div><span>Escala Y</span><strong>1 V/div</strong></div></div>
+            <div class="question-strip"><p><b>Desafio:</b> encontre duas configurações com o mesmo tempo alto e frequências diferentes.</p><button class="plain-button" data-check>Ver pista</button></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="decision">
+      <h2>O que a escolha decide</h2>
+      <div class="decision-grid">
+        <article><b>A · Bancada</b><p>Menor atrito. Cabe entre dois parágrafos e cria o padrão reutilizável para outras aulas.</p></article>
+        <article><b>B · Sequência</b><p>Mais mediação. Registra a hipótese antes de revelar o instrumento.</p></article>
+        <article><b>C · Livre</b><p>Mais parâmetros. Funciona melhor como laboratório no fim da aula.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const decimal = (value, digits = 1) => value.toFixed(digits).replace(".", ",");
+
+    function wavePath(duty, height = 190) {
+      const top = height === 190 ? 35 : 50;
+      const bottom = height === 190 ? 150 : 260;
+      const period = 190;
+      const high = Math.max(10, period * duty / 100);
+      let path = `M0 ${bottom}`;
+      for (let x = 0; x < 760; x += period) {
+        path += `V${top}H${Math.min(x + high, 760)}V${bottom}H${Math.min(x + period, 760)}`;
+      }
+      return path;
+    }
+
+    document.querySelectorAll("[data-slider]").forEach((slider) => {
+      const lab = slider.closest("[data-lab], [data-guided], [data-free]");
+      const update = () => {
+        const duty = Number(slider.value);
+        lab.querySelectorAll("[data-duty]").forEach((node) => node.textContent = `${duty}%`);
+        lab.querySelectorAll("[data-high]").forEach((node) => {
+          const frequency = Number(lab.querySelector("[data-frequency-slider]")?.value || 100);
+          node.textContent = `${decimal(1000 / frequency * duty / 100)} ms`;
+        });
+        lab.querySelectorAll("[data-wave]").forEach((node) => node.setAttribute("d", wavePath(duty, lab.hasAttribute("data-free") ? 320 : 190)));
+        lab.querySelectorAll(".lamp").forEach((lamp) => {
+          lamp.style.setProperty("--lamp", String(Math.max(.08, duty / 100)));
+          lamp.classList.add("pulse");
+          setTimeout(() => lamp.classList.remove("pulse"), 140);
+        });
+        const average = lab.querySelector("[data-average]");
+        if (average) average.textContent = `${decimal(3.3 * duty / 100, 2)} V`;
+      };
+      slider.addEventListener("input", update);
+      update();
+    });
+
+    document.querySelectorAll("[data-lab] .choice").forEach((button) => {
+      button.addEventListener("click", () => {
+        const group = button.closest(".answer-grid");
+        group.querySelectorAll(".choice").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
+        const feedback = button.closest(".prompt").querySelector(".feedback");
+        const right = button.dataset.answer === "right";
+        feedback.innerHTML = right
+          ? "<b>Boa previsão.</b> O período fica igual, mas o sinal passa mais tempo em nível alto. Arraste o controle e compare."
+          : "<b>Teste a hipótese.</b> Mude o duty cycle e observe quais medidas permanecem iguais.";
+        feedback.classList.add("show");
+      });
+    });
+
+    const guided = document.querySelector("[data-guided]");
+    let guidedPick = "nenhuma resposta";
+    guided.querySelectorAll("[data-pick]").forEach((button) => {
+      button.addEventListener("click", () => {
+        guidedPick = `${button.dataset.pick} ms`;
+        guided.querySelectorAll("[data-pick]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
+      });
+    });
+    function showStage(step) {
+      guided.querySelectorAll("[data-stage]").forEach((stage) => stage.classList.toggle("active", stage.dataset.stage === step));
+      guided.querySelectorAll("[data-step]").forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.step === step)));
+      guided.querySelector("[data-step-count]").textContent = step;
+      guided.querySelector("[data-guided-result]").textContent = `Sua previsão foi ${guidedPick}. A medida é 7 ms.`;
+    }
+    guided.querySelectorAll("[data-next], [data-step]").forEach((button) => button.addEventListener("click", () => showStage(button.dataset.next || button.dataset.step)));
+
+    const free = document.querySelector("[data-free]");
+    free.querySelectorAll("[data-mode]").forEach((button) => {
+      button.addEventListener("click", () => {
+        free.querySelectorAll("[data-mode]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        free.querySelector("[data-channel]").textContent = button.dataset.mode;
+      });
+    });
+    const frequencySlider = free.querySelector("[data-frequency-slider]");
+    frequencySlider.addEventListener("input", () => {
+      const frequency = Number(frequencySlider.value);
+      const duty = Number(free.querySelector("[data-slider]").value);
+      free.querySelector("[data-frequency]").textContent = `${frequency} Hz`;
+      free.querySelector("[data-period]").textContent = `${decimal(1000 / frequency)} ms`;
+      free.querySelector("[data-high]").textContent = `${decimal(1000 / frequency * duty / 100)} ms`;
+    });
+    free.querySelector("[data-check]").addEventListener("click", (event) => {
+      event.currentTarget.textContent = "Pista: preserve período × duty";
+    });
+  </script>
+</body>
+</html>
