@@ -199,6 +199,9 @@
   margin: 24px 0;
 }
 
+.os-pwm,
+.os-pwm * { transition: none; }
+
 .os-pwm__previsao,
 .os-pwm__bancada { padding: 20px; }
 

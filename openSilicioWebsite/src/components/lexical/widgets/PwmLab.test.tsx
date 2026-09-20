@@ -46,6 +46,22 @@ describe('PwmLab', () => {
     )
   })
 
+  it('representa o brilho no LED externo ao mudar o duty cycle', async () => {
+    const user = userEvent.setup()
+    render(<PwmLab configuracao={configuracao} />)
+    await user.click(screen.getByRole('button', { name: /led parece/i }))
+
+    const led = document.querySelector<HTMLElement>('.os-pwm__led')
+    if (led === null) throw new Error('LED PWM não encontrado')
+
+    expect(led).toHaveStyle({ opacity: '0.25' })
+    expect(led.querySelector('.os-pwm__led-pulso')).toBeNull()
+
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '75' } })
+
+    expect(led).toHaveStyle({ opacity: '0.75' })
+  })
+
   it('troca a explicação sem redefinir o ajuste atual', async () => {
     const user = userEvent.setup()
     render(<PwmLab configuracao={configuracao} />)

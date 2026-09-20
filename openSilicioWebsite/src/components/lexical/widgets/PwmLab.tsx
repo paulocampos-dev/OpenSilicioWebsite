@@ -75,11 +75,13 @@ export function PwmLab({ configuracao }: { configuracao: ConfiguracaoPwm }) {
           />
         </label>
         <span className="os-pwm__led" style={{ opacity: Math.max(.08, duty / 100) }} aria-hidden="true">
-          <span
-            className="os-pwm__led-pulso"
-            data-pulso={pulso || undefined}
-            onAnimationEnd={() => setPulso(false)}
-          />
+          {pulso && (
+            <span
+              className="os-pwm__led-pulso"
+              data-pulso
+              onAnimationEnd={() => setPulso(false)}
+            />
+          )}
         </span>
       </section>
     </div>
