@@ -355,6 +355,36 @@ export const aulaSchema = z.object({
 
 export const aulaUpdateSchema = aulaSchema.partial().strip();
 
+const quizAlternativaSchema = z.object({
+  id: z.string().uuid('ID da alternativa deve ser um UUID válido').optional(),
+  texto: z.string().trim().min(1, 'Alternativa não pode ser vazia'),
+  correta: z.boolean(),
+});
+
+const quizQuestaoSchema = z.object({
+  id: z.string().uuid('ID da questão deve ser um UUID válido').optional(),
+  enunciado: z.string().trim().min(1, 'Enunciado não pode ser vazio'),
+  explicacao: z.string().trim().min(1, 'Explicação não pode ser vazia'),
+  alternativas: z
+    .array(quizAlternativaSchema)
+    .length(4, 'Cada questão deve ter exatamente quatro alternativas')
+    .refine((itens) => itens.filter((item) => item.correta).length === 1, {
+      message: 'Cada questão deve ter exatamente uma alternativa correta',
+    }),
+});
+
+export const quizSchema = z.object({
+  modulo_id: z.string().uuid('ID do módulo deve ser um UUID válido'),
+  aula_id: z.string().uuid('ID da aula deve ser um UUID válido').nullish(),
+  slug,
+  titulo: z.string().trim().min(1, 'Título não pode ser vazio').max(500),
+  nota_minima: z.number().int().min(0).max(100).optional(),
+  publicado: z.boolean().optional(),
+  questoes: z.array(quizQuestaoSchema).min(1, 'O quiz precisa de ao menos uma questão'),
+});
+
+export const quizUpdateSchema = quizSchema.partial().strip();
+
 export const reordenarSchema = z.object({
   ids: z
     .array(z.string().uuid('Cada id deve ser um UUID válido'))

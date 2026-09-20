@@ -1,6 +1,6 @@
 import pool from '../config/database';
 import { BaseService, PaginationOptions, PaginatedResult } from '../services/BaseService';
-import { NotFoundError, DatabaseError } from '../errors/AppError';
+import { ConflictError, NotFoundError, DatabaseError } from '../errors/AppError';
 
 export interface Curso {
   id: string;
@@ -497,11 +497,37 @@ export class CursoService extends BaseService<Curso> {
   }
 
   async deletarAula(id: string): Promise<void> {
-    const { rows } = await this.pool.query(
-      'DELETE FROM curso_aulas WHERE id = $1 RETURNING id',
-      [id],
-    );
-    if (rows.length === 0) throw new NotFoundError('Aula');
+    const cliente = await this.pool.connect();
+    try {
+      await cliente.query('BEGIN');
+      await cliente.query(
+        `UPDATE curso_quizzes
+            SET aula_id = NULL, publicado = false, updated_at = NOW()
+          WHERE aula_id = $1`,
+        [id],
+      );
+      const { rows } = await cliente.query(
+        'DELETE FROM curso_aulas WHERE id = $1 RETURNING id',
+        [id],
+      );
+      if (rows.length === 0) throw new NotFoundError('Aula');
+      await cliente.query('COMMIT');
+    } catch (erro) {
+      await cliente.query('ROLLBACK');
+      if (
+        typeof erro === 'object' &&
+        erro !== null &&
+        'code' in erro &&
+        erro.code === '23505' &&
+        'constraint' in erro &&
+        erro.constraint === 'curso_quizzes_um_final_por_modulo'
+      ) {
+        throw new ConflictError('O módulo já tem um quiz final; mova ou exclua um dos quizzes antes');
+      }
+      throw erro;
+    } finally {
+      cliente.release();
+    }
   }
 
   /**

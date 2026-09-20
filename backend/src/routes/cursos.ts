@@ -31,9 +31,18 @@ import {
   aulaSchema,
   aulaUpdateSchema,
   reordenarSchema,
+  quizSchema,
+  quizUpdateSchema,
 } from '../middleware/validation';
 import { cacheMiddleware } from '../middleware/cache';
 import { NotFoundError } from '../errors/AppError';
+import {
+  atualizarQuiz,
+  criarQuiz,
+  deletarQuiz,
+  getQuiz,
+  getQuizById,
+} from '../controllers/cursoQuizController';
 
 const router = Router();
 
@@ -58,10 +67,12 @@ const exigirUuid =
 router.get('/admin/todos', authMiddleware, listarCursosAdmin);
 router.get('/id/:id', authMiddleware, exigirUuid('id'), getCursoById);
 router.get('/aulas/:id', authMiddleware, exigirUuid('id', 'Aula'), getAulaById);
+router.get('/quizzes/:id', authMiddleware, exigirUuid('id', 'Quiz'), getQuizById);
 router.get('/completo/:slug', authMiddleware, getCursoCompleto);
 
 // — leitura pública —
 router.get('/', cacheMiddleware({ ttl: 120 }), listarCursos);
+router.get('/:slug/quizzes/:quizSlug', cacheMiddleware({ ttl: 120 }), getQuiz);
 router.get('/:slug', cacheMiddleware({ ttl: 120 }), getCurso);
 router.get('/:slug/aulas/:aulaSlug', cacheMiddleware({ ttl: 120 }), getAula);
 
@@ -82,5 +93,23 @@ router.post('/:cursoId/aulas', authMiddleware, exigirUuid('cursoId'), validate(a
 router.put('/modulos/:moduloId/aulas/ordem', authMiddleware, exigirUuid('moduloId', 'Módulo'), validate(reordenarSchema), reordenarAulas);
 router.put('/aulas/:id', authMiddleware, exigirUuid('id', 'Aula'), validate(aulaUpdateSchema), atualizarAula);
 router.delete('/aulas/:id', authMiddleware, exigirUuid('id', 'Aula'), deletarAula);
+
+// — escrita: quizzes —
+router.post(
+  '/:cursoId/modulos/:moduloId/quizzes',
+  authMiddleware,
+  exigirUuid('cursoId'),
+  exigirUuid('moduloId', 'Módulo'),
+  validate(quizSchema),
+  criarQuiz,
+);
+router.put(
+  '/quizzes/:id',
+  authMiddleware,
+  exigirUuid('id', 'Quiz'),
+  validate(quizUpdateSchema),
+  atualizarQuiz,
+);
+router.delete('/quizzes/:id', authMiddleware, exigirUuid('id', 'Quiz'), deletarQuiz);
 
 export default router;
