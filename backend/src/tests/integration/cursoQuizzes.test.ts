@@ -124,12 +124,74 @@ describe('Quizzes de cursos', () => {
       `/api/cursos/${curso.slug}/quizzes/quiz-celulas-padrao`,
     );
     expect(publico.status).toBe(200);
-    expect(publico.body.questoes[0].alternativas.map((item: { ordem: number }) => item.ordem)).toEqual([
+    expect(publico.body.quiz.questoes[0].alternativas.map((item: { ordem: number }) => item.ordem)).toEqual([
       0,
       1,
       2,
       3,
     ]);
+  });
+
+  it('encadeia aulas e quizzes publicados na ordem das atividades do curso', async () => {
+    const { curso, modulo, aula } = await criarEstrutura();
+    const { rows: aulasDoPrimeiro } = await testPool.query(
+      `INSERT INTO curso_aulas (curso_id, modulo_id, slug, titulo, publicado, ordem)
+       VALUES ($1, $2, 'm1-a2', 'M1 A2', true, 1) RETURNING *`,
+      [curso.id, modulo.id],
+    );
+    const { rows: segundosModulos } = await testPool.query(
+      `INSERT INTO curso_modulos (curso_id, titulo, ordem)
+       VALUES ($1, 'Segundo módulo', 1) RETURNING *`,
+      [curso.id],
+    );
+    const { rows: aulasDoSegundo } = await testPool.query(
+      `INSERT INTO curso_aulas (curso_id, modulo_id, slug, titulo, publicado, ordem)
+       VALUES ($1, $2, 'm2-a1', 'M2 A1', true, 0) RETURNING *`,
+      [curso.id, segundosModulos[0].id],
+    );
+
+    const token = await getAuthToken();
+    await request(app)
+      .post(`/api/cursos/${curso.id}/modulos/${modulo.id}/quizzes`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        ...corpoDoQuiz(modulo.id, aula.id),
+        slug: 'quiz-m1-a1',
+        titulo: 'Quiz M1 A1',
+        publicado: true,
+      });
+    await request(app)
+      .post(`/api/cursos/${curso.id}/modulos/${modulo.id}/quizzes`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        ...corpoDoQuiz(modulo.id, aula.id),
+        aula_id: null,
+        slug: 'revisao-m1',
+        titulo: 'Revisão M1',
+        publicado: true,
+      });
+
+    const aula1 = await request(app).get(`/api/cursos/${curso.slug}/aulas/${aula.slug}`);
+    const quiz1 = await request(app).get(`/api/cursos/${curso.slug}/quizzes/quiz-m1-a1`);
+    const aula2 = await request(app).get(`/api/cursos/${curso.slug}/aulas/${aulasDoPrimeiro[0].slug}`);
+    const revisao = await request(app).get(`/api/cursos/${curso.slug}/quizzes/revisao-m1`);
+    const aula3 = await request(app).get(`/api/cursos/${curso.slug}/aulas/${aulasDoSegundo[0].slug}`);
+
+    expect([
+      ['aula', aula.slug],
+      [aula1.body.proxima.tipo, aula1.body.proxima.slug],
+      [quiz1.body.proxima.tipo, quiz1.body.proxima.slug],
+      [aula2.body.proxima.tipo, aula2.body.proxima.slug],
+      [revisao.body.proxima.tipo, revisao.body.proxima.slug],
+    ]).toEqual([
+      ['aula', 'celulas-padrao'],
+      ['quiz', 'quiz-m1-a1'],
+      ['aula', 'm1-a2'],
+      ['quiz', 'revisao-m1'],
+      ['aula', 'm2-a1'],
+    ]);
+    expect(quiz1.body.anterior).toEqual({ tipo: 'aula', slug: aula.slug, titulo: aula.titulo });
+    expect(aula3.body.anterior).toEqual({ tipo: 'quiz', slug: 'revisao-m1', titulo: 'Revisão M1' });
   });
 
   it('rejeita banco de questões incompleto ou sem uma única resposta correta', async () => {

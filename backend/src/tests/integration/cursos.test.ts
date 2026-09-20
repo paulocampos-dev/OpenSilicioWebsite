@@ -42,12 +42,92 @@ const criarCurso = async (opcoes: {
   return { curso, modulo, aulas };
 };
 
+const criarQuizDireto = async (dados: {
+  cursoId: string;
+  moduloId: string;
+  aulaId?: string | null;
+  slug: string;
+  titulo: string;
+  publicado: boolean;
+  questoes?: number;
+}) => {
+  const { rows } = await testPool.query(
+    `INSERT INTO curso_quizzes
+       (curso_id, modulo_id, aula_id, slug, titulo, publicado)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [
+      dados.cursoId,
+      dados.moduloId,
+      dados.aulaId ?? null,
+      dados.slug,
+      dados.titulo,
+      dados.publicado,
+    ],
+  );
+  const quiz = rows[0];
+
+  for (let ordem = 0; ordem < (dados.questoes ?? 0); ordem++) {
+    const { rows: questoes } = await testPool.query(
+      `INSERT INTO curso_quiz_questoes (quiz_id, ordem, enunciado, explicacao)
+       VALUES ($1, $2, $3, 'Explicação') RETURNING id`,
+      [quiz.id, ordem, `Questão ${ordem + 1}`],
+    );
+    for (let alternativa = 0; alternativa < 4; alternativa++) {
+      await testPool.query(
+        `INSERT INTO curso_quiz_alternativas (questao_id, ordem, texto, correta)
+         VALUES ($1, $2, $3, $4)`,
+        [questoes[0].id, alternativa, `Alternativa ${alternativa + 1}`, alternativa === 0],
+      );
+    }
+  }
+
+  return quiz;
+};
+
 describe('Cursos API', () => {
   beforeEach(async () => {
     await cleanDatabase();
   });
 
   describe('GET /api/cursos', () => {
+    it('soma quizzes e lista somente os publicados na ordem do curso', async () => {
+      const { curso, modulo, aulas } = await criarCurso({
+        aulas: [
+          { slug: 'a1', titulo: 'A1', publicado: true },
+          { slug: 'a2', titulo: 'A2', publicado: true },
+        ],
+      });
+      await criarQuizDireto({
+        cursoId: curso.id,
+        moduloId: modulo.id,
+        aulaId: aulas[1].id,
+        slug: 'depois-a2',
+        titulo: 'Depois da A2',
+        publicado: true,
+      });
+      await criarQuizDireto({
+        cursoId: curso.id,
+        moduloId: modulo.id,
+        slug: 'final-rascunho',
+        titulo: 'Final em preparo',
+        publicado: false,
+      });
+
+      const resposta = await request(app).get('/api/cursos');
+      const encontrado = resposta.body.data.find((item: { id: string }) => item.id === curso.id);
+
+      expect(encontrado.quizzes).toBe(1);
+      expect(encontrado.quizzes_rascunho).toBe(1);
+      expect(encontrado.quizzes_publicados).toEqual([
+        {
+          slug: 'depois-a2',
+          titulo: 'Depois da A2',
+          aula_id: aulas[1].id,
+          nota_minima: 70,
+        },
+      ]);
+    });
+
     it('soma módulos, aulas e duração publicadas', async () => {
       await criarCurso({
         aulas: [
@@ -144,6 +224,45 @@ describe('Cursos API', () => {
   });
 
   describe('GET /api/cursos/:slug', () => {
+    it('devolve quizzes publicados completos e rascunhos sem metadados privados', async () => {
+      const { curso, modulo, aulas } = await criarCurso({
+        aulas: [{ slug: 'aula-a', titulo: 'Aula A', publicado: true }],
+      });
+      await criarQuizDireto({
+        cursoId: curso.id,
+        moduloId: modulo.id,
+        aulaId: aulas[0].id,
+        slug: 'quiz-a',
+        titulo: 'Quiz A',
+        publicado: true,
+        questoes: 4,
+      });
+      await criarQuizDireto({
+        cursoId: curso.id,
+        moduloId: modulo.id,
+        slug: 'quiz-em-preparo',
+        titulo: 'Quiz em preparo',
+        publicado: false,
+        questoes: 2,
+      });
+
+      const resposta = await request(app).get(`/api/cursos/${curso.slug}`);
+
+      expect(resposta.status).toBe(200);
+      expect(resposta.body.modulos[0].quizzes).toEqual([
+        {
+          publicado: true,
+          id: expect.any(String),
+          aula_id: aulas[0].id,
+          slug: 'quiz-a',
+          titulo: 'Quiz A',
+          nota_minima: 70,
+          total_questoes: 4,
+        },
+        { publicado: false, id: expect.any(String), titulo: 'Quiz em preparo' },
+      ]);
+    });
+
     it('devolve a árvore com a aula em rascunho sem slug nem duração', async () => {
       const { curso } = await criarCurso({
         slug: 'do-rtl-ao-gds',

@@ -47,6 +47,8 @@ export interface CursoNaListagem extends Curso {
   modulos: number;
   aulas: number;
   aulas_rascunho: number;
+  quizzes: number;
+  quizzes_rascunho: number;
   duracao_seg: number;
   /**
    * As aulas publicadas, em ordem, só com o necessário para duas coisas do
@@ -61,6 +63,12 @@ export interface CursoNaListagem extends Curso {
     titulo: string;
     duracao_seg: number | null;
     opcional: boolean;
+  }>;
+  quizzes_publicados: Array<{
+    slug: string;
+    titulo: string;
+    aula_id: string | null;
+    nota_minima: number;
   }>;
 }
 
@@ -81,8 +89,21 @@ export type AulaNaArvore =
     }
   | { publicado: false; id: string; titulo: string };
 
+export type QuizNaArvore =
+  | {
+      publicado: true;
+      id: string;
+      aula_id: string | null;
+      slug: string;
+      titulo: string;
+      nota_minima: number;
+      total_questoes: number;
+    }
+  | { publicado: false; id: string; titulo: string };
+
 export interface ModuloNaArvore extends CursoModulo {
   aulas: AulaNaArvore[];
+  quizzes: QuizNaArvore[];
 }
 
 export interface CursoComArvore extends Curso {
@@ -96,10 +117,9 @@ export interface CursoComArvore extends Curso {
   duracao_seg: number;
 }
 
-export interface VizinhaDaAula {
-  slug: string;
-  titulo: string;
-}
+export type VizinhaDeAtividade =
+  | { tipo: 'aula'; slug: string; titulo: string }
+  | { tipo: 'quiz'; slug: string; titulo: string };
 
 export interface AulaComVizinhas {
   aula: CursoAula;
@@ -107,14 +127,70 @@ export interface AulaComVizinhas {
   modulo: Pick<CursoModulo, 'id' | 'titulo' | 'ordem'>;
   posicao: number;
   total: number;
-  anterior: VizinhaDaAula | null;
-  proxima: VizinhaDaAula | null;
+  anterior: VizinhaDeAtividade | null;
+  proxima: VizinhaDeAtividade | null;
 }
 
 type LinhaDeAula = Pick<
   CursoAula,
   'id' | 'modulo_id' | 'ordem' | 'slug' | 'titulo' | 'duracao_seg' | 'publicado' | 'opcional'
 > & { video_id: string | null };
+
+interface LinhaDeQuizNaArvore {
+  id: string;
+  modulo_id: string;
+  aula_id: string | null;
+  ordem: number;
+  slug: string;
+  titulo: string;
+  nota_minima: number;
+  publicado: boolean;
+  total_questoes: number;
+}
+
+type AtividadeOrdenada = VizinhaDeAtividade & { modulo_id: string };
+
+export const comoVizinha = ({ tipo, slug, titulo }: AtividadeOrdenada): VizinhaDeAtividade => ({
+  tipo,
+  slug,
+  titulo,
+});
+
+/** Uma única ordem pública para links anterior/próximo de aulas e quizzes. */
+export const listarAtividadesPublicadas = async (cursoId: string): Promise<AtividadeOrdenada[]> => {
+  const { rows } = await pool.query<AtividadeOrdenada>(
+    `SELECT tipo, slug, titulo, modulo_id
+       FROM (
+         SELECT 'aula'::text AS tipo,
+                a.slug,
+                a.titulo,
+                a.modulo_id,
+                m.ordem AS modulo_ordem,
+                a.ordem AS posicao_ordem,
+                0 AS tipo_ordem,
+                a.id AS desempate
+           FROM curso_aulas a
+           JOIN curso_modulos m ON m.id = a.modulo_id
+          WHERE a.curso_id = $1 AND a.publicado = true
+         UNION ALL
+         SELECT 'quiz'::text AS tipo,
+                q.slug,
+                q.titulo,
+                q.modulo_id,
+                m.ordem AS modulo_ordem,
+                COALESCE(a.ordem, 2147483647) AS posicao_ordem,
+                CASE WHEN q.aula_id IS NULL THEN 2 ELSE 1 END AS tipo_ordem,
+                q.id AS desempate
+           FROM curso_quizzes q
+           JOIN curso_modulos m ON m.id = q.modulo_id
+           LEFT JOIN curso_aulas a ON a.id = q.aula_id
+          WHERE q.curso_id = $1 AND q.publicado = true
+       ) atividades
+      ORDER BY modulo_ordem, posicao_ordem, tipo_ordem, desempate`,
+    [cursoId],
+  );
+  return rows;
+};
 
 export class CursoService extends BaseService<Curso> {
   constructor() {
@@ -148,8 +224,11 @@ export class CursoService extends BaseService<Curso> {
                COALESCE(m.total, 0)                AS modulos,
                COALESCE(a.publicadas, 0)           AS aulas,
                COALESCE(a.rascunhos, 0)            AS aulas_rascunho,
+               COALESCE(q.publicados, 0)           AS quizzes,
+               COALESCE(q.rascunhos, 0)            AS quizzes_rascunho,
                COALESCE(a.duracao, 0)              AS duracao_seg,
-               COALESCE(a.publicadas_json, '[]'::json) AS aulas_publicadas
+               COALESCE(a.publicadas_json, '[]'::json) AS aulas_publicadas,
+               COALESCE(q.publicados_json, '[]'::json) AS quizzes_publicados
           FROM cursos c
           LEFT JOIN LATERAL (
             SELECT COUNT(*)::int AS total
@@ -173,6 +252,23 @@ export class CursoService extends BaseService<Curso> {
               JOIN curso_modulos mo ON mo.id = au.modulo_id
              WHERE au.curso_id = c.id
           ) a ON true
+          LEFT JOIN LATERAL (
+            SELECT (COUNT(*) FILTER (WHERE qu.publicado))::int     AS publicados,
+                   (COUNT(*) FILTER (WHERE NOT qu.publicado))::int AS rascunhos,
+                   JSON_AGG(JSON_BUILD_OBJECT('slug', qu.slug, 'titulo', qu.titulo,
+                                              'aula_id', qu.aula_id,
+                                              'nota_minima', qu.nota_minima)
+                            ORDER BY qm.ordem,
+                                     CASE WHEN qu.aula_id IS NULL THEN 1 ELSE 0 END,
+                                     qa.ordem,
+                                     qu.ordem,
+                                     qu.id)
+                     FILTER (WHERE qu.publicado) AS publicados_json
+              FROM curso_quizzes qu
+              JOIN curso_modulos qm ON qm.id = qu.modulo_id
+              LEFT JOIN curso_aulas qa ON qa.id = qu.aula_id
+             WHERE qu.curso_id = c.id
+          ) q ON true
           ${filtro}
          ORDER BY c.created_at DESC
       `;
@@ -232,7 +328,7 @@ export class CursoService extends BaseService<Curso> {
   async getArvore(slug: string, incluirRascunhos: boolean): Promise<CursoComArvore> {
     const curso = await this.getBySlug(slug, !incluirRascunhos);
 
-    const [modulos, aulas] = await Promise.all([
+    const [modulos, aulas, quizzes] = await Promise.all([
       this.pool.query<CursoModulo>(
         'SELECT * FROM curso_modulos WHERE curso_id = $1 ORDER BY ordem, id',
         [curso.id],
@@ -243,6 +339,17 @@ export class CursoService extends BaseService<Curso> {
            FROM curso_aulas a
           WHERE a.curso_id = $1
           ORDER BY a.ordem, a.id`,
+        [curso.id],
+      ),
+      this.pool.query<LinhaDeQuizNaArvore>(
+        `SELECT q.id, q.modulo_id, q.aula_id, q.ordem, q.slug, q.titulo,
+                q.nota_minima, q.publicado, COUNT(qq.id)::int AS total_questoes
+           FROM curso_quizzes q
+           LEFT JOIN curso_aulas a ON a.id = q.aula_id
+           LEFT JOIN curso_quiz_questoes qq ON qq.quiz_id = q.id
+          WHERE q.curso_id = $1
+          GROUP BY q.id, a.ordem
+          ORDER BY COALESCE(a.ordem, 2147483647), q.ordem, q.id`,
         [curso.id],
       ),
     ]);
@@ -271,9 +378,32 @@ export class CursoService extends BaseService<Curso> {
       porModulo.set(aula.modulo_id, lista);
     }
 
+    const quizzesPorModulo = new Map<string, QuizNaArvore[]>();
+    for (const quiz of quizzes.rows) {
+      const lista = quizzesPorModulo.get(quiz.modulo_id) ?? [];
+      if (quiz.publicado) {
+        lista.push({
+          publicado: true,
+          id: quiz.id,
+          aula_id: quiz.aula_id,
+          slug: quiz.slug,
+          titulo: quiz.titulo,
+          nota_minima: quiz.nota_minima,
+          total_questoes: quiz.total_questoes,
+        });
+      } else {
+        lista.push({ publicado: false, id: quiz.id, titulo: quiz.titulo });
+      }
+      quizzesPorModulo.set(quiz.modulo_id, lista);
+    }
+
     return {
       ...curso,
-      modulos: modulos.rows.map((m) => ({ ...m, aulas: porModulo.get(m.id) ?? [] })),
+      modulos: modulos.rows.map((m) => ({
+        ...m,
+        aulas: porModulo.get(m.id) ?? [],
+        quizzes: quizzesPorModulo.get(m.id) ?? [],
+      })),
       total_aulas: totalPublicadas,
       duracao_seg: duracao,
     };
@@ -302,25 +432,20 @@ export class CursoService extends BaseService<Curso> {
     if (encontradas.length === 0) throw new NotFoundError('Aula');
     const linha = encontradas[0];
 
-    const { rows: ordenadas } = await this.pool.query<{ slug: string; titulo: string }>(
-      `SELECT a.slug, a.titulo
-         FROM curso_aulas a
-         JOIN curso_modulos m ON m.id = a.modulo_id
-        WHERE a.curso_id = $1 AND a.publicado = true
-        ORDER BY m.ordem, a.ordem, a.id`,
-      [linha.curso_id],
-    );
-
-    const indice = ordenadas.findIndex((a) => a.slug === aulaSlug);
+    const ordenadas = await listarAtividadesPublicadas(linha.curso_id);
+    const indice = ordenadas.findIndex((atividade) => atividade.tipo === 'aula' && atividade.slug === aulaSlug);
+    const aulas = ordenadas.filter((atividade) => atividade.tipo === 'aula');
+    const indiceDaAula = aulas.findIndex((atividade) => atividade.slug === aulaSlug);
 
     return {
       aula: linha,
       curso: { id: linha.curso_id, slug: linha.curso_slug, titulo: linha.curso_titulo },
       modulo: { id: linha.modulo_id, titulo: linha.modulo_titulo, ordem: linha.modulo_ordem },
-      posicao: indice + 1,
-      total: ordenadas.length,
-      anterior: indice > 0 ? ordenadas[indice - 1] : null,
-      proxima: indice >= 0 && indice < ordenadas.length - 1 ? ordenadas[indice + 1] : null,
+      posicao: indiceDaAula + 1,
+      total: aulas.length,
+      anterior: indice > 0 ? comoVizinha(ordenadas[indice - 1]) : null,
+      proxima:
+        indice >= 0 && indice < ordenadas.length - 1 ? comoVizinha(ordenadas[indice + 1]) : null,
     };
   }
 

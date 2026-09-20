@@ -1,6 +1,13 @@
 import type { PoolClient, QueryResultRow } from 'pg';
 import pool from '../config/database';
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/AppError';
+import {
+  comoVizinha,
+  listarAtividadesPublicadas,
+  type Curso,
+  type CursoModulo,
+  type VizinhaDeAtividade,
+} from './CursoService';
 
 export interface QuizAlternativa {
   id: string;
@@ -33,6 +40,14 @@ export interface CursoQuiz {
 
 export interface QuizCompleto extends CursoQuiz {
   questoes: QuizQuestao[];
+}
+
+export interface QuizComVizinhas {
+  quiz: QuizCompleto;
+  curso: Pick<Curso, 'id' | 'slug' | 'titulo'>;
+  modulo: Pick<CursoModulo, 'id' | 'titulo' | 'ordem'>;
+  anterior: VizinhaDeAtividade | null;
+  proxima: VizinhaDeAtividade | null;
 }
 
 interface AlternativaInput {
@@ -175,13 +190,22 @@ class CursoQuizService {
     throw erro;
   }
 
-  async getPublico(cursoSlug: string, quizSlug: string): Promise<QuizCompleto> {
+  async getPublico(cursoSlug: string, quizSlug: string): Promise<QuizComVizinhas> {
     const cliente = await pool.connect();
     try {
-      const { rows } = await cliente.query<CursoQuiz>(
-        `SELECT q.*
+      const { rows } = await cliente.query<
+        CursoQuiz & {
+          curso_slug: string;
+          curso_titulo: string;
+          modulo_titulo: string;
+          modulo_ordem: number;
+        }
+      >(
+        `SELECT q.*, c.slug AS curso_slug, c.titulo AS curso_titulo,
+                m.titulo AS modulo_titulo, m.ordem AS modulo_ordem
            FROM curso_quizzes q
            JOIN cursos c ON c.id = q.curso_id
+           JOIN curso_modulos m ON m.id = q.modulo_id
           WHERE c.slug = $1
             AND q.slug = $2
             AND c.publicado = true
@@ -189,7 +213,22 @@ class CursoQuizService {
         [cursoSlug, quizSlug],
       );
       if (rows.length === 0) throw new NotFoundError('Quiz');
-      return this.montarCompleto(cliente, rows[0]);
+      const linha = rows[0];
+      const quiz = await this.montarCompleto(cliente, linha);
+      const atividades = await listarAtividadesPublicadas(linha.curso_id);
+      const indice = atividades.findIndex(
+        (atividade) => atividade.tipo === 'quiz' && atividade.slug === quizSlug,
+      );
+      return {
+        quiz,
+        curso: { id: linha.curso_id, slug: linha.curso_slug, titulo: linha.curso_titulo },
+        modulo: { id: linha.modulo_id, titulo: linha.modulo_titulo, ordem: linha.modulo_ordem },
+        anterior: indice > 0 ? comoVizinha(atividades[indice - 1]) : null,
+        proxima:
+          indice >= 0 && indice < atividades.length - 1
+            ? comoVizinha(atividades[indice + 1])
+            : null,
+      };
     } finally {
       cliente.release();
     }
