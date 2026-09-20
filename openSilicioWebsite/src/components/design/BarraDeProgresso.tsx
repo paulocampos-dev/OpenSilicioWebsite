@@ -27,7 +27,7 @@ export default function BarraDeProgresso({
       aria-valuenow={concluidas}
       aria-valuemin={0}
       aria-valuemax={total}
-      aria-label={rotulo ?? `${concluidas} de ${total} aulas concluídas`}
+      aria-label={rotulo ?? `${concluidas} de ${total} atividades concluídas`}
       sx={{ height: altura, background: 'var(--color-line)', position: 'relative' }}
     >
       {/* Anima scaleX, e não width, para a mudança ficar no compositor: é a

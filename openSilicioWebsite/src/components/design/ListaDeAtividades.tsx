@@ -128,7 +128,9 @@ export default function ListaDeAtividades({
                 ...grade,
                 textDecoration: 'none',
                 color: 'inherit',
-                background: atual ? 'var(--color-steel-100)' : 'transparent',
+                background: atual
+                  ? 'color-mix(in srgb, var(--color-accent) 18%, transparent)'
+                  : 'transparent',
                 '&:hover': { background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)' },
               }}
             >
@@ -180,7 +182,9 @@ export default function ListaDeAtividades({
               ...grade,
               textDecoration: 'none',
               color: 'inherit',
-              background: atual ? 'var(--color-steel-100)' : 'transparent',
+              background: atual
+                ? 'color-mix(in srgb, var(--color-accent) 18%, transparent)'
+                : 'transparent',
               '&:hover': { background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)' },
             }}
           >
