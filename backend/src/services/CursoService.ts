@@ -1,3 +1,4 @@
+import type { PoolClient } from 'pg';
 import pool from '../config/database';
 import { BaseService, PaginationOptions, PaginatedResult } from '../services/BaseService';
 import { ConflictError, NotFoundError, DatabaseError } from '../errors/AppError';
@@ -61,6 +62,8 @@ export interface CursoNaListagem extends Curso {
   aulas_publicadas: Array<{
     id: string;
     modulo_id: string;
+    modulo_ordem: number;
+    ordem: number;
     slug: string;
     titulo: string;
     duracao_seg: number | null;
@@ -68,9 +71,11 @@ export interface CursoNaListagem extends Curso {
   }>;
   quizzes_publicados: Array<{
     modulo_id: string;
+    modulo_ordem: number;
     slug: string;
     titulo: string;
     aula_id: string | null;
+    aula_ordem: number | null;
     nota_minima: number;
   }>;
 }
@@ -170,8 +175,11 @@ export const comoVizinha = ({ tipo, slug, titulo }: AtividadeOrdenada): VizinhaD
 });
 
 /** Uma única ordem pública para links anterior/próximo de aulas e quizzes. */
-export const listarAtividadesPublicadas = async (cursoId: string): Promise<AtividadeOrdenada[]> => {
-  const { rows } = await pool.query<AtividadeOrdenada>(
+export const listarAtividadesPublicadas = async (
+  cursoId: string,
+  executor: Pick<PoolClient, 'query'> = pool,
+): Promise<AtividadeOrdenada[]> => {
+  const { rows } = await executor.query<AtividadeOrdenada>(
     `SELECT tipo, slug, titulo, modulo_id
        FROM (
          SELECT 'aula'::text AS tipo,
@@ -257,6 +265,7 @@ export class CursoService extends BaseService<Curso> {
                    -- módulos, e aí o botão "começar" do índice aponta para a
                    -- aula errada.
                    JSON_AGG(JSON_BUILD_OBJECT('id', au.id, 'modulo_id', au.modulo_id,
+                                              'modulo_ordem', mo.ordem, 'ordem', au.ordem,
                                               'slug', au.slug, 'titulo', au.titulo,
                                               'duracao_seg', au.duracao_seg,
                                               'opcional', au.opcional)
@@ -270,8 +279,10 @@ export class CursoService extends BaseService<Curso> {
             SELECT (COUNT(*) FILTER (WHERE qu.publicado))::int     AS publicados,
                    (COUNT(*) FILTER (WHERE NOT qu.publicado))::int AS rascunhos,
                    JSON_AGG(JSON_BUILD_OBJECT('modulo_id', qu.modulo_id,
+                                              'modulo_ordem', qm.ordem,
                                               'slug', qu.slug, 'titulo', qu.titulo,
                                               'aula_id', qu.aula_id,
+                                              'aula_ordem', qa.ordem,
                                               'nota_minima', qu.nota_minima)
                             ORDER BY qm.ordem,
                                      CASE WHEN qu.aula_id IS NULL THEN 1 ELSE 0 END,

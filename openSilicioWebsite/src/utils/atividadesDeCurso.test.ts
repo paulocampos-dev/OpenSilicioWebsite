@@ -115,13 +115,13 @@ describe('atividadesDaListagem', () => {
       quizzes_rascunho: 0,
       duracao_seg: 0,
       aulas_publicadas: [
-        { id: 'a1', modulo_id: 'm1', slug: 'a1', titulo: 'A1', duracao_seg: null, opcional: false },
-        { id: 'a2', modulo_id: 'm1', slug: 'a2', titulo: 'A2', duracao_seg: null, opcional: false },
-        { id: 'a3', modulo_id: 'm2', slug: 'a3', titulo: 'A3', duracao_seg: null, opcional: false },
+        { id: 'a1', modulo_id: 'm1', modulo_ordem: 0, ordem: 0, slug: 'a1', titulo: 'A1', duracao_seg: null, opcional: false },
+        { id: 'a2', modulo_id: 'm1', modulo_ordem: 0, ordem: 1, slug: 'a2', titulo: 'A2', duracao_seg: null, opcional: false },
+        { id: 'a3', modulo_id: 'm2', modulo_ordem: 1, ordem: 0, slug: 'a3', titulo: 'A3', duracao_seg: null, opcional: false },
       ],
       quizzes_publicados: [
-        { modulo_id: 'm1', aula_id: 'a1', slug: 'q1', titulo: 'Q1', nota_minima: 70 },
-        { modulo_id: 'm1', aula_id: null, slug: 'final', titulo: 'Final', nota_minima: 70 },
+        { modulo_id: 'm1', modulo_ordem: 0, aula_id: 'a1', aula_ordem: 0, slug: 'q1', titulo: 'Q1', nota_minima: 70 },
+        { modulo_id: 'm1', modulo_ordem: 0, aula_id: null, aula_ordem: null, slug: 'final', titulo: 'Final', nota_minima: 70 },
       ],
     }
 
@@ -131,6 +131,52 @@ describe('atividadesDaListagem', () => {
       ['aula', 'a2'],
       ['quiz', 'final'],
       ['aula', 'a3'],
+    ])
+  })
+
+  it('mantém um quiz no módulo correto quando sua aula associada está em rascunho', () => {
+    const curso = {
+      id: 'curso',
+      slug: 'curso',
+      titulo: 'Curso',
+      descricao: 'Descrição',
+      publicado: true,
+      created_at: '',
+      updated_at: '',
+      modulos: 2,
+      aulas: 1,
+      aulas_rascunho: 1,
+      quizzes: 1,
+      quizzes_rascunho: 0,
+      duracao_seg: 0,
+      aulas_publicadas: [
+        {
+          id: 'a2',
+          modulo_id: 'm2',
+          modulo_ordem: 1,
+          ordem: 0,
+          slug: 'a2',
+          titulo: 'A2',
+          duracao_seg: null,
+          opcional: false,
+        },
+      ],
+      quizzes_publicados: [
+        {
+          modulo_id: 'm1',
+          modulo_ordem: 0,
+          aula_id: 'a1-rascunho',
+          aula_ordem: 0,
+          slug: 'q1',
+          titulo: 'Q1',
+          nota_minima: 70,
+        },
+      ],
+    }
+
+    expect(atividadesDaListagem(curso).map(({ tipo, slug }) => [tipo, slug])).toEqual([
+      ['quiz', 'q1'],
+      ['aula', 'a2'],
     ])
   })
 })

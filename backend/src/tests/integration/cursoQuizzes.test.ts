@@ -4,6 +4,7 @@ import { testPool } from '../setup';
 import { cleanDatabase } from '../utils/helpers';
 import { getAuthToken } from '../utils/auth';
 import { cursoQuizService } from '../../services/CursoQuizService';
+import pool from '../../config/database';
 
 const criarEstrutura = async (publicado = true) => {
   const { rows: cursos } = await testPool.query(
@@ -130,6 +131,23 @@ describe('Quizzes de cursos', () => {
       2,
       3,
     ]);
+  });
+
+  it('reutiliza a conexão adquirida ao montar as atividades vizinhas', async () => {
+    const { curso, modulo, aula } = await criarEstrutura();
+    const token = await getAuthToken();
+    const criado = await request(app)
+      .post(`/api/cursos/${curso.id}/modulos/${modulo.id}/quizzes`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ ...corpoDoQuiz(modulo.id, aula.id), publicado: true });
+    expect(criado.status).toBe(201);
+
+    const consultaNoPool = jest.spyOn(pool, 'query');
+    await cursoQuizService.getPublico(curso.slug, criado.body.slug);
+
+    const chamadas = consultaNoPool.mock.calls.length;
+    consultaNoPool.mockRestore();
+    expect(chamadas).toBe(0);
   });
 
   it('encadeia aulas e quizzes publicados na ordem das atividades do curso', async () => {

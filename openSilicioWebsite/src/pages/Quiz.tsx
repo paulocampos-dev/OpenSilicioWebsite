@@ -13,7 +13,7 @@ import { atividadesDoModulo, hrefDaAtividade } from '../utils/atividadesDeCurso'
 import { corrigirQuiz, type CorrecaoDoQuiz } from '../utils/correcaoDeQuiz'
 import { contarAtividadesConcluidas } from '../utils/progressoDeCurso'
 
-export default function Quiz() {
+function ConteudoDoQuiz() {
   const { cursoSlug, quizSlug } = useParams<{ cursoSlug: string; quizSlug: string }>()
   const tema = useTheme()
   const noCelular = useMediaQuery(tema.breakpoints.down('md'))
@@ -357,4 +357,10 @@ export default function Quiz() {
       <Box sx={{ pl: { md: 4 }, minWidth: 0 }}>{conteudo}</Box>
     </Box>
   )
+}
+
+/** Uma nova rota de quiz sempre começa uma tentativa nova, mesmo sem remount do React Router. */
+export default function Quiz() {
+  const { cursoSlug, quizSlug } = useParams<{ cursoSlug: string; quizSlug: string }>()
+  return <ConteudoDoQuiz key={`${cursoSlug ?? ''}/${quizSlug ?? ''}`} />
 }

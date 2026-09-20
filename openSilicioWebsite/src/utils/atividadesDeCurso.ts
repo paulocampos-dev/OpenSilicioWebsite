@@ -57,56 +57,42 @@ export function hrefDaAtividade(
 
 /** Reconstrói a ordem pública do índice usando os resumos leves da API. */
 export function atividadesDaListagem(curso: CursoNaListagem): AtividadePublicada[] {
-  const atividades: AtividadePublicada[] = []
-  const adicionados = new Set<string>()
-
-  for (const [indice, aula] of curso.aulas_publicadas.entries()) {
-    atividades.push({
-      tipo: 'aula',
-      slug: aula.slug,
-      titulo: aula.titulo,
-      opcional: aula.opcional,
-      duracao_seg: aula.duracao_seg,
-    })
-
-    for (const quiz of curso.quizzes_publicados) {
-      if (quiz.aula_id === aula.id) {
-        atividades.push({
-          tipo: 'quiz',
-          slug: quiz.slug,
-          titulo: quiz.titulo,
-          nota_minima: quiz.nota_minima,
-        })
-        adicionados.add(quiz.slug)
-      }
-    }
-
-    const proximaAula = curso.aulas_publicadas[indice + 1]
-    if (!proximaAula || proximaAula.modulo_id !== aula.modulo_id) {
-      for (const quiz of curso.quizzes_publicados) {
-        if (quiz.modulo_id === aula.modulo_id && quiz.aula_id === null) {
-          atividades.push({
-            tipo: 'quiz',
-            slug: quiz.slug,
-            titulo: quiz.titulo,
-            nota_minima: quiz.nota_minima,
-          })
-          adicionados.add(quiz.slug)
-        }
-      }
-    }
-  }
-
-  for (const quiz of curso.quizzes_publicados) {
-    if (!adicionados.has(quiz.slug)) {
-      atividades.push({
-        tipo: 'quiz',
+  const fimDoModulo = Number.MAX_SAFE_INTEGER
+  const posicionadas = [
+    ...curso.aulas_publicadas.map((aula) => ({
+      atividade: {
+        tipo: 'aula' as const,
+        slug: aula.slug,
+        titulo: aula.titulo,
+        opcional: aula.opcional,
+        duracao_seg: aula.duracao_seg,
+      },
+      moduloOrdem: aula.modulo_ordem,
+      posicaoOrdem: aula.ordem,
+      tipoOrdem: 0,
+      desempate: aula.id,
+    })),
+    ...curso.quizzes_publicados.map((quiz) => ({
+      atividade: {
+        tipo: 'quiz' as const,
         slug: quiz.slug,
         titulo: quiz.titulo,
         nota_minima: quiz.nota_minima,
-      })
-    }
-  }
+      },
+      moduloOrdem: quiz.modulo_ordem,
+      posicaoOrdem: quiz.aula_ordem ?? fimDoModulo,
+      tipoOrdem: quiz.aula_id === null ? 2 : 1,
+      desempate: quiz.slug,
+    })),
+  ]
 
-  return atividades
+  posicionadas.sort(
+    (a, b) =>
+      a.moduloOrdem - b.moduloOrdem ||
+      a.posicaoOrdem - b.posicaoOrdem ||
+      a.tipoOrdem - b.tipoOrdem ||
+      a.desempate.localeCompare(b.desempate),
+  )
+
+  return posicionadas.map(({ atividade }) => atividade)
 }

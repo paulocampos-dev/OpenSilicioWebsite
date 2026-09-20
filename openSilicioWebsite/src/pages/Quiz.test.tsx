@@ -1,6 +1,6 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { createMemoryRouter, MemoryRouter, Route, RouterProvider, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { QuizComVizinhas } from '../types'
 import Quiz from './Quiz'
@@ -77,6 +77,15 @@ function renderizar() {
   )
 }
 
+function renderizarComNavegacao() {
+  const router = createMemoryRouter(
+    [{ path: '/cursos/:cursoSlug/quizzes/:quizSlug', element: <Quiz /> }],
+    { initialEntries: ['/cursos/projeto-digital/quizzes/revisao-celulas'] },
+  )
+  render(<RouterProvider router={router} />)
+  return router
+}
+
 describe('Quiz público', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -143,6 +152,82 @@ describe('Quiz público', () => {
 
     expect(screen.getByLabelText('Q1 alternativa 1')).not.toBeChecked()
     expect(screen.getByText('Melhor nota: 80%')).toBeInTheDocument()
+  })
+
+  it('inicia uma tentativa limpa ao navegar para outro quiz antes de corrigir', async () => {
+    const usuario = userEvent.setup()
+    const quizCurto: QuizComVizinhas = {
+      ...dados,
+      quiz: {
+        ...dados.quiz,
+        id: 'quiz-2',
+        slug: 'quiz-curto',
+        titulo: 'Quiz curto',
+        questoes: [
+          {
+            id: 'curta-1',
+            ordem: 0,
+            enunciado: 'Pergunta curta',
+            explicacao: 'Explicação curta',
+            alternativas: dados.quiz.questoes[0]!.alternativas.map((alternativa) => ({
+              ...alternativa,
+              id: `curta-${alternativa.id}`,
+            })),
+          },
+        ],
+      },
+    }
+    mocks.getQuiz.mockImplementation((_cursoSlug: string, quizSlug: string) =>
+      Promise.resolve(quizSlug === 'quiz-curto' ? quizCurto : dados),
+    )
+    const router = renderizarComNavegacao()
+
+    await usuario.click(await screen.findByLabelText('Q1 alternativa 2'))
+    await usuario.click(screen.getByRole('button', { name: 'Próxima questão' }))
+    await act(() => router.navigate('/cursos/projeto-digital/quizzes/quiz-curto'))
+
+    expect(await screen.findByRole('heading', { name: 'Pergunta curta' })).toBeInTheDocument()
+    expect(screen.queryByText('Não foi possível carregar. Tente de novo em alguns minutos.')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('radio').every((radio) => !(radio as HTMLInputElement).checked)).toBe(true)
+  })
+
+  it('remove o resultado anterior ao navegar para outro quiz', async () => {
+    const usuario = userEvent.setup()
+    const segundoQuiz: QuizComVizinhas = {
+      ...dados,
+      quiz: {
+        ...dados.quiz,
+        id: 'quiz-2',
+        slug: 'segundo-quiz',
+        titulo: 'Segundo quiz',
+        questoes: dados.quiz.questoes.map((questao) => ({
+          ...questao,
+          id: `segundo-${questao.id}`,
+          enunciado: `Segundo ${questao.enunciado}`,
+          alternativas: questao.alternativas.map((alternativa) => ({
+            ...alternativa,
+            id: `segundo-${alternativa.id}`,
+          })),
+        })),
+      },
+    }
+    mocks.getQuiz.mockImplementation((_cursoSlug: string, quizSlug: string) =>
+      Promise.resolve(quizSlug === 'segundo-quiz' ? segundoQuiz : dados),
+    )
+    const router = renderizarComNavegacao()
+
+    await usuario.click(await screen.findByLabelText('Q1 alternativa 1'))
+    await usuario.click(screen.getByRole('button', { name: 'Finalizar tentativa' }))
+    await usuario.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Finalizar mesmo assim' }),
+    )
+    expect(await screen.findByRole('heading', { name: '25%' })).toBeInTheDocument()
+
+    await act(() => router.navigate('/cursos/projeto-digital/quizzes/segundo-quiz'))
+
+    expect(await screen.findByRole('heading', { name: 'Segundo Enunciado 1' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '25%' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('radio').every((radio) => !(radio as HTMLInputElement).checked)).toBe(true)
   })
 
   it('mostra erro de carga e tenta novamente', async () => {

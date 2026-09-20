@@ -80,6 +80,8 @@ export interface CursoNaListagem extends Curso {
   aulas_publicadas: Array<{
     id: string;
     modulo_id: string;
+    modulo_ordem: number;
+    ordem: number;
     slug: string;
     titulo: string;
     duracao_seg: number | null;
@@ -87,9 +89,11 @@ export interface CursoNaListagem extends Curso {
   }>;
   quizzes_publicados: Array<{
     modulo_id: string;
+    modulo_ordem: number;
     slug: string;
     titulo: string;
     aula_id: string | null;
+    aula_ordem: number | null;
     nota_minima: number;
   }>;
 }

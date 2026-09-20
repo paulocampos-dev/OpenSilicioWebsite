@@ -215,7 +215,7 @@ class CursoQuizService {
       if (rows.length === 0) throw new NotFoundError('Quiz');
       const linha = rows[0];
       const quiz = await this.montarCompleto(cliente, linha);
-      const atividades = await listarAtividadesPublicadas(linha.curso_id);
+      const atividades = await listarAtividadesPublicadas(linha.curso_id, cliente);
       const indice = atividades.findIndex(
         (atividade) => atividade.tipo === 'quiz' && atividade.slug === quizSlug,
       );

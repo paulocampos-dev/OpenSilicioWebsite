@@ -121,9 +121,11 @@ describe('Cursos API', () => {
       expect(encontrado.quizzes_publicados).toEqual([
         {
           modulo_id: modulo.id,
+          modulo_ordem: 0,
           slug: 'depois-a2',
           titulo: 'Depois da A2',
           aula_id: aulas[1].id,
+          aula_ordem: 1,
           nota_minima: 70,
         },
       ]);
@@ -151,6 +153,8 @@ describe('Cursos API', () => {
         {
           id: aulas[0].id,
           modulo_id: modulo.id,
+          modulo_ordem: 0,
+          ordem: 0,
           slug: 'pdk',
           titulo: 'O que é um PDK',
           duracao_seg: 480,
@@ -159,6 +163,8 @@ describe('Cursos API', () => {
         {
           id: aulas[1].id,
           modulo_id: modulo.id,
+          modulo_ordem: 0,
+          ordem: 1,
           slug: 'verilog',
           titulo: 'Seu primeiro Verilog',
           duracao_seg: 840,
@@ -626,12 +632,47 @@ describe('Cursos API', () => {
         {
           id: criada.body.id,
           modulo_id: modulo.id,
+          modulo_ordem: 0,
+          ordem: 0,
           slug: 'instalar-no-windows',
           titulo: 'Instalar no Windows',
           duracao_seg: null,
           opcional: true,
         },
       ]);
+    });
+
+    it('move uma aula com quiz para outro módulo sem romper a posição do quiz', async () => {
+      const token = await getAuthToken();
+      const { curso, modulo, aulas } = await criarCurso({
+        aulas: [{ slug: 'com-quiz', titulo: 'Com quiz', publicado: true }],
+      });
+      const { rows: outrosModulos } = await testPool.query(
+        `INSERT INTO curso_modulos (curso_id, titulo, ordem)
+         VALUES ($1, 'Segundo módulo', 1) RETURNING *`,
+        [curso.id],
+      );
+      const quiz = await criarQuizDireto({
+        cursoId: curso.id,
+        moduloId: modulo.id,
+        aulaId: aulas[0].id,
+        slug: 'quiz-da-aula',
+        titulo: 'Quiz da aula',
+        publicado: false,
+      });
+
+      const resposta = await request(app)
+        .put(`/api/cursos/aulas/${aulas[0].id}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ modulo_id: outrosModulos[0].id });
+
+      expect(resposta.status).toBe(200);
+      expect(resposta.body.modulo_id).toBe(outrosModulos[0].id);
+      const { rows: quizzes } = await testPool.query(
+        'SELECT modulo_id, aula_id FROM curso_quizzes WHERE id = $1',
+        [quiz.id],
+      );
+      expect(quizzes[0]).toEqual({ modulo_id: outrosModulos[0].id, aula_id: aulas[0].id });
     });
 
     it('reordena as aulas numa tacada e mantém a ordem pedida', async () => {
