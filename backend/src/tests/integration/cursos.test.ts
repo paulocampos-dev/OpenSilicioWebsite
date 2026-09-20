@@ -239,9 +239,12 @@ describe('Cursos API', () => {
   });
 
   describe('GET /api/cursos/:slug', () => {
-    it('devolve quizzes publicados completos e rascunhos sem metadados privados', async () => {
+    it('devolve a posição dos rascunhos sem expor seus metadados privados', async () => {
       const { curso, modulo, aulas } = await criarCurso({
-        aulas: [{ slug: 'aula-a', titulo: 'Aula A', publicado: true }],
+        aulas: [
+          { slug: 'aula-a', titulo: 'Aula A', publicado: true },
+          { slug: 'aula-b', titulo: 'Aula B', publicado: false },
+        ],
       });
       await criarQuizDireto({
         cursoId: curso.id,
@@ -255,6 +258,7 @@ describe('Cursos API', () => {
       await criarQuizDireto({
         cursoId: curso.id,
         moduloId: modulo.id,
+        aulaId: aulas[1].id,
         slug: 'quiz-em-preparo',
         titulo: 'Quiz em preparo',
         publicado: false,
@@ -274,8 +278,16 @@ describe('Cursos API', () => {
           nota_minima: 70,
           total_questoes: 4,
         },
-        { publicado: false, id: expect.any(String), titulo: 'Quiz em preparo' },
+        {
+          publicado: false,
+          id: expect.any(String),
+          aula_id: aulas[1].id,
+          titulo: 'Quiz em preparo',
+        },
       ]);
+      expect(resposta.body.modulos[0].quizzes[1]).not.toHaveProperty('slug');
+      expect(resposta.body.modulos[0].quizzes[1]).not.toHaveProperty('nota_minima');
+      expect(resposta.body.modulos[0].quizzes[1]).not.toHaveProperty('total_questoes');
     });
 
     it('devolve a posição e os metadados do quiz em rascunho só na árvore do admin', async () => {

@@ -106,8 +106,9 @@ export type QuizNaArvore =
       publicado: false;
       id: string;
       titulo: string;
-      /** Metadados presentes só na rota autenticada da estrutura. */
-      aula_id?: string | null;
+      /** A posição é pública para manter a linha "em breve" no lugar certo. */
+      aula_id: string | null;
+      /** Demais metadados aparecem só na rota autenticada da estrutura. */
       slug?: string;
       nota_minima?: number;
       total_questoes?: number;
@@ -416,7 +417,12 @@ export class CursoService extends BaseService<Curso> {
           total_questoes: quiz.total_questoes,
         });
       } else {
-        lista.push({ publicado: false, id: quiz.id, titulo: quiz.titulo });
+        lista.push({
+          publicado: false,
+          id: quiz.id,
+          aula_id: quiz.aula_id,
+          titulo: quiz.titulo,
+        });
       }
       quizzesPorModulo.set(quiz.modulo_id, lista);
     }

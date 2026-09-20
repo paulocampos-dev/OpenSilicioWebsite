@@ -59,14 +59,12 @@ function linhasDoModulo(modulo: ModuloNaArvore, numeroInicial: number): Linha[] 
       item: aula,
       numero: aula.publicado ? String(numeroInicial + publicadasAntes++).padStart(2, '0') : '',
     })
-    const quiz = modulo.quizzes.find(
-      (item) => item.publicado && item.aula_id === aula.id,
-    )
+    const quiz = modulo.quizzes.find((item) => item.aula_id === aula.id)
     if (quiz) linhas.push({ tipo: 'quiz', item: quiz })
   }
 
   for (const quiz of modulo.quizzes) {
-    if (!quiz.publicado || quiz.aula_id === null) linhas.push({ tipo: 'quiz', item: quiz })
+    if (quiz.aula_id === null) linhas.push({ tipo: 'quiz', item: quiz })
   }
   return linhas
 }

@@ -125,8 +125,9 @@ export type QuizNaArvore =
       publicado: false;
       id: string;
       titulo: string;
-      /** Metadados presentes só na árvore autenticada usada pelo admin. */
-      aula_id?: string | null;
+      /** A posição é pública para manter a linha "em breve" no lugar certo. */
+      aula_id: string | null;
+      /** Demais metadados aparecem só na árvore autenticada usada pelo admin. */
       slug?: string;
       nota_minima?: number;
       total_questoes?: number;

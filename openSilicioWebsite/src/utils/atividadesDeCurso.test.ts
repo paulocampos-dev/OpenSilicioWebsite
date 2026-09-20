@@ -38,7 +38,7 @@ const modulo: ModuloNaArvore = {
       nota_minima: 70,
       total_questoes: 3,
     },
-    { publicado: false, id: 'quiz-rascunho', titulo: 'Ainda não' },
+    { publicado: false, id: 'quiz-rascunho', aula_id: null, titulo: 'Ainda não' },
     {
       publicado: true,
       id: 'quiz-1',

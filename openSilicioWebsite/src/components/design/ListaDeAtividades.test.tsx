@@ -19,6 +19,16 @@ const modulo: ModuloNaArvore = {
       tem_video: false,
       opcional: false,
     },
+    { publicado: false, id: 'aula-2', titulo: 'Segunda aula' },
+    {
+      publicado: true,
+      id: 'aula-3',
+      slug: 'aula-3',
+      titulo: 'Terceira aula',
+      duracao_seg: null,
+      tem_video: false,
+      opcional: false,
+    },
   ],
   quizzes: [
     {
@@ -30,7 +40,12 @@ const modulo: ModuloNaArvore = {
       nota_minima: 70,
       total_questoes: 4,
     },
-    { publicado: false, id: 'quiz-rascunho', titulo: 'Quiz em preparação' },
+    {
+      publicado: false,
+      id: 'quiz-rascunho',
+      aula_id: 'aula-2',
+      titulo: 'Quiz em preparação',
+    },
     {
       publicado: true,
       id: 'quiz-final',
@@ -66,7 +81,9 @@ describe('ListaDeAtividades', () => {
     expect(linhas).toEqual([
       expect.stringContaining('01Primeira aula'),
       expect.stringContaining('Quiz da aula'),
+      expect.stringContaining('Segunda aula'),
       expect.stringContaining('Quiz em preparação'),
+      expect.stringContaining('02Terceira aula'),
       expect.stringContaining('Revisão do módulo'),
     ])
     expect(screen.getByRole('link', { name: /Quiz da aula/ })).toHaveAttribute(
