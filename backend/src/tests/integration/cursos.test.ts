@@ -236,6 +236,94 @@ describe('Cursos API', () => {
   });
 
   describe('integridade da estrutura', () => {
+    it('recusa quiz associado a uma aula de outro curso', async () => {
+      await expect(testPool.query('SELECT 1 FROM curso_quizzes LIMIT 0')).resolves.toBeDefined();
+
+      const a = await criarCurso({
+        slug: 'curso-do-quiz',
+        aulas: [{ slug: 'aula-a', titulo: 'Aula A', publicado: true }],
+      });
+      const b = await criarCurso({
+        slug: 'curso-da-aula',
+        aulas: [{ slug: 'aula-b', titulo: 'Aula B', publicado: true }],
+      });
+
+      await expect(
+        testPool.query(
+          `INSERT INTO curso_quizzes
+             (curso_id, modulo_id, aula_id, slug, titulo)
+           VALUES ($1, $2, $3, 'quiz-intruso', 'Quiz intruso')`,
+          [a.curso.id, a.modulo.id, b.aulas[0].id],
+        ),
+      ).rejects.toThrow();
+    });
+
+    it('recusa dois quizzes associados à mesma aula', async () => {
+      const { curso, modulo, aulas } = await criarCurso({
+        aulas: [{ slug: 'uma-aula', titulo: 'Uma aula', publicado: true }],
+      });
+
+      await testPool.query(
+        `INSERT INTO curso_quizzes (curso_id, modulo_id, aula_id, slug, titulo)
+         VALUES ($1, $2, $3, 'primeiro', 'Primeiro')`,
+        [curso.id, modulo.id, aulas[0].id],
+      );
+
+      await expect(
+        testPool.query(
+          `INSERT INTO curso_quizzes (curso_id, modulo_id, aula_id, slug, titulo)
+           VALUES ($1, $2, $3, 'segundo', 'Segundo')`,
+          [curso.id, modulo.id, aulas[0].id],
+        ),
+      ).rejects.toThrow();
+    });
+
+    it('recusa dois quizzes no fim do mesmo módulo', async () => {
+      const { curso, modulo } = await criarCurso();
+
+      await testPool.query(
+        `INSERT INTO curso_quizzes (curso_id, modulo_id, slug, titulo)
+         VALUES ($1, $2, 'primeiro-final', 'Primeiro final')`,
+        [curso.id, modulo.id],
+      );
+
+      await expect(
+        testPool.query(
+          `INSERT INTO curso_quizzes (curso_id, modulo_id, slug, titulo)
+           VALUES ($1, $2, 'segundo-final', 'Segundo final')`,
+          [curso.id, modulo.id],
+        ),
+      ).rejects.toThrow();
+    });
+
+    it('recusa duas alternativas corretas na mesma questão', async () => {
+      const { curso, modulo } = await criarCurso();
+      const { rows: quizzes } = await testPool.query(
+        `INSERT INTO curso_quizzes (curso_id, modulo_id, slug, titulo)
+         VALUES ($1, $2, 'quiz-respostas', 'Quiz respostas') RETURNING id`,
+        [curso.id, modulo.id],
+      );
+      const { rows: questoes } = await testPool.query(
+        `INSERT INTO curso_quiz_questoes (quiz_id, ordem, enunciado, explicacao)
+         VALUES ($1, 0, 'Uma questão', 'Uma explicação') RETURNING id`,
+        [quizzes[0].id],
+      );
+
+      await testPool.query(
+        `INSERT INTO curso_quiz_alternativas (questao_id, ordem, texto, correta)
+         VALUES ($1, 0, 'Correta A', true)`,
+        [questoes[0].id],
+      );
+
+      await expect(
+        testPool.query(
+          `INSERT INTO curso_quiz_alternativas (questao_id, ordem, texto, correta)
+           VALUES ($1, 1, 'Correta B', true)`,
+          [questoes[0].id],
+        ),
+      ).rejects.toThrow();
+    });
+
     it('recusa aula cujo curso não é o curso do módulo', async () => {
       const a = await criarCurso({ slug: 'curso-a' });
       const b = await criarCurso({ slug: 'curso-b' });
