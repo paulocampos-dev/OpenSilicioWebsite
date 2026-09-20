@@ -102,7 +102,16 @@ export type QuizNaArvore =
       nota_minima: number;
       total_questoes: number;
     }
-  | { publicado: false; id: string; titulo: string };
+  | {
+      publicado: false;
+      id: string;
+      titulo: string;
+      /** Metadados presentes só na rota autenticada da estrutura. */
+      aula_id?: string | null;
+      slug?: string;
+      nota_minima?: number;
+      total_questoes?: number;
+    };
 
 export interface ModuloNaArvore extends CursoModulo {
   aulas: AulaNaArvore[];
@@ -389,6 +398,16 @@ export class CursoService extends BaseService<Curso> {
       if (quiz.publicado) {
         lista.push({
           publicado: true,
+          id: quiz.id,
+          aula_id: quiz.aula_id,
+          slug: quiz.slug,
+          titulo: quiz.titulo,
+          nota_minima: quiz.nota_minima,
+          total_questoes: quiz.total_questoes,
+        });
+      } else if (incluirRascunhos) {
+        lista.push({
+          publicado: false,
           id: quiz.id,
           aula_id: quiz.aula_id,
           slug: quiz.slug,

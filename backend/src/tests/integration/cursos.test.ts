@@ -278,6 +278,39 @@ describe('Cursos API', () => {
       ]);
     });
 
+    it('devolve a posição e os metadados do quiz em rascunho só na árvore do admin', async () => {
+      const { curso, modulo, aulas } = await criarCurso({
+        aulas: [{ slug: 'aula-a', titulo: 'Aula A', publicado: true }],
+      });
+      const quiz = await criarQuizDireto({
+        cursoId: curso.id,
+        moduloId: modulo.id,
+        aulaId: aulas[0].id,
+        slug: 'quiz-em-preparo',
+        titulo: 'Quiz em preparo',
+        publicado: false,
+        questoes: 2,
+      });
+      const token = await getAuthToken();
+
+      const resposta = await request(app)
+        .get(`/api/cursos/completo/${curso.slug}`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(resposta.status).toBe(200);
+      expect(resposta.body.modulos[0].quizzes).toEqual([
+        {
+          publicado: false,
+          id: quiz.id,
+          aula_id: aulas[0].id,
+          slug: 'quiz-em-preparo',
+          titulo: 'Quiz em preparo',
+          nota_minima: 70,
+          total_questoes: 2,
+        },
+      ]);
+    });
+
     it('devolve a árvore com a aula em rascunho sem slug nem duração', async () => {
       const { curso } = await criarCurso({
         slug: 'do-rtl-ao-gds',

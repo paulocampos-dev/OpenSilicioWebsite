@@ -23,7 +23,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PublishIcon from '@mui/icons-material/Publish';
 import { cursosApi } from '../../services/api';
-import type { CursoComArvore } from '../../types';
+import type { AulaNaArvore, CursoComArvore, ModuloNaArvore, QuizNaArvore } from '../../types';
 import { duracaoPorExtenso } from '../../utils/duracao';
 
 /** Troca dois itens de lugar e devolve a lista nova. */
@@ -33,6 +33,37 @@ const trocar = <T,>(lista: T[], de: number, para: number): T[] => {
   const [movido] = copia.splice(de, 1);
   copia.splice(para, 0, movido!);
   return copia;
+};
+
+type AtividadeDoAdmin =
+  | { tipo: 'aula'; item: AulaNaArvore; indiceAula: number }
+  | { tipo: 'quiz'; item: QuizNaArvore; posicao: string };
+
+/** Intercala cada quiz depois da aula escolhida e deixa a revisão no final. */
+const atividadesDoModulo = (modulo: ModuloNaArvore): AtividadeDoAdmin[] => {
+  const atividades: AtividadeDoAdmin[] = [];
+  const quizzesAdicionados = new Set<string>();
+
+  for (const [indiceAula, aula] of modulo.aulas.entries()) {
+    atividades.push({ tipo: 'aula', item: aula, indiceAula });
+    for (const quiz of modulo.quizzes) {
+      if (quiz.aula_id === aula.id) {
+        atividades.push({ tipo: 'quiz', item: quiz, posicao: `Depois de ${aula.titulo}` });
+        quizzesAdicionados.add(quiz.id);
+      }
+    }
+  }
+
+  for (const quiz of modulo.quizzes) {
+    if (quizzesAdicionados.has(quiz.id)) continue;
+    atividades.push({
+      tipo: 'quiz',
+      item: quiz,
+      posicao: quiz.aula_id === null ? 'Fim do módulo' : 'Posição indisponível',
+    });
+  }
+
+  return atividades;
 };
 
 export default function CursoEstrutura() {
@@ -124,10 +155,14 @@ export default function CursoEstrutura() {
     }
   };
 
-  const apagarModulo = async (id: string, titulo: string, quantasAulas: number) => {
+  const apagarModulo = async (id: string, titulo: string, quantasAulas: number, quantosQuizzes: number) => {
+    const itens = [
+      quantasAulas > 0 ? `${quantasAulas} ${quantasAulas === 1 ? 'aula' : 'aulas'}` : null,
+      quantosQuizzes > 0 ? `${quantosQuizzes} ${quantosQuizzes === 1 ? 'quiz' : 'quizzes'}` : null,
+    ].filter(Boolean).join(' e ');
     const confirmado = window.confirm(
-      quantasAulas > 0
-        ? `Apagar o módulo "${titulo}" também apaga suas ${quantasAulas} aulas e o texto delas. Continuar?`
+      itens
+        ? `Apagar o módulo "${titulo}" também apaga ${itens} e todo o conteúdo deles. Continuar?`
         : `Apagar o módulo "${titulo}"?`,
     );
     if (!confirmado) return;
@@ -182,6 +217,17 @@ export default function CursoEstrutura() {
       await carregar();
     } catch (erro) {
       falhar('Erro ao deletar a aula', erro);
+    }
+  };
+
+  const apagarQuiz = async (id: string, titulo: string) => {
+    if (!window.confirm(`Apagar o quiz "${titulo}" e todas as questões dele?`)) return;
+
+    try {
+      await cursosApi.deletarQuiz(id);
+      await carregar();
+    } catch (erro) {
+      falhar('Erro ao deletar o quiz', erro);
     }
   };
 
@@ -282,7 +328,9 @@ export default function CursoEstrutura() {
               <IconButton
                 size="small"
                 color="error"
-                onClick={() => apagarModulo(modulo.id, modulo.titulo, modulo.aulas.length)}
+                onClick={() =>
+                  apagarModulo(modulo.id, modulo.titulo, modulo.aulas.length, modulo.quizzes.length)
+                }
                 title="Deletar"
               >
                 <DeleteIcon fontSize="small" />
@@ -290,70 +338,120 @@ export default function CursoEstrutura() {
             </Stack>
 
             <Stack spacing={0.5} sx={{ mt: 2 }}>
-              {modulo.aulas.map((aula, indiceAula) => (
-                <Stack
-                  key={aula.id}
-                  direction="row"
-                  alignItems="center"
-                  spacing={1}
-                  sx={{ py: 0.75, borderTop: '1px solid', borderColor: 'divider' }}
-                >
-                  <Typography sx={{ flex: 1, minWidth: 0 }}>
-                    {aula.titulo}
-                    {aula.publicado && aula.duracao_seg ? (
-                      <Typography component="span" variant="caption" color="text.secondary">
-                        {' '}
-                        · {duracaoPorExtenso(aula.duracao_seg)}
+              {atividadesDoModulo(modulo).map((atividade) => {
+                if (atividade.tipo === 'aula') {
+                  const aula = atividade.item;
+                  const indiceAula = atividade.indiceAula;
+                  return (
+                    <Stack
+                      key={`aula-${aula.id}`}
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                      sx={{ py: 0.75, borderTop: '1px solid', borderColor: 'divider' }}
+                    >
+                      <Typography sx={{ flex: 1, minWidth: 0 }}>
+                        {aula.titulo}
+                        {aula.publicado && aula.duracao_seg ? (
+                          <Typography component="span" variant="caption" color="text.secondary">
+                            {' '}
+                            · {duracaoPorExtenso(aula.duracao_seg)}
+                          </Typography>
+                        ) : null}
+                        {aula.publicado && aula.opcional ? (
+                          <Typography component="span" variant="caption" color="text.secondary">
+                            {' '}
+                            · opcional
+                          </Typography>
+                        ) : null}
                       </Typography>
-                    ) : null}
-                    {aula.publicado && aula.opcional ? (
-                      <Typography component="span" variant="caption" color="text.secondary">
-                        {' '}
-                        · opcional
-                      </Typography>
-                    ) : null}
-                  </Typography>
-                  <Chip
-                    size="small"
-                    label={aula.publicado ? 'Publicada' : 'Rascunho'}
-                    color={aula.publicado ? 'success' : 'default'}
-                  />
-                  <IconButton
-                    size="small"
-                    disabled={indiceAula === 0}
-                    onClick={() => moverAula(modulo.id, indiceAula, -1)}
-                    title="Subir"
-                  >
-                    <ArrowUpwardIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    disabled={indiceAula === modulo.aulas.length - 1}
-                    onClick={() => moverAula(modulo.id, indiceAula, 1)}
-                    title="Descer"
-                  >
-                    <ArrowDownwardIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    component={RouterLink}
-                    to={`/admin/cursos/${curso.slug}/aulas/${aula.id}`}
-                    title="Editar"
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => apagarAula(aula.id, aula.titulo)}
-                    title="Deletar"
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
-              ))}
+                      <Chip
+                        size="small"
+                        label={aula.publicado ? 'Publicada' : 'Rascunho'}
+                        color={aula.publicado ? 'success' : 'default'}
+                      />
+                      <IconButton
+                        size="small"
+                        disabled={indiceAula === 0}
+                        onClick={() => moverAula(modulo.id, indiceAula, -1)}
+                        title="Subir"
+                      >
+                        <ArrowUpwardIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        disabled={indiceAula === modulo.aulas.length - 1}
+                        onClick={() => moverAula(modulo.id, indiceAula, 1)}
+                        title="Descer"
+                      >
+                        <ArrowDownwardIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        component={RouterLink}
+                        to={`/admin/cursos/${curso.slug}/aulas/${aula.id}`}
+                        title="Editar"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => apagarAula(aula.id, aula.titulo)}
+                        title="Deletar"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  );
+                }
 
-              <Box sx={{ pt: 1 }}>
+                const quiz = atividade.item;
+                return (
+                  <Stack
+                    key={`quiz-${quiz.id}`}
+                    direction="row"
+                    alignItems="center"
+                    spacing={1}
+                    sx={{ py: 0.75, pl: 2, borderTop: '1px solid', borderColor: 'divider' }}
+                  >
+                    <Box sx={{ width: 22, textAlign: 'center', color: 'primary.main', fontWeight: 700 }}>
+                      ?
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography>{quiz.titulo}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {quiz.total_questoes ?? 0}{' '}
+                        {(quiz.total_questoes ?? 0) === 1 ? 'questão' : 'questões'} · mínimo{' '}
+                        {quiz.nota_minima ?? 70}% · {atividade.posicao.toLocaleLowerCase('pt-BR')}
+                      </Typography>
+                    </Box>
+                    <Chip
+                      size="small"
+                      label={quiz.publicado ? 'Publicado' : 'Rascunho'}
+                      color={quiz.publicado ? 'success' : 'default'}
+                    />
+                    <IconButton
+                      size="small"
+                      component={RouterLink}
+                      to={`/admin/cursos/${curso.slug}/quizzes/${quiz.id}`}
+                      aria-label={`Editar quiz ${quiz.titulo}`}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => apagarQuiz(quiz.id, quiz.titulo)}
+                      aria-label={`Deletar quiz ${quiz.titulo}`}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Stack>
+                );
+              })}
+
+              <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
                 <Button
                   size="small"
                   startIcon={<AddIcon />}
@@ -362,7 +460,15 @@ export default function CursoEstrutura() {
                 >
                   Nova aula
                 </Button>
-              </Box>
+                <Button
+                  size="small"
+                  startIcon={<AddIcon />}
+                  component={RouterLink}
+                  to={`/admin/cursos/${curso.slug}/quizzes/novo?modulo=${modulo.id}`}
+                >
+                  Novo quiz
+                </Button>
+              </Stack>
             </Stack>
           </Paper>
         ))}

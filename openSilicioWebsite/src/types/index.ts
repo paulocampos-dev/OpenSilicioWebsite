@@ -121,7 +121,16 @@ export type QuizNaArvore =
       nota_minima: number;
       total_questoes: number;
     }
-  | { publicado: false; id: string; titulo: string };
+  | {
+      publicado: false;
+      id: string;
+      titulo: string;
+      /** Metadados presentes só na árvore autenticada usada pelo admin. */
+      aula_id?: string | null;
+      slug?: string;
+      nota_minima?: number;
+      total_questoes?: number;
+    };
 
 export type AtividadePublicada =
   | {

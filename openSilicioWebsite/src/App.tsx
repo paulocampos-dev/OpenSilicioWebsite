@@ -36,6 +36,7 @@ import CursoList from './pages/admin/CursoList'
 import CursoForm from './pages/admin/CursoForm'
 import CursoEstrutura from './pages/admin/CursoEstrutura'
 import AulaForm from './pages/admin/AulaForm'
+import QuizForm from './pages/admin/QuizForm'
 import AdminWikiList from './pages/admin/WikiList'
 import WikiForm from './pages/admin/WikiForm'
 import Settings from './pages/admin/Settings'
@@ -379,6 +380,13 @@ function AppContent() {
                   </AdminLayout>
                 </ProtectedRoute>
               } />
+              <Route path="/admin/cursos/:cursoSlug/quizzes/:quizId" element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <QuizForm />
+                  </AdminLayout>
+                </ProtectedRoute>
+              } />
               <Route path="/admin/wiki" element={
                 <ProtectedRoute>
                   <AdminLayout>
@@ -426,4 +434,3 @@ export default function App() {
     </BrowserRouter>
   )
 }
-
