@@ -2,7 +2,7 @@
 
 **Data:** 2026-09-20
 
-**Status:** aguardando revisão
+**Status:** aprovado
 
 ## Objetivo
 
@@ -65,8 +65,8 @@ vence. Informações que possam ter mudado, em especial LibreLane e Tiny Tapeout
 serão conferidas na documentação oficial antes de entrar no rascunho.
 
 As capturas do curso original não serão copiadas. O Markdown usará lembretes
-visíveis no rascunho no formato `Captura pendente: ...`, descrevendo exatamente
-o que Paulo deve registrar. Esses lembretes precisam ser substituídos ou
+visíveis no rascunho no formato `> **IMAGEM.** ...`, descrevendo exatamente o
+que Paulo deve registrar. Esses lembretes precisam ser substituídos ou
 removidos antes da publicação da aula.
 
 ## Fontes locais
@@ -125,6 +125,17 @@ como uma lista editorial, não como fonte da associação no banco.
 Links externos devem priorizar documentação oficial e páginas estáveis. Links do
 curso de referência, canais de comunidade e recursos comerciais só entram se
 forem necessários para executar a atividade.
+
+## Registro de melhorias
+
+Durante a produção, qualquer atrito real no site, no painel ou no editor será
+registrado em `docs/course-authoring-improvements.md`. Cada observação deve
+trazer o contexto em que apareceu, o impacto para autor ou estudante, o
+contorno usado nesta rodada e uma proposta curta de melhoria.
+
+Esse registro não autoriza mudanças de produto dentro desta entrega. Ele serve
+como uma fila concreta para decisões futuras, sem misturar melhorias desejáveis
+com o trabalho necessário para terminar o curso.
 
 ## Validação
 
