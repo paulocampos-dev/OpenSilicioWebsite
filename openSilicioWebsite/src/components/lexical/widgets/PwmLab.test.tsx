@@ -25,9 +25,27 @@ const configuracao: ConfiguracaoPwm = {
 
 describe('PwmLab', () => {
   it('empilha as leituras na faixa móvel', () => {
-    expect(estilosDeWidgets).toMatch(
-      /@media \(max-width: 900px\) \{\s*\.os-pwm__leituras \{ grid-template-columns: 1fr; \}/,
-    )
+    const estilo = document.createElement('style')
+    estilo.textContent = estilosDeWidgets
+    document.head.append(estilo)
+
+    try {
+      const regraMovel = Array.from(estilo.sheet?.cssRules ?? []).find(
+        (regra) => regra instanceof CSSMediaRule && regra.conditionText === '(max-width: 900px)',
+      )
+      expect(regraMovel).toBeInstanceOf(CSSMediaRule)
+      if (!(regraMovel instanceof CSSMediaRule)) return
+
+      const regraLeituras = Array.from(regraMovel.cssRules).find(
+        (regra) => regra instanceof CSSStyleRule && regra.selectorText === '.os-pwm__leituras',
+      )
+      expect(regraLeituras).toBeInstanceOf(CSSStyleRule)
+      if (!(regraLeituras instanceof CSSStyleRule)) return
+
+      expect(regraLeituras.style.getPropertyValue('grid-template-columns')).toBe('1fr')
+    } finally {
+      estilo.remove()
+    }
   })
 
   it('exige uma hipótese antes de liberar a bancada', async () => {
