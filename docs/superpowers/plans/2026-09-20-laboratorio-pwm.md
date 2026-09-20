@@ -58,7 +58,7 @@
 - `docs/course-authoring-improvements.md`: registrar atritos reais encontrados ao inserir o laboratório.
 - `AGENTS.md`: documentar o formato, a carga dinâmica e a regra de estado transitório do novo nó.
 
-## Tarefa 1: domínio PWM validado e testado
+## Task 1: domínio PWM validado e testado
 
 **Files:**
 - Create: `openSilicioWebsite/src/components/lexical/utils/pwmLab.ts`
@@ -274,7 +274,7 @@ git add openSilicioWebsite/src/components/lexical/utils/pwmLab.ts openSilicioWeb
 git commit -m "feat(cursos): add PWM lab domain model"
 ```
 
-## Tarefa 2: bancada React acessível e responsiva
+## Task 2: bancada React acessível e responsiva
 
 **Files:**
 - Create: `openSilicioWebsite/src/components/lexical/widgets/PwmLab.tsx`
@@ -510,7 +510,7 @@ git add openSilicioWebsite/src/components/lexical/widgets/PwmLab.tsx openSilicio
 git commit -m "feat(cursos): add interactive PWM bench"
 ```
 
-## Tarefa 3: nó Lexical e autoria no editor
+## Task 3: nó Lexical e autoria no editor
 
 **Files:**
 - Create: `openSilicioWebsite/src/components/lexical/nodes/PwmLabNode.tsx`
@@ -704,7 +704,7 @@ git add openSilicioWebsite/src/components/lexical/nodes/PwmLabNode.tsx openSilic
 git commit -m "feat(cursos): add PWM lab authoring"
 ```
 
-## Tarefa 4: revisão, documentação e conteúdo piloto
+## Task 4: revisão, documentação e conteúdo piloto
 
 **Files:**
 - Modify: `AGENTS.md`
@@ -796,7 +796,7 @@ git add AGENTS.md docs/course-authoring-improvements.md
 git commit -m "docs(cursos): document PWM lab authoring"
 ```
 
-## Tarefa 5: publicar a capacidade e inserir o rascunho real
+## Task 5: publicar a capacidade e inserir o rascunho real
 
 **Files:**
 - No tracked source changes expected after deploy.
