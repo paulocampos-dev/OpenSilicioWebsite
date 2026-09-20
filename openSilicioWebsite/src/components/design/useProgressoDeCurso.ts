@@ -7,11 +7,16 @@ import {
   lerProgresso,
   marcarAutomaticamente,
   proximaAula,
+  quizConcluido,
+  melhorNota,
+  tentativasDoQuiz,
+  registrarTentativa,
   registrarVisita,
   temProgressoGravado,
   zerarCurso,
   type AulaPublicada,
   type Progresso,
+  type UltimaAtividade,
 } from '../../utils/progressoDeCurso'
 
 /**
@@ -58,7 +63,17 @@ export function useProgressoDeCurso() {
   }, [])
 
   const visitar = useCallback((curso: string, aula: string) => {
-    setProgresso((anterior) => registrarVisita(anterior, curso, aula))
+    setProgresso((anterior) =>
+      registrarVisita(anterior, curso, { tipo: 'aula', slug: aula }),
+    )
+  }, [])
+
+  const visitarAtividade = useCallback((curso: string, atividade: UltimaAtividade) => {
+    setProgresso((anterior) => registrarVisita(anterior, curso, atividade))
+  }, [])
+
+  const registrarResultado = useCallback((curso: string, quiz: string, nota: number) => {
+    setProgresso((anterior) => registrarTentativa(anterior, curso, quiz, nota))
   }, [])
 
   const zerar = useCallback((curso: string) => {
@@ -87,16 +102,37 @@ export function useProgressoDeCurso() {
     [progresso],
   )
 
+  const notaDoQuiz = useCallback(
+    (curso: string, quiz: string) => melhorNota(progresso, curso, quiz),
+    [progresso],
+  )
+
+  const tentativas = useCallback(
+    (curso: string, quiz: string) => tentativasDoQuiz(progresso, curso, quiz),
+    [progresso],
+  )
+
+  const quizEstaConcluido = useCallback(
+    (curso: string, quiz: string, notaMinima: number) =>
+      quizConcluido(progresso, curso, quiz, notaMinima),
+    [progresso],
+  )
+
   return {
     progresso,
     marcarAutomatico,
     alternar,
     visitar,
+    visitarAtividade,
+    registrarResultado,
     zerar,
     concluida,
     concluidas,
     temProgresso,
     retomarEm,
+    notaDoQuiz,
+    tentativasDoQuiz: tentativas,
+    quizEstaConcluido,
   }
 }
 

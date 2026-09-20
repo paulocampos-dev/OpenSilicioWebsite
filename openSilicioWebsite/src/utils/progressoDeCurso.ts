@@ -10,13 +10,24 @@
  * React, para dar para testar sem DOM. Quem usa é o hook useProgresso.
  */
 
+import type { AtividadePublicada } from '../types'
+
 export type EstadoAula = 'concluida' | 'nao-concluida';
+
+export interface ProgressoQuiz {
+  melhorNota: number;
+  tentativas: number;
+}
+
+export type UltimaAtividade = { tipo: 'aula' | 'quiz'; slug: string };
 
 export interface ProgressoCurso {
   /** Chaveado pelo slug da aula. */
   aulas: Record<string, EstadoAula>;
-  /** Slug da última aula aberta, para o botão "retomar". */
-  ultima: string | null;
+  /** Chaveado pelo slug do quiz. */
+  quizzes: Record<string, ProgressoQuiz>;
+  /** Última aula ou quiz aberto, para o botão "retomar". */
+  ultima: UltimaAtividade | null;
 }
 
 export type Progresso = Record<string, ProgressoCurso>;
@@ -40,7 +51,7 @@ export const CHAVE_DE_ARMAZENAMENTO = 'opensilicio-cursos-progresso';
 export const contaveis = <T extends AulaPublicada>(publicadas: readonly T[]): T[] =>
   publicadas.filter((aula) => !aula.opcional);
 
-const cursoVazio = (): ProgressoCurso => ({ aulas: {}, ultima: null });
+const cursoVazio = (): ProgressoCurso => ({ aulas: {}, quizzes: {}, ultima: null });
 
 /**
  * Descarta o que não tiver a forma esperada em vez de confiar.
@@ -65,7 +76,11 @@ export function lerProgresso(bruto: string | null): Progresso {
   for (const [curso, valor] of Object.entries(analisado as Record<string, unknown>)) {
     if (typeof valor !== 'object' || valor === null) continue;
 
-    const { aulas, ultima } = valor as { aulas?: unknown; ultima?: unknown };
+    const { aulas, quizzes, ultima } = valor as {
+      aulas?: unknown;
+      quizzes?: unknown;
+      ultima?: unknown;
+    };
     if (typeof aulas !== 'object' || aulas === null || Array.isArray(aulas)) continue;
 
     const limpas: Record<string, EstadoAula> = {};
@@ -73,7 +88,42 @@ export function lerProgresso(bruto: string | null): Progresso {
       if (estado === 'concluida' || estado === 'nao-concluida') limpas[aula] = estado;
     }
 
-    saida[curso] = { aulas: limpas, ultima: typeof ultima === 'string' ? ultima : null };
+    const quizzesLimpos: Record<string, ProgressoQuiz> = {};
+    if (typeof quizzes === 'object' && quizzes !== null && !Array.isArray(quizzes)) {
+      for (const [quiz, tentativa] of Object.entries(quizzes as Record<string, unknown>)) {
+        if (typeof tentativa !== 'object' || tentativa === null || Array.isArray(tentativa)) continue;
+        const { melhorNota: nota, tentativas } = tentativa as {
+          melhorNota?: unknown;
+          tentativas?: unknown;
+        };
+        if (
+          typeof nota === 'number' &&
+          Number.isFinite(nota) &&
+          nota >= 0 &&
+          nota <= 100 &&
+          typeof tentativas === 'number' &&
+          Number.isInteger(tentativas) &&
+          tentativas > 0
+        ) {
+          quizzesLimpos[quiz] = { melhorNota: nota, tentativas };
+        }
+      }
+    }
+
+    let ultimaLimpa: UltimaAtividade | null = null;
+    if (typeof ultima === 'string') {
+      ultimaLimpa = { tipo: 'aula', slug: ultima };
+    } else if (typeof ultima === 'object' && ultima !== null && !Array.isArray(ultima)) {
+      const candidata = ultima as { tipo?: unknown; slug?: unknown };
+      if (
+        (candidata.tipo === 'aula' || candidata.tipo === 'quiz') &&
+        typeof candidata.slug === 'string'
+      ) {
+        ultimaLimpa = { tipo: candidata.tipo, slug: candidata.slug };
+      }
+    }
+
+    saida[curso] = { aulas: limpas, quizzes: quizzesLimpos, ultima: ultimaLimpa };
   }
 
   return saida;
@@ -114,16 +164,61 @@ export function definirEstado(
   };
 }
 
-export function registrarVisita(progresso: Progresso, curso: string, aula: string): Progresso {
+export function registrarVisita(
+  progresso: Progresso,
+  curso: string,
+  atividade: UltimaAtividade,
+): Progresso {
   const atual = progresso[curso] ?? cursoVazio();
-  if (atual.ultima === aula) return progresso;
+  if (atual.ultima?.tipo === atividade.tipo && atual.ultima.slug === atividade.slug) return progresso;
 
-  return { ...progresso, [curso]: { ...atual, ultima: aula } };
+  return { ...progresso, [curso]: { ...atual, ultima: atividade } };
+}
+
+export function registrarTentativa(
+  progresso: Progresso,
+  curso: string,
+  quiz: string,
+  nota: number,
+): Progresso {
+  const atual = progresso[curso] ?? cursoVazio();
+  const tentativa = atual.quizzes[quiz];
+  return {
+    ...progresso,
+    [curso]: {
+      ...atual,
+      quizzes: {
+        ...atual.quizzes,
+        [quiz]: {
+          melhorNota: Math.max(tentativa?.melhorNota ?? 0, nota),
+          tentativas: (tentativa?.tentativas ?? 0) + 1,
+        },
+      },
+    },
+  };
+}
+
+export function melhorNota(progresso: Progresso, curso: string, quiz: string): number | null {
+  return progresso[curso]?.quizzes[quiz]?.melhorNota ?? null;
+}
+
+export function tentativasDoQuiz(progresso: Progresso, curso: string, quiz: string): number {
+  return progresso[curso]?.quizzes[quiz]?.tentativas ?? 0;
+}
+
+export function quizConcluido(
+  progresso: Progresso,
+  curso: string,
+  quiz: string,
+  notaMinima: number,
+): boolean {
+  const nota = melhorNota(progresso, curso, quiz);
+  return nota !== null && nota >= notaMinima;
 }
 
 /**
- * Apaga tudo o que está gravado de um curso: as concluídas, os
- * 'nao-concluida' explícitos e a última aula aberta.
+ * Apaga tudo o que está gravado de um curso: aulas, tentativas de quiz e a
+ * última atividade aberta.
  *
  * Tira a chave inteira em vez de zerar os campos, senão o curso continuaria
  * com um `ultima` e um mapa vazios, e `proximaAula` teria que tratar esse
@@ -147,7 +242,10 @@ export function zerarCurso(progresso: Progresso, curso: string): Progresso {
  */
 export function temProgressoGravado(progresso: Progresso, curso: string): boolean {
   const doCurso = progresso[curso];
-  return doCurso !== undefined && Object.keys(doCurso.aulas).length > 0;
+  return (
+    doCurso !== undefined &&
+    (Object.keys(doCurso.aulas).length > 0 || Object.keys(doCurso.quizzes).length > 0)
+  );
 }
 
 export function estaConcluida(progresso: Progresso, curso: string, aula: string): boolean {
@@ -195,10 +293,57 @@ export function proximaAula(
   const doCurso = progresso[curso];
   if (!doCurso) return publicadas[0]!.slug;
 
-  if (doCurso.ultima && publicadas.some((aula) => aula.slug === doCurso.ultima)) {
-    return doCurso.ultima;
+  if (
+    doCurso.ultima?.tipo === 'aula' &&
+    publicadas.some((aula) => aula.slug === doCurso.ultima?.slug)
+  ) {
+    return doCurso.ultima.slug;
   }
 
   const pendente = contaveis(publicadas).find((aula) => doCurso.aulas[aula.slug] !== 'concluida');
   return pendente?.slug ?? publicadas[0]!.slug;
+}
+
+const atividadeConta = (atividade: AtividadePublicada): boolean =>
+  atividade.tipo === 'quiz' || !atividade.opcional;
+
+const atividadeConcluida = (
+  progresso: Progresso,
+  curso: string,
+  atividade: AtividadePublicada,
+): boolean =>
+  atividade.tipo === 'quiz'
+    ? quizConcluido(progresso, curso, atividade.slug, atividade.nota_minima)
+    : estaConcluida(progresso, curso, atividade.slug);
+
+export function contarAtividadesConcluidas(
+  progresso: Progresso,
+  curso: string,
+  atividades: readonly AtividadePublicada[],
+): number {
+  return atividades.filter(
+    (atividade) => atividadeConta(atividade) && atividadeConcluida(progresso, curso, atividade),
+  ).length;
+}
+
+export function proximaAtividade(
+  progresso: Progresso,
+  curso: string,
+  atividades: readonly AtividadePublicada[],
+): AtividadePublicada | null {
+  if (atividades.length === 0) return null;
+
+  const ultima = progresso[curso]?.ultima;
+  if (ultima) {
+    const publicada = atividades.find(
+      (atividade) => atividade.tipo === ultima.tipo && atividade.slug === ultima.slug,
+    );
+    if (publicada) return publicada;
+  }
+
+  return (
+    atividades.find(
+      (atividade) => atividadeConta(atividade) && !atividadeConcluida(progresso, curso, atividade),
+    ) ?? atividades[0]!
+  );
 }

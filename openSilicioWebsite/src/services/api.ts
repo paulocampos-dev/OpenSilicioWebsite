@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings, PendingWikiLink, PendingWikiLinkGrouped, SeriesNavigation, Curso, CursoNaListagem, CursoComArvore, CursoAula, CursoModulo, AulaComVizinhas, AparicaoDeVerbete } from '../types';
+import type { User, BlogPost, EducationResource, WikiEntry, WikiLink, PaginatedResponse, SiteSettings, PendingWikiLink, PendingWikiLinkGrouped, SeriesNavigation, Curso, CursoNaListagem, CursoComArvore, CursoAula, CursoModulo, AulaComVizinhas, AparicaoDeVerbete, QuizCompleto, QuizComVizinhas, CursoQuizInput } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -380,6 +380,14 @@ export const cursosApi = {
     const response = await api.get<CursoAula>(`/cursos/aulas/${id}`);
     return response.data;
   },
+  getQuiz: async (cursoSlug: string, quizSlug: string) => {
+    const response = await api.get<QuizComVizinhas>(`/cursos/${cursoSlug}/quizzes/${quizSlug}`);
+    return response.data;
+  },
+  getQuizById: async (id: string) => {
+    const response = await api.get<QuizCompleto>(`/cursos/quizzes/${id}`);
+    return response.data;
+  },
 
   create: async (data: Partial<Curso>) => {
     const response = await api.post<Curso>('/cursos', data);
@@ -427,7 +435,20 @@ export const cursosApi = {
   reordenarAulas: async (moduloId: string, ids: string[]) => {
     await api.put(`/cursos/modulos/${moduloId}/aulas/ordem`, { ids });
   },
+  criarQuiz: async (cursoId: string, moduloId: string, data: CursoQuizInput) => {
+    const response = await api.post<QuizCompleto>(
+      `/cursos/${cursoId}/modulos/${moduloId}/quizzes`,
+      data,
+    );
+    return response.data;
+  },
+  atualizarQuiz: async (id: string, data: Partial<CursoQuizInput>) => {
+    const response = await api.put<QuizCompleto>(`/cursos/quizzes/${id}`, data);
+    return response.data;
+  },
+  deletarQuiz: async (id: string) => {
+    await api.delete(`/cursos/quizzes/${id}`);
+  },
 };
 
 export default api;
-

@@ -4,6 +4,12 @@ import {
   marcarAutomaticamente,
   definirEstado,
   registrarVisita,
+  registrarTentativa,
+  quizConcluido,
+  melhorNota,
+  tentativasDoQuiz,
+  contarAtividadesConcluidas,
+  proximaAtividade,
   zerarCurso,
   temProgressoGravado,
   estaConcluida,
@@ -21,13 +27,35 @@ const aula = (slug: string, opcional = false) => ({ slug, opcional });
 describe('lerProgresso', () => {
   it('lê o que a própria página gravou', () => {
     const gravado = JSON.stringify({
-      [CURSO]: { aulas: { pdk: 'concluida', verilog: 'nao-concluida' }, ultima: 'verilog' },
+      [CURSO]: {
+        aulas: { pdk: 'concluida', verilog: 'nao-concluida' },
+        quizzes: { revisao: { melhorNota: 80, tentativas: 2 } },
+        ultima: { tipo: 'quiz', slug: 'revisao' },
+      },
     });
 
     expect(lerProgresso(gravado)).toEqual({
-      [CURSO]: { aulas: { pdk: 'concluida', verilog: 'nao-concluida' }, ultima: 'verilog' },
+      [CURSO]: {
+        aulas: { pdk: 'concluida', verilog: 'nao-concluida' },
+        quizzes: { revisao: { melhorNota: 80, tentativas: 2 } },
+        ultima: { tipo: 'quiz', slug: 'revisao' },
+      },
     });
   });
+
+  it('migra o formato antigo sem perder aulas nem a última visita', () => {
+    const antigo = JSON.stringify({
+      [CURSO]: { aulas: { pdk: 'concluida' }, ultima: 'pdk' },
+    })
+
+    expect(lerProgresso(antigo)).toEqual({
+      [CURSO]: {
+        aulas: { pdk: 'concluida' },
+        quizzes: {},
+        ultima: { tipo: 'aula', slug: 'pdk' },
+      },
+    })
+  })
 
   it('devolve vazio para ausente, quebrado ou do tipo errado', () => {
     expect(lerProgresso(null)).toEqual({});
@@ -45,10 +73,32 @@ describe('lerProgresso', () => {
     });
 
     expect(lerProgresso(meioQuebrado)).toEqual({
-      bom: { aulas: { a: 'concluida' }, ultima: 'a' },
-      ultimaErrada: { aulas: { c: 'concluida' }, ultima: null },
+      bom: { aulas: { a: 'concluida' }, quizzes: {}, ultima: { tipo: 'aula', slug: 'a' } },
+      ultimaErrada: { aulas: { c: 'concluida' }, quizzes: {}, ultima: null },
     });
   });
+
+  it('descarta um quiz corrompido e preserva o restante do curso', () => {
+    const meioQuebrado = JSON.stringify({
+      [CURSO]: {
+        aulas: { pdk: 'concluida' },
+        quizzes: {
+          bom: { melhorNota: 70, tentativas: 1 },
+          notaRuim: { melhorNota: 'setenta', tentativas: 2 },
+          tentativasRuins: { melhorNota: 90, tentativas: -1 },
+        },
+        ultima: { tipo: 'quiz', slug: 'bom' },
+      },
+    })
+
+    expect(lerProgresso(meioQuebrado)).toEqual({
+      [CURSO]: {
+        aulas: { pdk: 'concluida' },
+        quizzes: { bom: { melhorNota: 70, tentativas: 1 } },
+        ultima: { tipo: 'quiz', slug: 'bom' },
+      },
+    })
+  })
 });
 
 describe('marcação automática e manual', () => {
@@ -89,7 +139,8 @@ describe('zerarCurso', () => {
   it('apaga concluídas, desmarcadas e última aula, só do curso pedido', () => {
     let progresso = definirEstado({}, CURSO, 'pdk', 'concluida');
     progresso = definirEstado(progresso, CURSO, 'verilog', 'nao-concluida');
-    progresso = registrarVisita(progresso, CURSO, 'verilog');
+    progresso = registrarVisita(progresso, CURSO, { tipo: 'aula', slug: 'verilog' });
+    progresso = registrarTentativa(progresso, CURSO, 'revisao', 80);
     progresso = definirEstado(progresso, 'outro-curso', 'aula', 'concluida');
 
     const depois = zerarCurso(progresso, CURSO);
@@ -107,9 +158,12 @@ describe('zerarCurso', () => {
   it('ter aberto uma aula não é progresso; marcar ou desmarcar é', () => {
     // É o que decide se o botão de zerar aparece: sem isto, quem só abriu a
     // primeira aula veria "zerar progresso" ainda em 0 de N.
-    expect(temProgressoGravado(registrarVisita({}, CURSO, 'pdk'), CURSO)).toBe(false);
+    expect(
+      temProgressoGravado(registrarVisita({}, CURSO, { tipo: 'aula', slug: 'pdk' }), CURSO),
+    ).toBe(false);
     expect(temProgressoGravado(definirEstado({}, CURSO, 'pdk', 'nao-concluida'), CURSO)).toBe(true);
     expect(temProgressoGravado(marcarAutomaticamente({}, CURSO, 'pdk'), CURSO)).toBe(true);
+    expect(temProgressoGravado(registrarTentativa({}, CURSO, 'quiz', 40), CURSO)).toBe(true);
     expect(temProgressoGravado({}, CURSO)).toBe(false);
   });
 });
@@ -144,12 +198,12 @@ describe('proximaAula', () => {
   const publicadas = [aula('pdk'), aula('verilog'), aula('cocotb')];
 
   it('retoma na última aberta', () => {
-    const progresso = registrarVisita({}, CURSO, 'verilog');
+    const progresso = registrarVisita({}, CURSO, { tipo: 'aula', slug: 'verilog' });
     expect(proximaAula(progresso, CURSO, publicadas)).toBe('verilog');
   });
 
   it('cai na primeira pendente quando a última saiu do ar', () => {
-    let progresso = registrarVisita({}, CURSO, 'aula-removida');
+    let progresso = registrarVisita({}, CURSO, { tipo: 'aula', slug: 'aula-removida' });
     progresso = definirEstado(progresso, CURSO, 'pdk', 'concluida');
 
     expect(proximaAula(progresso, CURSO, publicadas)).toBe('verilog');
@@ -170,13 +224,92 @@ describe('proximaAula', () => {
   it('honra a última aberta mesmo sendo opcional, mas não a oferece como pendente', () => {
     const comAlternativa = [aula('windows', true), ...publicadas];
 
-    expect(proximaAula(registrarVisita({}, CURSO, 'windows'), CURSO, comAlternativa)).toBe(
+    expect(
+      proximaAula(
+        registrarVisita({}, CURSO, { tipo: 'aula', slug: 'windows' }),
+        CURSO,
+        comAlternativa,
+      ),
+    ).toBe(
       'windows',
     );
-    expect(proximaAula(registrarVisita({}, CURSO, 'saiu-do-ar'), CURSO, comAlternativa)).toBe('pdk');
+    expect(
+      proximaAula(
+        registrarVisita({}, CURSO, { tipo: 'aula', slug: 'saiu-do-ar' }),
+        CURSO,
+        comAlternativa,
+      ),
+    ).toBe('pdk');
   });
 
   it('devolve null para curso sem aula publicada', () => {
     expect(proximaAula({}, CURSO, [])).toBeNull();
   });
 });
+
+describe('tentativas de quiz', () => {
+  it('70 passa e 69 não passa', () => {
+    const com69 = registrarTentativa({}, CURSO, 'quiz', 69)
+    const com70 = registrarTentativa(com69, CURSO, 'outro-quiz', 70)
+
+    expect(quizConcluido(com70, CURSO, 'quiz', 70)).toBe(false)
+    expect(quizConcluido(com70, CURSO, 'outro-quiz', 70)).toBe(true)
+  })
+
+  it('preserva a melhor nota e incrementa todas as tentativas', () => {
+    let progresso = registrarTentativa({}, CURSO, 'quiz', 80)
+    progresso = registrarTentativa(progresso, CURSO, 'quiz', 40)
+
+    expect(melhorNota(progresso, CURSO, 'quiz')).toBe(80)
+    expect(tentativasDoQuiz(progresso, CURSO, 'quiz')).toBe(2)
+  })
+
+  it('reavalia a conclusão quando a nota mínima muda', () => {
+    const progresso = registrarTentativa({}, CURSO, 'quiz', 80)
+
+    expect(quizConcluido(progresso, CURSO, 'quiz', 70)).toBe(true)
+    expect(quizConcluido(progresso, CURSO, 'quiz', 90)).toBe(false)
+  })
+})
+
+describe('progresso por atividade', () => {
+  const atividades = [
+    {
+      tipo: 'aula' as const,
+      slug: 'opcional',
+      titulo: 'Alternativa',
+      opcional: true,
+      duracao_seg: null,
+    },
+    {
+      tipo: 'aula' as const,
+      slug: 'aula',
+      titulo: 'Aula',
+      opcional: false,
+      duracao_seg: 300,
+    },
+    {
+      tipo: 'quiz' as const,
+      slug: 'quiz',
+      titulo: 'Quiz',
+      nota_minima: 70,
+    },
+  ]
+
+  it('conta aulas obrigatórias e quizzes aprovados', () => {
+    let progresso = definirEstado({}, CURSO, 'opcional', 'concluida')
+    progresso = definirEstado(progresso, CURSO, 'aula', 'concluida')
+    progresso = registrarTentativa(progresso, CURSO, 'quiz', 70)
+
+    expect(contarAtividadesConcluidas(progresso, CURSO, atividades)).toBe(2)
+  })
+
+  it('retoma a última atividade publicada e depois cai na primeira pendente', () => {
+    const visitado = registrarVisita({}, CURSO, { tipo: 'quiz', slug: 'quiz' })
+    expect(proximaAtividade(visitado, CURSO, atividades)).toEqual(atividades[2])
+
+    let semUltima = definirEstado({}, CURSO, 'aula', 'concluida')
+    semUltima = registrarTentativa(semUltima, CURSO, 'quiz', 50)
+    expect(proximaAtividade(semUltima, CURSO, atividades)).toEqual(atividades[2])
+  })
+})

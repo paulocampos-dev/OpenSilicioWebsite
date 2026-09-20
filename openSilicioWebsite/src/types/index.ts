@@ -68,6 +68,8 @@ export interface CursoNaListagem extends Curso {
   modulos: number;
   aulas: number;
   aulas_rascunho: number;
+  quizzes: number;
+  quizzes_rascunho: number;
   duracao_seg: number;
   /**
    * Aulas publicadas em ordem. O título alimenta a busca da página de Educação,
@@ -80,6 +82,12 @@ export interface CursoNaListagem extends Curso {
     titulo: string;
     duracao_seg: number | null;
     opcional: boolean;
+  }>;
+  quizzes_publicados: Array<{
+    slug: string;
+    titulo: string;
+    aula_id: string | null;
+    nota_minima: number;
   }>;
 }
 
@@ -100,6 +108,28 @@ export type AulaNaArvore =
     }
   | { publicado: false; id: string; titulo: string };
 
+export type QuizNaArvore =
+  | {
+      publicado: true;
+      id: string;
+      aula_id: string | null;
+      slug: string;
+      titulo: string;
+      nota_minima: number;
+      total_questoes: number;
+    }
+  | { publicado: false; id: string; titulo: string };
+
+export type AtividadePublicada =
+  | {
+      tipo: 'aula';
+      slug: string;
+      titulo: string;
+      opcional: boolean;
+      duracao_seg: number | null;
+    }
+  | { tipo: 'quiz'; slug: string; titulo: string; nota_minima: number };
+
 export interface ModuloNaArvore {
   id: string;
   curso_id: string;
@@ -107,6 +137,7 @@ export interface ModuloNaArvore {
   titulo: string;
   resumo?: string | null;
   aulas: AulaNaArvore[];
+  quizzes: QuizNaArvore[];
 }
 
 export interface CursoComArvore extends Curso {
@@ -139,8 +170,74 @@ export interface AulaComVizinhas {
   modulo: { id: string; titulo: string; ordem: number };
   posicao: number;
   total: number;
-  anterior: { slug: string; titulo: string } | null;
-  proxima: { slug: string; titulo: string } | null;
+  anterior: VizinhaDeAtividade | null;
+  proxima: VizinhaDeAtividade | null;
+}
+
+export type VizinhaDeAtividade =
+  | { tipo: 'aula'; slug: string; titulo: string }
+  | { tipo: 'quiz'; slug: string; titulo: string };
+
+export interface CursoQuiz {
+  id: string;
+  curso_id: string;
+  modulo_id: string;
+  aula_id: string | null;
+  ordem: number;
+  slug: string;
+  titulo: string;
+  nota_minima: number;
+  publicado: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuizAlternativa {
+  id: string;
+  ordem: number;
+  texto: string;
+  correta: boolean;
+}
+
+export interface QuizQuestao {
+  id: string;
+  ordem: number;
+  enunciado: string;
+  explicacao: string;
+  alternativas: QuizAlternativa[];
+}
+
+export interface QuizCompleto extends CursoQuiz {
+  questoes: QuizQuestao[];
+}
+
+export interface QuizComVizinhas {
+  quiz: QuizCompleto;
+  curso: Pick<Curso, 'id' | 'slug' | 'titulo'>;
+  modulo: Pick<CursoModulo, 'id' | 'titulo' | 'ordem'>;
+  anterior: VizinhaDeAtividade | null;
+  proxima: VizinhaDeAtividade | null;
+}
+
+export interface QuizAlternativaInput {
+  texto: string;
+  correta: boolean;
+}
+
+export interface QuizQuestaoInput {
+  enunciado: string;
+  explicacao: string;
+  alternativas: QuizAlternativaInput[];
+}
+
+export interface CursoQuizInput {
+  modulo_id: string;
+  aula_id?: string | null;
+  slug: string;
+  titulo: string;
+  nota_minima?: number;
+  publicado?: boolean;
+  questoes: QuizQuestaoInput[];
 }
 
 export interface CursoModulo {

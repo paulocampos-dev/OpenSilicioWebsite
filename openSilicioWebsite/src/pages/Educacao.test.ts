@@ -32,11 +32,14 @@ const curso: CursoNaListagem = {
   modulos: 2,
   aulas: 3,
   aulas_rascunho: 1,
+  quizzes: 0,
+  quizzes_rascunho: 0,
   duracao_seg: 1320,
   aulas_publicadas: [
     { slug: 'pdk', titulo: 'O que é um PDK', duracao_seg: 480, opcional: false },
     { slug: 'yosys', titulo: 'Síntese com Yosys', duracao_seg: 840, opcional: false },
   ],
+  quizzes_publicados: [],
 }
 
 describe('adaptadores de cartão', () => {
