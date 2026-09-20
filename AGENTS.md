@@ -130,6 +130,11 @@ rediscovering them.
   follows the `partes` array, not left-to-right string position, so an
   author can explain a name back-to-front like the original sky130 post
   did. No SVG, no measured pixel positions — it's plain text that wraps.
+- **`PwmLabNode` (`os-pwm-lab`) mantém o experimento dentro da aula.** A fonte
+  é JSON5 e carrega de modo assíncrono; uma mudança de fonte invalida a carga
+  anterior. A interação do aluno é transitória, não toca em progresso nem
+  `localStorage`. `data-os-pwm-lab` vazio ainda importa um nó para o autor poder
+  corrigir a configuração no editor.
 - **Wiki term association lives in the `content_wiki_links` table**, and since
   `53324f5` the server derives it from the saved content: on every
   blog/education/curso-aula create or update it walks the Lexical JSON for
