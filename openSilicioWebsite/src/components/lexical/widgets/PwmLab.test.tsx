@@ -1,8 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { PwmLab } from './PwmLab'
 import type { ConfiguracaoPwm } from '../utils/pwmLab'
+
+const estilosDeWidgets = readFileSync(
+  resolve(process.cwd(), 'src/styles/design-system/patterns/widgets.css'),
+  'utf8',
+)
 
 const configuracao: ConfiguracaoPwm = {
   titulo: 'Brilho por PWM',
@@ -17,6 +24,12 @@ const configuracao: ConfiguracaoPwm = {
 }
 
 describe('PwmLab', () => {
+  it('empilha as leituras na faixa móvel', () => {
+    expect(estilosDeWidgets).toMatch(
+      /@media \(max-width: 900px\) \{\s*\.os-pwm__leituras \{ grid-template-columns: 1fr; \}/,
+    )
+  })
+
   it('exige uma hipótese antes de liberar a bancada', async () => {
     const user = userEvent.setup()
     render(<PwmLab configuracao={configuracao} />)

@@ -67,8 +67,8 @@ function validarConfiguracao(valor: unknown): ResultadoConfiguracaoPwm {
 
   const { titulo, pergunta, alternativas, dutyInicial, frequenciaHz, tensaoVolts } = valor
 
-  if (typeof titulo !== 'string') return erroDeCampo('titulo')
-  if (typeof pergunta !== 'string') return erroDeCampo('pergunta')
+  if (!ehTextoPreenchido(titulo)) return erroDeCampo('titulo')
+  if (!ehTextoPreenchido(pergunta)) return erroDeCampo('pergunta')
   if (!Array.isArray(alternativas)) return erroDeCampo('alternativas')
   if (alternativas.length < 2 || alternativas.length > 4) {
     return { ok: false, erro: 'O campo "alternativas" deve ter entre 2 e 4 alternativas.' }
@@ -114,9 +114,9 @@ function validarAlternativa(
   if (!ehRegistro(valor)) return erroDeCampo(`alternativas[${indice}]`)
 
   const { texto, correta, explicacao } = valor
-  if (typeof texto !== 'string') return erroDeCampo(`alternativas[${indice}].texto`)
+  if (!ehTextoPreenchido(texto)) return erroDeCampo(`alternativas[${indice}].texto`)
   if (typeof correta !== 'boolean') return erroDeCampo(`alternativas[${indice}].correta`)
-  if (typeof explicacao !== 'string') return erroDeCampo(`alternativas[${indice}].explicacao`)
+  if (!ehTextoPreenchido(explicacao)) return erroDeCampo(`alternativas[${indice}].explicacao`)
 
   return { ok: true, alternativa: { texto, correta, explicacao } }
 }
@@ -135,6 +135,10 @@ function estaNoIntervalo(valor: unknown, minimo: number, maximo: number): valor 
 
 function ehNumeroFinito(valor: unknown): valor is number {
   return typeof valor === 'number' && Number.isFinite(valor)
+}
+
+function ehTextoPreenchido(valor: unknown): valor is string {
+  return typeof valor === 'string' && valor.trim().length > 0
 }
 
 function erroDeCampo(campo: string): { ok: false; erro: string } {

@@ -107,6 +107,17 @@ describe('parsearConfiguracaoPwm', () => {
   })
 
   it.each([
+    ['titulo', fonteValida.replace("titulo: 'Brilho por PWM'", "titulo: '  '")],
+    ['pergunta', fonteValida.replace("pergunta: 'O que muda?'", "pergunta: ''")],
+    ['alternativas[0].texto', fonteValida.replace("texto: 'Frequência'", "texto: ''")],
+    ['alternativas[0].explicacao', fonteValida.replace("explicacao: 'Permanece igual.'", "explicacao: '  '")],
+  ])('rejeita %s vazio', async (campo, fonte) => {
+    const resultado = await parsearConfiguracaoPwm(fonte)
+
+    expect(resultado).toMatchObject({ ok: false, erro: expect.stringContaining(campo) })
+  })
+
+  it.each([
     ['{', 'JSON5 inválido'],
     ['{}', 'campo "titulo"'],
     [fonteValida.replace('alternativas: [', 'alternativas: null, ignoradas: ['), 'campo "alternativas"'],

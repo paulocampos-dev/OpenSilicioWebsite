@@ -353,6 +353,10 @@
   .os-pwm__previsao { border-bottom: 0; border-right: 1px solid var(--color-line); }
 }
 
+@media (max-width: 900px) {
+  .os-pwm__leituras { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .os-pwm__led-pulso[data-pulso] { animation: none; }
 }
