@@ -39,7 +39,7 @@
 
 ---
 
-### Tarefa 1: Criar o registro de melhorias de autoria
+### Task 1: Criar o registro de melhorias de autoria
 
 **Arquivos:**
 - Criar: `docs/course-authoring-improvements.md`
@@ -115,7 +115,7 @@ git add docs/course-authoring-improvements.md
 git commit -m "docs(cursos): registrar melhorias de autoria"
 ```
 
-### Tarefa 2: Produzir o módulo Construindo projetos digitais
+### Task 2: Produzir o módulo Construindo projetos digitais
 
 **Arquivos:**
 - Criar: `conteudo/cursos/projeto-digital/02-1-misturador-rgb.md`
@@ -269,7 +269,7 @@ Abra o currículo público em outra aba. Esperado:
 
 Se o painel, editor ou leitura pública gerou atrito, adicione uma linha a `docs/course-authoring-improvements.md`. Se nada novo apareceu, não altere o arquivo.
 
-### Tarefa 3: Produzir o módulo Verificação
+### Task 3: Produzir o módulo Verificação
 
 **Arquivos:**
 - Criar: `conteudo/cursos/projeto-digital/03-1-provando-temporizador.md`
@@ -343,7 +343,7 @@ Esperado na conferência pública: aula, quiz, aula, quiz, todos `EM BREVE`, sem
 
 Use o mesmo critério da Tarefa 2. Uma ideia entra no documento apenas se surgiu de um caso concreto durante esta tarefa.
 
-### Tarefa 4: Produzir o módulo LibreLane
+### Task 4: Produzir o módulo LibreLane
 
 **Arquivos:**
 - Criar: `conteudo/cursos/projeto-digital/04-1-endurecendo-projeto-exemplo.md`
@@ -428,7 +428,7 @@ Durante a recarga, compare os comandos salvos com o Markdown, pois blocos de có
 
 Registre atritos concretos, especialmente perda de linguagem de bloco, dificuldade de comparar conteúdo salvo ou risco de publicação acidental.
 
-### Tarefa 5: Produzir o módulo Chegando ao silício
+### Task 5: Produzir o módulo Chegando ao silício
 
 **Arquivos:**
 - Criar: `conteudo/cursos/projeto-digital/05-1-submetendo-ao-tiny-tapeout.md`
@@ -508,7 +508,7 @@ Esperado no currículo público: duas atividades, aula e quiz, ambas `EM BREVE`,
 
 Registre qualquer dificuldade concreta de autoria ou revisão. Não registre mudanças no processo do Tiny Tapeout como defeito do site.
 
-### Tarefa 6: Fazer a auditoria final do curso
+### Task 6: Fazer a auditoria final do curso
 
 **Arquivos:**
 - Verificar: `conteudo/cursos/projeto-digital/02-*.md`
