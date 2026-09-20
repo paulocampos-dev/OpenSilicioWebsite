@@ -2,7 +2,7 @@
 
 **Data:** 2026-09-20
 
-**Status:** aprovado em conversa, aguardando revisão do documento
+**Status:** aprovado
 
 **Mock escolhido:** opção A, "Estação de trabalho"
 
@@ -213,7 +213,6 @@ type EstadoAula = 'concluida' | 'nao-concluida'
 type ProgressoQuiz = {
   melhorNota: number
   tentativas: number
-  concluido: boolean
 }
 
 type UltimaAtividade =
@@ -236,11 +235,12 @@ Ao finalizar uma tentativa:
 1. o frontend calcula a porcentagem;
 2. incrementa `tentativas`;
 3. mantém o maior valor entre a nota antiga e a nova;
-4. define `concluido` pela melhor nota e pela nota mínima do quiz;
-5. grava a atividade como `ultima`.
+4. grava a atividade como `ultima`.
 
-Uma tentativa abaixo da nota mínima não remove uma conclusão anterior. Alterar a
-nota mínima depois de publicado reavalia `concluido` ao ler o progresso.
+Uma tentativa abaixo da nota mínima não remove uma conclusão anterior. A
+conclusão é sempre derivada da melhor nota e da nota mínima atual, sem guardar
+um booleano que possa ficar desatualizado. Alterar a nota mínima depois de
+publicado, portanto, reavalia o estado automaticamente.
 
 O denominador contém aulas publicadas não opcionais e quizzes publicados. Um
 quiz concluído soma uma atividade. Rascunhos não entram. Publicar um quiz novo
