@@ -12,6 +12,7 @@ import WaveDromPlugin from './plugins/WaveDromPlugin';
 import EmbedPlugin from './plugins/EmbedPlugin';
 import SevenSegmentPlugin from './plugins/SevenSegmentPlugin';
 import AnatomiaPlugin from './plugins/AnatomiaPlugin';
+import PwmLabPlugin from './plugins/PwmLabPlugin';
 
 /** Plugins de inserção. Só o editor precisa deles; o leitor não insere nada. */
 export function OsWidgetPlugins() {
@@ -21,6 +22,7 @@ export function OsWidgetPlugins() {
       <EmbedPlugin />
       <SevenSegmentPlugin />
       <AnatomiaPlugin />
+      <PwmLabPlugin />
     </>
   );
 }

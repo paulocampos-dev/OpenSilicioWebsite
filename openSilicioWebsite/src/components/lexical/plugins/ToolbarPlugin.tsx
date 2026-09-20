@@ -63,10 +63,12 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import WebIcon from '@mui/icons-material/Web';
 import MemoryIcon from '@mui/icons-material/Memory';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
 import { INSERT_WAVEDROM_COMMAND } from './WaveDromPlugin';
 import { INSERT_EMBED_COMMAND } from './EmbedPlugin';
 import { INSERT_SEVEN_SEGMENT_COMMAND } from './SevenSegmentPlugin';
 import { INSERT_ANATOMIA_COMMAND } from './AnatomiaPlugin';
+import { INSERT_PWM_LAB_COMMAND } from './PwmLabPlugin';
 import { verificarUrlEmbed } from '../nodes/EmbedNode';
 
 const LowPriority = 1;
@@ -298,6 +300,10 @@ export default function ToolbarPlugin() {
 
   const inserirAnatomia = useCallback(() => {
     editor.dispatchCommand(INSERT_ANATOMIA_COMMAND, {});
+  }, [editor]);
+
+  const inserirPwmLab = useCallback(() => {
+    editor.dispatchCommand(INSERT_PWM_LAB_COMMAND, {});
   }, [editor]);
 
   return (
@@ -587,6 +593,11 @@ export default function ToolbarPlugin() {
         <Tooltip title="Inserir Diagrama Anotado">
           <IconButton size="small" onClick={inserirAnatomia}>
             <AccountTreeIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Inserir Laboratório PWM">
+          <IconButton size="small" onClick={inserirPwmLab}>
+            <ElectricBoltIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
