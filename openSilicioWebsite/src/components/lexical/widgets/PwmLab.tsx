@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
+import { useEffect, useId, useMemo, useState } from 'react'
 import {
   calcularPwm,
   criarCaminhoPwm,
@@ -8,6 +9,8 @@ import {
 const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 
 export function PwmLab({ configuracao }: { configuracao: ConfiguracaoPwm }) {
+  const perguntaId = useId()
+  const movimentoReduzido = useReducedMotion() ?? false
   const [alternativa, setAlternativa] = useState<number | null>(null)
   const [duty, setDuty] = useState(configuracao.dutyInicial)
   const [pulso, setPulso] = useState(false)
@@ -21,17 +24,22 @@ export function PwmLab({ configuracao }: { configuracao: ConfiguracaoPwm }) {
     setDuty(configuracao.dutyInicial)
   }, [configuracao])
 
+  useEffect(() => {
+    if (movimentoReduzido) setPulso(false)
+  }, [movimentoReduzido])
+
   const mudarDuty = (novoDuty: number) => {
     setDuty(novoDuty)
     setPulso(false)
+    if (movimentoReduzido) return
     requestAnimationFrame(() => setPulso(true))
   }
 
   return (
     <div className="os-pwm">
-      <section className="os-pwm__previsao" aria-labelledby="os-pwm-pergunta">
+      <section className="os-pwm__previsao" aria-labelledby={perguntaId}>
         <p className="os-pwm__rotulo">Preveja antes de testar</p>
-        <h3 id="os-pwm-pergunta">{configuracao.pergunta}</h3>
+        <h3 id={perguntaId}>{configuracao.pergunta}</h3>
         <p>Escolha uma hipótese. Você poderá tentar de novo.</p>
         <div className="os-pwm__alternativas" role="group" aria-label="Hipóteses">
           {configuracao.alternativas.map((item, indice) => (

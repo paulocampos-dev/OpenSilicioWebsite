@@ -312,6 +312,12 @@
   font-family: var(--font-mono);
 }
 
+:root[data-color-mode="dark"] .os-pwm__alternativas button[aria-pressed="true"],
+:root[data-color-mode="dark"] .os-pwm__alternativas button[aria-pressed="true"] > span,
+:root[data-color-mode="dark"] .os-pwm__controle {
+  color: var(--color-steel-300);
+}
+
 .os-pwm__controle output { font-weight: 700; }
 
 .os-pwm__controle input {
