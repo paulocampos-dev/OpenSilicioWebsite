@@ -1,8 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import api from '../../../services/api'
 import { PwmLab } from './PwmLab'
 import type { ConfiguracaoPwm } from '../utils/pwmLab'
 
@@ -36,9 +37,11 @@ describe('PwmLab', () => {
       callback(0)
       return 1
     }))
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
   })
@@ -110,6 +113,15 @@ describe('PwmLab', () => {
     const getItemSpy = vi.spyOn(Storage.prototype, 'getItem')
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem')
     const removeItemSpy = vi.spyOn(Storage.prototype, 'removeItem')
+    const clearSpy = vi.spyOn(Storage.prototype, 'clear')
+    const apiSpies = [
+      vi.spyOn(api, 'request'),
+      vi.spyOn(api, 'get'),
+      vi.spyOn(api, 'post'),
+      vi.spyOn(api, 'put'),
+      vi.spyOn(api, 'patch'),
+      vi.spyOn(api, 'delete'),
+    ]
     const user = userEvent.setup()
     render(<PwmLab configuracao={configuracao} />)
     await user.click(screen.getByRole('button', { name: /led parece/i }))
@@ -128,6 +140,8 @@ describe('PwmLab', () => {
     expect(getItemSpy).not.toHaveBeenCalled()
     expect(setItemSpy).not.toHaveBeenCalled()
     expect(removeItemSpy).not.toHaveBeenCalled()
+    expect(clearSpy).not.toHaveBeenCalled()
+    apiSpies.forEach((apiSpy) => expect(apiSpy).not.toHaveBeenCalled())
   })
 
   it('representa o brilho no LED externo ao mudar o duty cycle', async () => {
@@ -156,6 +170,21 @@ describe('PwmLab', () => {
 
     expect(document.querySelector('[data-pulso]')).toBeNull()
     expect(requestAnimationFrame).not.toHaveBeenCalled()
+  })
+
+  it('encerra o pulso sem depender do evento de animação do CSS', () => {
+    vi.useFakeTimers()
+    render(<PwmLab configuracao={configuracao} />)
+    fireEvent.click(screen.getByRole('button', { name: /led parece/i }))
+
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '75' } })
+    act(() => vi.advanceTimersToNextFrame())
+
+    expect(document.querySelector('[data-pulso]')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(139))
+    expect(document.querySelector('[data-pulso]')).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(1))
+    expect(document.querySelector('[data-pulso]')).toBeNull()
   })
 
   it('associa cada pergunta à sua própria seção', () => {

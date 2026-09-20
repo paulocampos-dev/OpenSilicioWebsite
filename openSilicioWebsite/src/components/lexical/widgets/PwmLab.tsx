@@ -1,5 +1,5 @@
 import { useReducedMotion } from 'framer-motion'
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import {
   calcularPwm,
   criarCaminhoPwm,
@@ -14,10 +14,19 @@ export function PwmLab({ configuracao }: { configuracao: ConfiguracaoPwm }) {
   const [alternativa, setAlternativa] = useState<number | null>(null)
   const [duty, setDuty] = useState(configuracao.dutyInicial)
   const [pulso, setPulso] = useState(false)
+  const quadroDoPulso = useRef<number | null>(null)
+  const fimDoPulso = useRef<number | null>(null)
   const medidas = useMemo(
     () => calcularPwm(duty, configuracao.frequenciaHz, configuracao.tensaoVolts),
     [configuracao.frequenciaHz, configuracao.tensaoVolts, duty],
   )
+
+  const cancelarPulso = useCallback(() => {
+    if (quadroDoPulso.current !== null) cancelAnimationFrame(quadroDoPulso.current)
+    if (fimDoPulso.current !== null) window.clearTimeout(fimDoPulso.current)
+    quadroDoPulso.current = null
+    fimDoPulso.current = null
+  }, [])
 
   useEffect(() => {
     setAlternativa(null)
@@ -25,14 +34,26 @@ export function PwmLab({ configuracao }: { configuracao: ConfiguracaoPwm }) {
   }, [configuracao])
 
   useEffect(() => {
-    if (movimentoReduzido) setPulso(false)
-  }, [movimentoReduzido])
+    if (!movimentoReduzido) return
+    cancelarPulso()
+    setPulso(false)
+  }, [cancelarPulso, movimentoReduzido])
+
+  useEffect(() => () => cancelarPulso(), [cancelarPulso])
 
   const mudarDuty = (novoDuty: number) => {
     setDuty(novoDuty)
+    cancelarPulso()
     setPulso(false)
     if (movimentoReduzido) return
-    requestAnimationFrame(() => setPulso(true))
+    quadroDoPulso.current = requestAnimationFrame(() => {
+      quadroDoPulso.current = null
+      setPulso(true)
+      fimDoPulso.current = window.setTimeout(() => {
+        fimDoPulso.current = null
+        setPulso(false)
+      }, 140)
+    })
   }
 
   return (
@@ -87,7 +108,6 @@ export function PwmLab({ configuracao }: { configuracao: ConfiguracaoPwm }) {
             <span
               className="os-pwm__led-pulso"
               data-pulso
-              onAnimationEnd={() => setPulso(false)}
             />
           )}
         </span>
