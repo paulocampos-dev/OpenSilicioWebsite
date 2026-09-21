@@ -254,7 +254,16 @@ export default function CursoEstrutura() {
             {curso.duracao_seg > 0 ? `, ${duracaoPorExtenso(curso.duracao_seg)}` : ''}
           </Typography>
         </Box>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={1}
+          sx={(theme) => ({
+            '& .MuiButton-root': { minHeight: 48 },
+            [theme.breakpoints.up('sm')]: {
+              '& .MuiButton-root': { minHeight: 0 },
+            },
+          })}
+        >
           <Button component={RouterLink} to={`/admin/cursos/editar/${curso.id}`}>
             Dados do curso
           </Button>

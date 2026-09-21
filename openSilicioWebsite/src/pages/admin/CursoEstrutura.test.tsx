@@ -127,9 +127,12 @@ describe('CursoEstrutura com quizzes', () => {
       'href',
       '/admin/cursos/projeto-digital/aulas/aula-1',
     )
+    await usuario.keyboard('{Escape}')
 
     expect(screen.getByTestId('mobile-create-actions')).toHaveStyle({ position: 'sticky' })
     expect(screen.getByTestId('mobile-create-actions')).toHaveTextContent('Nova aula')
     expect(screen.getByTestId('mobile-create-actions')).toHaveTextContent('Novo quiz')
+    expect(screen.getByRole('link', { name: 'Dados do curso' })).toHaveStyle({ minHeight: '48px' })
+    expect(screen.getByRole('button', { name: 'Despublicar curso' })).toHaveStyle({ minHeight: '48px' })
   })
 })

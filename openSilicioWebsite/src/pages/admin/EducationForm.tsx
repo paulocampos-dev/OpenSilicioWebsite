@@ -405,6 +405,10 @@ export default function EducationForm() {
                           const toc_items = (resource.toc_items || []).filter((_, i) => i !== index);
                           setResource({ ...resource, toc_items });
                         }}
+                        sx={(theme) => ({
+                          minHeight: 44,
+                          [theme.breakpoints.up('sm')]: { minHeight: 0 },
+                        })}
                       >
                         Remover
                       </Button>
@@ -414,7 +418,11 @@ export default function EducationForm() {
                     size="small"
                     variant="outlined"
                     onClick={() => setResource({ ...resource, toc_items: [...(resource.toc_items || []), ''] })}
-                    sx={{ alignSelf: 'flex-start' }}
+                    sx={(theme) => ({
+                      alignSelf: 'flex-start',
+                      minHeight: 44,
+                      [theme.breakpoints.up('sm')]: { minHeight: 0 },
+                    })}
                   >
                     Adicionar seção
                   </Button>

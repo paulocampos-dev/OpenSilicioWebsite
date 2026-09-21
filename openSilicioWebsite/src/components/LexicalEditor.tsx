@@ -53,7 +53,11 @@ function WikiLinkButton({
       variant="outlined"
       startIcon={<LinkIcon />}
       onClick={onOpenWikiLink}
-      sx={{ whiteSpace: 'nowrap' }}
+      sx={(theme) => ({
+        whiteSpace: 'nowrap',
+        minHeight: 44,
+        [theme.breakpoints.up('md')]: { minHeight: 0 },
+      })}
     >
       Adicionar Link da Wiki
     </Button>

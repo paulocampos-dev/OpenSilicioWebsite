@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -121,9 +121,15 @@ describe('QuizForm', () => {
     renderizar()
     await screen.findByDisplayValue('Primeiro enunciado')
 
+    expect(screen.getByRole('button', { name: 'Mover questão 1 para cima' })).toHaveStyle({
+      minHeight: '44px',
+      minWidth: '44px',
+    })
+    expect(screen.getByRole('button', { name: 'Adicionar questão' })).toHaveStyle({ minHeight: '48px' })
+
     await usuario.click(screen.getByRole('button', { name: 'Adicionar questão' }))
     const enunciado = screen.getByRole('textbox', { name: 'Enunciado' })
-    await usuario.type(enunciado, 'Terceiro enunciado')
+    fireEvent.change(enunciado, { target: { value: 'Terceiro enunciado' } })
     await usuario.click(screen.getByRole('button', { name: 'Editar questão 1' }))
 
     expect(screen.getByRole('textbox', { name: 'Enunciado' })).toHaveValue('Primeiro enunciado')

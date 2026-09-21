@@ -333,6 +333,10 @@ export default function BlogForm() {
                           const toc_items = (post.toc_items || []).filter((_, i) => i !== index);
                           setPost({ ...post, toc_items });
                         }}
+                        sx={(theme) => ({
+                          minHeight: 44,
+                          [theme.breakpoints.up('sm')]: { minHeight: 0 },
+                        })}
                       >
                         Remover
                       </Button>
@@ -342,7 +346,11 @@ export default function BlogForm() {
                     size="small"
                     variant="outlined"
                     onClick={() => setPost({ ...post, toc_items: [...(post.toc_items || []), ''] })}
-                    sx={{ alignSelf: 'flex-start' }}
+                    sx={(theme) => ({
+                      alignSelf: 'flex-start',
+                      minHeight: 44,
+                      [theme.breakpoints.up('sm')]: { minHeight: 0 },
+                    })}
                   >
                     Adicionar seção
                   </Button>

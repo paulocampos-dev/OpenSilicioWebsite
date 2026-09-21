@@ -402,7 +402,14 @@ export default function QuizForm() {
                     </Typography>
                   </Box>
                 </Button>
-                <Stack>
+                <Stack
+                  sx={(theme) => ({
+                    '& .MuiIconButton-root': { minWidth: 44, minHeight: 44 },
+                    [theme.breakpoints.up('md')]: {
+                      '& .MuiIconButton-root': { minWidth: 30, minHeight: 30 },
+                    },
+                  })}
+                >
                   <IconButton
                     size="small"
                     aria-label={`Mover questão ${indice + 1} para cima`}
@@ -432,7 +439,14 @@ export default function QuizForm() {
             ))}
 
             {mostrarErros && erros.questoes && <Alert severity="error">{erros.questoes}</Alert>}
-            <Button startIcon={<AddIcon />} onClick={adicionarQuestao}>
+            <Button
+              startIcon={<AddIcon />}
+              onClick={adicionarQuestao}
+              sx={(theme) => ({
+                minHeight: 48,
+                [theme.breakpoints.up('md')]: { minHeight: 0 },
+              })}
+            >
               Adicionar questão
             </Button>
           </Stack>
@@ -532,7 +546,14 @@ export default function QuizForm() {
           ) : (
             <Stack alignItems="center" spacing={2} sx={{ py: 8 }}>
               <Typography color="text.secondary">Adicione uma questão para começar.</Typography>
-              <Button startIcon={<AddIcon />} onClick={adicionarQuestao}>
+              <Button
+                startIcon={<AddIcon />}
+                onClick={adicionarQuestao}
+                sx={(theme) => ({
+                  minHeight: 48,
+                  [theme.breakpoints.up('md')]: { minHeight: 0 },
+                })}
+              >
                 Adicionar questão
               </Button>
             </Stack>

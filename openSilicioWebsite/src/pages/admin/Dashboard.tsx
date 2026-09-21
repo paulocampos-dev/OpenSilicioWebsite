@@ -90,6 +90,10 @@ export default function Dashboard() {
                           to={section.path}
                           variant="outlined"
                           size="small"
+                          sx={(theme) => ({
+                            minHeight: 44,
+                            [theme.breakpoints.up('md')]: { minHeight: 0 },
+                          })}
                         >
                           Ver Todos
                         </Button>
@@ -98,6 +102,10 @@ export default function Dashboard() {
                           to={section.createPath}
                           variant="contained"
                           size="small"
+                          sx={(theme) => ({
+                            minHeight: 44,
+                            [theme.breakpoints.up('md')]: { minHeight: 0 },
+                          })}
                         >
                           Criar Novo
                         </Button>
@@ -109,6 +117,10 @@ export default function Dashboard() {
                         variant="contained"
                         size="small"
                         fullWidth
+                        sx={(theme) => ({
+                          minHeight: 44,
+                          [theme.breakpoints.up('md')]: { minHeight: 0 },
+                        })}
                       >
                         Acessar
                       </Button>
@@ -123,4 +135,3 @@ export default function Dashboard() {
     </Stack>
   );
 }
-
