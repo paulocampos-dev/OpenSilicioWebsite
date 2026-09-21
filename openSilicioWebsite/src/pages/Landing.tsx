@@ -22,6 +22,12 @@ const offerings = [
   { title: 'Eventos e workshops', desc: 'Calendário próprio: oficinas de layout, semanas temáticas e mutirões de tape-out.' },
 ]
 
+const partners = [
+  { name: 'Amigos da Poli', href: 'https://www.amigosdapoli.com.br/', logo: '/amigos-da-poli-logo-sem-bg.png' },
+  { name: 'Universidade de São Paulo', href: 'https://www.usp.br/', logo: '/usp-logo-transp.png' },
+  { name: 'TinyTapeout', href: 'https://tinytapeout.com/' },
+]
+
 export default function Landing() {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
 
@@ -211,36 +217,24 @@ export default function Landing() {
         <span className="kicker">06 · Apoiadores e parceiros</span>
         <Box className="caption-rule" sx={{ mb: 3 }} />
         <Grid container spacing={3}>
-          {[
-            { name: 'Amigos da Poli', href: 'https://www.amigosdapoli.com.br/' },
-            { name: 'TinyTapeout', href: 'https://tinytapeout.com/' },
-          ].map((sponsor) => (
-            <Grid key={sponsor.name} size={{ xs: 6, sm: 3 }}>
+          {partners.map((partner) => (
+            <Grid key={partner.name} size={{ xs: 6, sm: 4 }}>
               <Box
                 component="a"
-                href={sponsor.href}
+                href={partner.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 sx={{ textDecoration: 'none', display: 'block' }}
               >
-                <BlueprintFrame sx={{ display: 'grid', placeItems: 'center', p: 3, minHeight: 96 }}>
-                  <Typography sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '20px', letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--color-accent-ink)' }}>
-                    {sponsor.name}
-                  </Typography>
+                <BlueprintFrame sx={{ display: 'grid', placeItems: 'center', p: 3, minHeight: 112, backgroundColor: '#fff' }}>
+                  {partner.logo ? (
+                    <Box component="img" src={partner.logo} alt={partner.name} sx={{ display: 'block', width: '100%', maxWidth: 180, maxHeight: 64, objectFit: 'contain' }} />
+                  ) : (
+                    <Typography sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '20px', letterSpacing: '.04em', textTransform: 'uppercase', color: 'var(--color-accent-ink)' }}>
+                      {partner.name}
+                    </Typography>
+                  )}
                 </BlueprintFrame>
-              </Box>
-            </Grid>
-          ))}
-          {[1, 2].map((slot) => (
-            <Grid key={slot} size={{ xs: 6, sm: 3 }}>
-              <Box
-                sx={{
-                  display: 'grid', placeItems: 'center', p: 3, minHeight: 96,
-                  border: '1px dashed var(--color-neutral-400)',
-                  fontSize: 12, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-neutral-600)',
-                }}
-              >
-                Vaga de parceiro
               </Box>
             </Grid>
           ))}
