@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { createElement } from 'react'
+import { MemoryRouter } from 'react-router-dom'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { cartaoDeCurso, cartaoDeRecurso } from './Educacao'
+import Educacao from './Educacao'
+import { cursosApi, educationApi } from '../services/api'
 import type { CursoNaListagem, EducationResource } from '../types'
 
 /**
@@ -42,6 +48,27 @@ const curso: CursoNaListagem = {
   quizzes_publicados: [],
 }
 
+vi.mock('../services/api', () => ({
+  educationApi: { getAll: vi.fn() },
+  cursosApi: { getAll: vi.fn() },
+}))
+
+const pagination = {
+  page: 1,
+  limit: 100,
+  total: 1,
+  totalPages: 1,
+  hasNext: false,
+  hasPrev: false,
+}
+
+const renderEducacao = () => render(createElement(MemoryRouter, null, createElement(Educacao)))
+
+beforeEach(() => {
+  vi.mocked(educationApi.getAll).mockResolvedValue({ data: [recurso], pagination })
+  vi.mocked(cursosApi.getAll).mockResolvedValue({ data: [curso], pagination })
+})
+
 describe('adaptadores de cartão', () => {
   it('produzem exatamente as mesmas chaves', () => {
     expect(Object.keys(cartaoDeCurso(curso)).sort()).toEqual(
@@ -71,5 +98,34 @@ describe('adaptadores de cartão', () => {
   it('categoria desconhecida cai numa aba que existe, em vez de sumir', () => {
     const antigo = { ...recurso, category: 'Categoria Que Não Existe Mais' }
     expect(cartaoDeRecurso(antigo).categoria).toBe('Guias')
+  })
+})
+
+describe('filtros mobile', () => {
+  it('filtra pelo drawer e expõe um resumo removível', async () => {
+    const user = userEvent.setup()
+    renderEducacao()
+
+    await user.click(await screen.findByRole('button', { name: 'Filtros' }))
+    await user.click(screen.getByRole('button', { name: 'Tutoriais' }))
+    await user.click(screen.getByRole('button', { name: 'Iniciante' }))
+    await user.click(screen.getByRole('button', { name: 'Ver resultados' }))
+
+    expect(screen.getByRole('button', { name: 'Remover filtro Tutoriais' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Remover filtro Iniciante' })).toBeVisible()
+    expect(screen.getByRole('link', { name: /Simulando no SiliWiz/i })).toBeVisible()
+  })
+
+  it('limpa categoria e nível sem apagar a busca', async () => {
+    const user = userEvent.setup()
+    renderEducacao()
+    const busca = await screen.findByRole('searchbox', { name: 'Buscar recursos' })
+
+    await user.type(busca, 'SiliWiz')
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+    await user.click(screen.getByRole('button', { name: 'Tutoriais' }))
+    await user.click(screen.getByRole('button', { name: 'Limpar filtros' }))
+
+    expect(busca).toHaveValue('SiliWiz')
   })
 })

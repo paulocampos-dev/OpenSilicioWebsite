@@ -1,4 +1,4 @@
-import { Box, Grid, Stack, Typography } from '@mui/material'
+import { Box, Button, Drawer, Grid, Stack, Typography } from '@mui/material'
 import { useMemo, useState, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
@@ -94,6 +94,7 @@ export default function Educacao() {
   const [tab, setTab] = useState<Kind>('Todos')
   const [level, setLevel] = useState<Level>('Todos')
   const [query, setQuery] = useState<string>('')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [cartoes, setCartoes] = useState<CartaoEducacao[]>([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState(false)
@@ -171,31 +172,7 @@ export default function Educacao() {
         </Typography>
       </Stack>
 
-      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} alignItems={{ xs: 'stretch', lg: 'center' }} flexWrap="wrap" useFlexGap>
-        <Box sx={{ display: 'flex', border: '1px solid var(--color-line)', flexWrap: 'wrap' }}>
-          {kinds.map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => setTab(k)}
-              className="filter-pill"
-              style={{
-                padding: '10px 16px',
-                fontSize: 14,
-                fontFamily: 'var(--font-body)',
-                border: 'none',
-                borderLeft: k === 'Todos' ? 'none' : '1px solid var(--color-line)',
-                cursor: 'pointer',
-                background: tab === k ? 'var(--color-accent)' : 'transparent',
-                color: tab === k ? 'var(--brand-paper)' : 'var(--color-text)',
-              }}
-            >
-              <span style={{ fontWeight: 600 }}>{k}</span>
-              <span style={{ marginLeft: 8, opacity: tab === k ? 0.75 : 0.55 }}>{counts[k]}</span>
-            </button>
-          ))}
-        </Box>
-
+      <Stack spacing={2}>
         <Box sx={{ position: 'relative', flex: 1, minWidth: 240 }}>
           <input
             className="input"
@@ -207,21 +184,172 @@ export default function Educacao() {
           />
         </Box>
 
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-          <span style={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Nível</span>
-          {levels.map((lvl) => (
-            <button
-              key={lvl}
-              type="button"
-              onClick={() => setLevel(lvl)}
-              className={level === lvl ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
-              style={level === lvl ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
-            >
-              {lvl}
-            </button>
-          ))}
+        <Button
+          variant="outlined"
+          aria-label="Filtros"
+          onClick={() => setFiltersOpen(true)}
+          sx={{ display: { xs: 'flex', md: 'none' }, minHeight: 48, borderRadius: 0 }}
+        >
+          Filtros
+        </Button>
+
+        {(tab !== 'Todos' || level !== 'Todos') && (
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap aria-label="Filtros ativos">
+            {tab !== 'Todos' && (
+              <button
+                type="button"
+                aria-label={`Remover filtro ${tab}`}
+                className="tag tag-outline filter-pill"
+                onClick={() => setTab('Todos')}
+              >
+                {tab} ×
+              </button>
+            )}
+            {level !== 'Todos' && (
+              <button
+                type="button"
+                aria-label={`Remover filtro ${level}`}
+                className="tag tag-outline filter-pill"
+                onClick={() => setLevel('Todos')}
+              >
+                {level} ×
+              </button>
+            )}
+          </Stack>
+        )}
+
+        <Stack
+          direction={{ md: 'column', lg: 'row' }}
+          spacing={2}
+          alignItems={{ md: 'stretch', lg: 'center' }}
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ display: { xs: 'none', md: 'flex' } }}
+        >
+          <Box sx={{ display: 'flex', border: '1px solid var(--color-line)', flexWrap: 'wrap' }}>
+            {kinds.map((k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setTab(k)}
+                className="filter-pill"
+                style={{
+                  padding: '10px 16px',
+                  fontSize: 14,
+                  fontFamily: 'var(--font-body)',
+                  border: 'none',
+                  borderLeft: k === 'Todos' ? 'none' : '1px solid var(--color-line)',
+                  cursor: 'pointer',
+                  background: tab === k ? 'var(--color-accent)' : 'transparent',
+                  color: tab === k ? 'var(--brand-paper)' : 'var(--color-text)',
+                }}
+              >
+                <span style={{ fontWeight: 600 }}>{k}</span>
+                <span style={{ marginLeft: 8, opacity: tab === k ? 0.75 : 0.55 }}>{counts[k]}</span>
+              </button>
+            ))}
+          </Box>
+
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+            <span style={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Nível</span>
+            {levels.map((lvl) => (
+              <button
+                key={lvl}
+                type="button"
+                onClick={() => setLevel(lvl)}
+                className={level === lvl ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
+                style={level === lvl ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
+              >
+                {lvl}
+              </button>
+            ))}
+          </Stack>
         </Stack>
       </Stack>
+
+      <Drawer
+        anchor="bottom"
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 0,
+              borderTop: '1px solid var(--color-line)',
+              bgcolor: 'background.paper',
+              maxHeight: 'min(82vh, 640px)',
+            },
+          },
+        }}
+      >
+        <Stack spacing={3} sx={{ p: 2.5, pb: 'max(20px, env(safe-area-inset-bottom))' }}>
+          <Typography component="h2" sx={{ fontFamily: 'var(--font-heading)', fontSize: 28, fontWeight: 600, textTransform: 'uppercase' }}>
+            Filtros
+          </Typography>
+
+          <Stack spacing={1}>
+            <Typography sx={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
+              Tipo de conteúdo
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {kinds.map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  aria-label={kind}
+                  aria-pressed={tab === kind}
+                  onClick={() => setTab(kind)}
+                  className={tab === kind ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
+                  style={tab === kind ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
+                >
+                  {kind} ({counts[kind]})
+                </button>
+              ))}
+            </Stack>
+          </Stack>
+
+          <Stack spacing={1}>
+            <Typography sx={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
+              Nível
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {levels.map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  aria-label={lvl}
+                  aria-pressed={level === lvl}
+                  onClick={() => setLevel(lvl)}
+                  className={level === lvl ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
+                  style={level === lvl ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
+                >
+                  {lvl}
+                </button>
+              ))}
+            </Stack>
+          </Stack>
+
+          <Stack direction="row" spacing={1.5}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setTab('Todos')
+                setLevel('Todos')
+              }}
+              sx={{ flex: 1, minHeight: 48, borderRadius: 0 }}
+            >
+              Limpar filtros
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setFiltersOpen(false)}
+              sx={{ flex: 1, minHeight: 48, borderRadius: 0 }}
+            >
+              Ver resultados
+            </Button>
+          </Stack>
+        </Stack>
+      </Drawer>
 
       {loading ? (
         <CardGridSkeleton count={6} columns={{ xs: 12, md: 6, lg: 4 }} />
