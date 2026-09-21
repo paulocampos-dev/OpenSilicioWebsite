@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  MenuItem,
   Paper,
   Snackbar,
   Stack,
@@ -25,6 +26,7 @@ import PublishIcon from '@mui/icons-material/Publish';
 import { cursosApi } from '../../services/api';
 import type { AulaNaArvore, CursoComArvore, ModuloNaArvore, QuizNaArvore } from '../../types';
 import { duracaoPorExtenso } from '../../utils/duracao';
+import AdminMobileItem from '../../components/admin/AdminMobileItem';
 
 /** Troca dois itens de lugar e devolve a lista nova. */
 const trocar = <T,>(lista: T[], de: number, para: number): T[] => {
@@ -236,7 +238,7 @@ export default function CursoEstrutura() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+      <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', md: 'center' }} spacing={2} sx={{ mb: 1 }}>
         <Box>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography variant="h4">{curso.titulo}</Typography>
@@ -252,7 +254,7 @@ export default function CursoEstrutura() {
             {curso.duracao_seg > 0 ? `, ${duracaoPorExtenso(curso.duracao_seg)}` : ''}
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
           <Button component={RouterLink} to={`/admin/cursos/editar/${curso.id}`}>
             Dados do curso
           </Button>
@@ -280,7 +282,7 @@ export default function CursoEstrutura() {
       <Stack spacing={2} sx={{ mt: 2 }}>
         {curso.modulos.map((modulo, indiceModulo) => (
           <Paper key={modulo.id} sx={{ p: 2 }}>
-            <Stack direction="row" alignItems="flex-start" spacing={1}>
+            <Stack direction="row" alignItems="flex-start" spacing={1} sx={{ display: { xs: 'none', md: 'flex' } }}>
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="overline" color="primary">
                   Módulo {indiceModulo + 1}
@@ -337,18 +339,35 @@ export default function CursoEstrutura() {
               </IconButton>
             </Stack>
 
+            <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+              <AdminMobileItem
+                title={modulo.titulo}
+                details={<>{`Módulo ${indiceModulo + 1}`}{modulo.resumo ? ` · ${modulo.resumo}` : ''}</>}
+                actionsLabel={`Ações do módulo ${modulo.titulo}`}
+                actions={(
+                  <>
+                    <MenuItem disabled={indiceModulo === 0} onClick={() => moverModulo(indiceModulo, -1)}>Mover módulo para cima</MenuItem>
+                    <MenuItem disabled={indiceModulo === curso.modulos.length - 1} onClick={() => moverModulo(indiceModulo, 1)}>Mover módulo para baixo</MenuItem>
+                    <MenuItem onClick={() => setDialogoModulo({ id: modulo.id, titulo: modulo.titulo, resumo: modulo.resumo ?? '' })}>Renomear módulo</MenuItem>
+                    {modulo.aulas.some((aula) => !aula.publicado) && <MenuItem onClick={() => publicarModulo(modulo.id)}>Publicar módulo</MenuItem>}
+                    <MenuItem onClick={() => apagarModulo(modulo.id, modulo.titulo, modulo.aulas.length, modulo.quizzes.length)} sx={{ color: 'error.main' }}>Deletar módulo</MenuItem>
+                  </>
+                )}
+              />
+            </Box>
+
             <Stack spacing={0.5} sx={{ mt: 2 }}>
               {atividadesDoModulo(modulo).map((atividade) => {
                 if (atividade.tipo === 'aula') {
                   const aula = atividade.item;
                   const indiceAula = atividade.indiceAula;
                   return (
+                    <Box key={`aula-${aula.id}`}>
                     <Stack
-                      key={`aula-${aula.id}`}
                       direction="row"
                       alignItems="center"
                       spacing={1}
-                      sx={{ py: 0.75, borderTop: '1px solid', borderColor: 'divider' }}
+                      sx={{ py: 0.75, borderTop: '1px solid', borderColor: 'divider', display: { xs: 'none', md: 'flex' } }}
                     >
                       <Typography sx={{ flex: 1, minWidth: 0 }}>
                         {aula.titulo}
@@ -403,17 +422,33 @@ export default function CursoEstrutura() {
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Stack>
+                    <Box sx={{ display: { xs: 'block', md: 'none' }, borderTop: '1px solid', borderColor: 'divider', pt: 0.5 }}>
+                      <AdminMobileItem
+                        title={aula.titulo}
+                        details={<>{aula.publicado && aula.duracao_seg ? duracaoPorExtenso(aula.duracao_seg) : 'Sem duração'}{aula.publicado && aula.opcional ? ' · opcional' : ''}</>}
+                        status={<Chip size="small" label={aula.publicado ? 'Publicada' : 'Rascunho'} color={aula.publicado ? 'success' : 'default'} />}
+                        actions={(
+                          <>
+                            <MenuItem disabled={indiceAula === 0} onClick={() => moverAula(modulo.id, indiceAula, -1)}>Mover aula para cima</MenuItem>
+                            <MenuItem disabled={indiceAula === modulo.aulas.length - 1} onClick={() => moverAula(modulo.id, indiceAula, 1)}>Mover aula para baixo</MenuItem>
+                            <MenuItem component={RouterLink} to={`/admin/cursos/${curso.slug}/aulas/${aula.id}`}>Editar aula</MenuItem>
+                            <MenuItem onClick={() => apagarAula(aula.id, aula.titulo)} sx={{ color: 'error.main' }}>Deletar aula</MenuItem>
+                          </>
+                        )}
+                      />
+                    </Box>
+                    </Box>
                   );
                 }
 
                 const quiz = atividade.item;
                 return (
+                  <Box key={`quiz-${quiz.id}`}>
                   <Stack
-                    key={`quiz-${quiz.id}`}
                     direction="row"
                     alignItems="center"
                     spacing={1}
-                    sx={{ py: 0.75, pl: 2, borderTop: '1px solid', borderColor: 'divider' }}
+                    sx={{ py: 0.75, pl: 2, borderTop: '1px solid', borderColor: 'divider', display: { xs: 'none', md: 'flex' } }}
                   >
                     <Box sx={{ width: 22, textAlign: 'center', color: 'primary.main', fontWeight: 700 }}>
                       ?
@@ -448,10 +483,24 @@ export default function CursoEstrutura() {
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Stack>
+                  <Box sx={{ display: { xs: 'block', md: 'none' }, borderTop: '1px solid', borderColor: 'divider', pt: 0.5 }}>
+                    <AdminMobileItem
+                      title={quiz.titulo}
+                      details={<>{quiz.total_questoes ?? 0} {(quiz.total_questoes ?? 0) === 1 ? 'questão' : 'questões'} · mínimo {quiz.nota_minima ?? 70}% · {atividade.posicao.toLocaleLowerCase('pt-BR')}</>}
+                      status={<Chip size="small" label={quiz.publicado ? 'Publicado' : 'Rascunho'} color={quiz.publicado ? 'success' : 'default'} />}
+                      actions={(
+                        <>
+                          <MenuItem component={RouterLink} to={`/admin/cursos/${curso.slug}/quizzes/${quiz.id}`}>Editar quiz</MenuItem>
+                          <MenuItem onClick={() => apagarQuiz(quiz.id, quiz.titulo)} sx={{ color: 'error.main' }}>Deletar quiz</MenuItem>
+                        </>
+                      )}
+                    />
+                  </Box>
+                  </Box>
                 );
               })}
 
-              <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
+              <Stack direction="row" spacing={1} sx={{ pt: 1, display: { xs: 'none', md: 'flex' } }}>
                 <Button
                   size="small"
                   startIcon={<AddIcon />}
@@ -468,6 +517,24 @@ export default function CursoEstrutura() {
                 >
                   Novo quiz
                 </Button>
+              </Stack>
+              <Stack
+                data-testid="mobile-create-actions"
+                direction="row"
+                spacing={1}
+                sx={{
+                  display: { xs: 'flex', md: 'none' },
+                  position: 'sticky',
+                  bottom: 0,
+                  zIndex: 1,
+                  bgcolor: 'background.paper',
+                  py: 1,
+                  pb: 'max(8px, env(safe-area-inset-bottom))',
+                  '& > *': { flex: 1, minHeight: 48 },
+                }}
+              >
+                <Button startIcon={<AddIcon />} component={RouterLink} to={`/admin/cursos/${curso.slug}/aulas/nova?modulo=${modulo.id}`}>Nova aula</Button>
+                <Button startIcon={<AddIcon />} component={RouterLink} to={`/admin/cursos/${curso.slug}/quizzes/novo?modulo=${modulo.id}`}>Novo quiz</Button>
               </Stack>
             </Stack>
           </Paper>

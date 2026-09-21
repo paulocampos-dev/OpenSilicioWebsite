@@ -12,12 +12,18 @@ describe('AdminMobileItem', () => {
         title="Projeto Digital"
         details={<span>6 módulos</span>}
         status={<span>Publicado</span>}
-        actions={<MenuItem>Editar</MenuItem>}
+        actions={(
+          <>
+            <MenuItem>Editar</MenuItem>
+            <MenuItem>Excluir</MenuItem>
+          </>
+        )}
       />,
     )
 
     expect(screen.getByText('6 módulos')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Ações de Projeto Digital' }))
     expect(screen.getByRole('menuitem', { name: 'Editar' })).toBeVisible()
+    expect(screen.getByRole('menuitem', { name: 'Excluir' })).toBeVisible()
   })
 })

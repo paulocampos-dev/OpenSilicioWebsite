@@ -81,13 +81,16 @@ describe('CursoEstrutura com quizzes', () => {
       </MemoryRouter>,
     )
 
-    expect(await screen.findByText('Quiz: células padrão')).toBeInTheDocument()
-    expect(screen.getByText(/4 questões · mínimo 70% · depois de Simulando uma célula padrão/i)).toBeInTheDocument()
-    expect(screen.getByText('Rascunho')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Novo quiz' })).toHaveAttribute(
-      'href',
-      '/admin/cursos/projeto-digital/quizzes/novo?modulo=modulo-1',
-    )
+    expect((await screen.findAllByText('Quiz: células padrão')).length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText(/4 questões · mínimo 70% · depois de Simulando uma célula padrão/i).length,
+    ).toBeGreaterThan(0)
+    expect(screen.getAllByText('Rascunho').length).toBeGreaterThan(0)
+    expect(
+      screen
+        .getAllByRole('link', { name: 'Novo quiz' })
+        .every((link) => link.getAttribute('href') === '/admin/cursos/projeto-digital/quizzes/novo?modulo=modulo-1'),
+    ).toBe(true)
     expect(screen.getByRole('link', { name: 'Editar quiz Quiz: células padrão' })).toHaveAttribute(
       'href',
       '/admin/cursos/projeto-digital/quizzes/quiz-1',
@@ -98,5 +101,35 @@ describe('CursoEstrutura com quizzes', () => {
       'Apagar o quiz "Quiz: células padrão" e todas as questões dele?',
     )
     await waitFor(() => expect(cursosApi.deletarQuiz).toHaveBeenCalledWith('quiz-1'))
+  })
+
+  it('reúne ações de módulo e aula em menus e mantém a criação acessível', async () => {
+    const usuario = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/admin/cursos/projeto-digital/estrutura']}>
+        <Routes>
+          <Route path="/admin/cursos/:cursoSlug/estrutura" element={<CursoEstrutura />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await usuario.click(await screen.findByRole('button', { name: 'Ações do módulo Transistores' }))
+    expect(screen.getByRole('menuitem', { name: 'Mover módulo para baixo' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+    expect(screen.getByRole('menuitem', { name: 'Renomear módulo' })).toBeVisible()
+    expect(screen.getByRole('menuitem', { name: 'Deletar módulo' })).toBeVisible()
+    await usuario.keyboard('{Escape}')
+
+    await usuario.click(screen.getByRole('button', { name: 'Ações de Simulando uma célula padrão' }))
+    expect(screen.getByRole('menuitem', { name: 'Editar aula' })).toHaveAttribute(
+      'href',
+      '/admin/cursos/projeto-digital/aulas/aula-1',
+    )
+
+    expect(screen.getByTestId('mobile-create-actions')).toHaveStyle({ position: 'sticky' })
+    expect(screen.getByTestId('mobile-create-actions')).toHaveTextContent('Nova aula')
+    expect(screen.getByTestId('mobile-create-actions')).toHaveTextContent('Novo quiz')
   })
 })

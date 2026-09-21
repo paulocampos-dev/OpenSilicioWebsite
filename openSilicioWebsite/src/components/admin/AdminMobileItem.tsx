@@ -1,4 +1,11 @@
-import { useState, type MouseEvent, type ReactNode } from 'react'
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from 'react'
 import { Box, IconButton, Menu, Paper, Stack, Typography } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 
@@ -7,10 +14,26 @@ interface AdminMobileItemProps {
   details: ReactNode
   status?: ReactNode
   actions: ReactNode
+  actionsLabel?: string
 }
 
+const flattenActions = (actions: ReactNode): ReactNode[] =>
+  Children.toArray(actions).flatMap((action) => {
+    if (isValidElement<{ children?: ReactNode }>(action) && action.type === Fragment) {
+      return flattenActions(action.props.children)
+    }
+
+    return action
+  })
+
 /** Compact record row used by admin lists below the desktop breakpoint. */
-export default function AdminMobileItem({ title, details, status, actions }: AdminMobileItemProps) {
+export default function AdminMobileItem({
+  title,
+  details,
+  status,
+  actions,
+  actionsLabel,
+}: AdminMobileItemProps) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const menuId = `acoes-${title.toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g, '-')}`
 
@@ -26,7 +49,7 @@ export default function AdminMobileItem({ title, details, status, actions }: Adm
           {status && <Box sx={{ mt: 1 }}>{status}</Box>}
         </Box>
         <IconButton
-          aria-label={`Ações de ${title}`}
+          aria-label={actionsLabel ?? `Ações de ${title}`}
           aria-controls={anchor ? menuId : undefined}
           aria-expanded={anchor ? 'true' : undefined}
           aria-haspopup="menu"
@@ -37,7 +60,7 @@ export default function AdminMobileItem({ title, details, status, actions }: Adm
         </IconButton>
       </Stack>
       <Menu id={menuId} anchorEl={anchor} open={Boolean(anchor)} onClose={closeMenu} onClick={closeMenu}>
-        {actions}
+        {flattenActions(actions)}
       </Menu>
     </Paper>
   )
