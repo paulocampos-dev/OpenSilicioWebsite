@@ -25,5 +25,10 @@ describe('Landing partners', () => {
       'src',
       '/usp-logo-transp.png',
     )
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
+    expect(
+      screen.getByRole('heading', { name: 'Microeletrônica aberta, na Poli', level: 2 }),
+    ).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'Educação estruturada', level: 3 })).toBeVisible()
   })
 })

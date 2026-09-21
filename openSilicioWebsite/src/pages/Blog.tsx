@@ -74,7 +74,7 @@ export default function Blog() {
   return (
     <Stack spacing={5}>
       <Stack spacing={1.5}>
-        <Typography component="h2" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: { xs: '40px', md: '56px' }, lineHeight: { xs: '42px', md: '58px' }, letterSpacing: '.01em', textTransform: 'uppercase', marginLeft: 'var(--optical-left)' }}>
+        <Typography component="h1" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: { xs: '40px', md: '56px' }, lineHeight: { xs: '42px', md: '58px' }, letterSpacing: '.01em', textTransform: 'uppercase', marginLeft: 'var(--optical-left)' }}>
           Blog do OpenSilício
         </Typography>
         <Typography sx={{ fontSize: '17px', lineHeight: '26px', maxWidth: '64ch', color: 'var(--color-text-muted)' }}>
@@ -131,7 +131,7 @@ export default function Blog() {
                     )}
                     <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 1 }}>
                       <span className="kicker" style={{ margin: 0 }}>{post.category}</span>
-                      <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '22px', lineHeight: '24px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                      <Typography component="h2" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '22px', lineHeight: '24px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
                         {post.title}
                       </Typography>
                       <Typography sx={{ fontSize: '15px', lineHeight: '24px', color: 'var(--color-text-muted)' }}>{post.excerpt}</Typography>

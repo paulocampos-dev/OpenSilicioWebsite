@@ -47,7 +47,7 @@ export default function WikiList() {
   return (
     <Stack spacing={4}>
       <Stack spacing={1.5}>
-        <Typography component="h2" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: { xs: '34px', md: '44px' }, lineHeight: { xs: '36px', md: '46px' }, letterSpacing: '.01em', textTransform: 'uppercase', marginLeft: 'var(--optical-left)' }}>
+        <Typography component="h1" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: { xs: '34px', md: '44px' }, lineHeight: { xs: '36px', md: '46px' }, letterSpacing: '.01em', textTransform: 'uppercase', marginLeft: 'var(--optical-left)' }}>
           Wiki do OpenSilício
         </Typography>
         <Typography sx={{ fontSize: '16px', lineHeight: '24px', maxWidth: '60ch', color: 'var(--color-text-muted)' }}>
@@ -94,7 +94,7 @@ export default function WikiList() {
             {filteredEntries.map((entry) => (
               <Grid key={entry.id} size={{ xs: 12, sm: 6 }}>
                 <RouterLink to={`/wiki/${entry.slug}`} className="card blueprint" style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                  <Typography component="h2" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
                     {entry.term}
                   </Typography>
                   <Typography sx={{ fontSize: '15px', lineHeight: '24px', color: 'var(--color-text-muted)' }}>{entry.definition}</Typography>

@@ -123,7 +123,7 @@ export default function Landing() {
           <Grid size={{ xs: 12, md: 7 }}>
             <span className="kicker">02 · Sobre o OpenSilício</span>
             <Box className="caption-rule" />
-            <Typography component="h3" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '36px', lineHeight: '38px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+            <Typography component="h2" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '36px', lineHeight: '38px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
               Microeletrônica aberta, na Poli
             </Typography>
             <Typography sx={{ fontSize: '16px', lineHeight: '24px', mt: 2.5, maxWidth: '58ch', color: 'var(--color-text-muted)' }}>
@@ -144,7 +144,7 @@ export default function Landing() {
           {offerings.map((item) => (
             <Grid key={item.title} size={{ xs: 12, sm: 6, md: 4 }}>
               <BlueprintFrame sx={{ p: 3, height: '100%' }}>
-                <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '22px', lineHeight: '24px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                <Typography component="h3" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '22px', lineHeight: '24px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
                   {item.title}
                 </Typography>
                 <Typography sx={{ fontSize: '15px', lineHeight: '24px', mt: 1.5, color: 'var(--color-text-muted)' }}>{item.desc}</Typography>
@@ -175,7 +175,7 @@ export default function Landing() {
                   />
                   <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
                     <span className="tag tag-accent" style={{ alignSelf: 'flex-start' }}>{resource.category}{resource.difficulty ? ` · ${resource.difficulty}` : ''}</span>
-                    <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                    <Typography component="h3" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
                       {resource.title}
                     </Typography>
                     <Typography sx={{ fontSize: '15px', lineHeight: '24px', color: 'var(--color-text-muted)' }}>{resource.description}</Typography>
@@ -200,7 +200,7 @@ export default function Landing() {
               <Grid key={post.id} size={{ xs: 12, sm: 6, md: 4 }}>
                 <RouterLink to={`/blog/${post.slug}`} className="card blueprint" style={{ textDecoration: 'none', color: 'inherit' }}>
                   <span className="kicker" style={{ margin: 0 }}>{post.category}</span>
-                  <Typography component="h4" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
+                  <Typography component="h3" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '24px', lineHeight: '26px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
                     {post.title}
                   </Typography>
                   <Typography sx={{ fontSize: '15px', lineHeight: '24px', color: 'var(--color-text-muted)' }}>{post.excerpt}</Typography>

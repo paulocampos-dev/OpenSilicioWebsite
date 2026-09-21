@@ -127,7 +127,7 @@ export default function Cursos() {
     <Stack spacing={5}>
       <Stack spacing={1.5}>
         <Typography
-          component="h2"
+          component="h1"
           sx={{
             fontFamily: 'var(--font-heading)',
             fontWeight: 600,
@@ -156,7 +156,7 @@ export default function Cursos() {
           >
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
-                component="h3"
+                component="h2"
                 sx={{
                   fontFamily: 'var(--font-heading)',
                   fontWeight: 600,
@@ -235,7 +235,7 @@ export default function Cursos() {
               >
                 <Box sx={{ minWidth: 0 }}>
                   <Typography
-                    component="h3"
+                    component="h2"
                     sx={{
                       fontFamily: 'var(--font-heading)',
                       fontWeight: 600,

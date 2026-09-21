@@ -59,7 +59,7 @@ export default function About() {
     <Stack spacing={8}>
       {/* Hero Section */}
       <Stack spacing={2} textAlign="center" alignItems="center">
-        <Typography sx={{ typography: { xs: 'h3', md: 'h2' } }} fontWeight={900}>
+        <Typography component="h1" sx={{ typography: { xs: 'h3', md: 'h2' } }} fontWeight={900}>
           {settings.about_title || 'Sobre o OpenSilício'}
         </Typography>
       </Stack>
@@ -80,7 +80,7 @@ export default function About() {
             <Grid size={{ xs: 12, md: 6 }}>
               <Card sx={{ height: '100%', background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)' }}>
                 <CardContent>
-                  <Typography variant="h5" fontWeight={700} gutterBottom color="primary.main">
+                  <Typography component="h2" variant="h5" fontWeight={700} gutterBottom color="primary.main">
                     Nossa Missão
                   </Typography>
                   {renderContent(settings.about_mission)}
@@ -93,7 +93,7 @@ export default function About() {
             <Grid size={{ xs: 12, md: 6 }}>
               <Card sx={{ height: '100%', background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.05) 0%, rgba(245, 87, 108, 0.05) 100%)' }}>
                 <CardContent>
-                  <Typography variant="h5" fontWeight={700} gutterBottom color="secondary.main">
+                  <Typography component="h2" variant="h5" fontWeight={700} gutterBottom color="secondary.main">
                     Nossa Visão
                   </Typography>
                   {renderContent(settings.about_vision)}
@@ -107,7 +107,7 @@ export default function About() {
       {/* History */}
       {settings.about_history && (
         <Box>
-          <Typography variant="h4" fontWeight={800} gutterBottom>
+          <Typography component="h2" variant="h4" fontWeight={800} gutterBottom>
             Nossa História
           </Typography>
           <Divider sx={{ mb: 3 }} />
@@ -118,7 +118,7 @@ export default function About() {
       {/* Team */}
       {settings.about_team_members && settings.about_team_members.length > 0 && (
         <Box>
-          <Typography variant="h4" fontWeight={800} gutterBottom textAlign="center">
+          <Typography component="h2" variant="h4" fontWeight={800} gutterBottom textAlign="center">
             Nossa Equipe
           </Typography>
           <Divider sx={{ mb: 4 }} />
@@ -140,7 +140,7 @@ export default function About() {
                         </Avatar>
                       )}
                       <Box>
-                        <Typography variant="h6" fontWeight={700}>
+                        <Typography component="h3" variant="h6" fontWeight={700}>
                           {member.name}
                         </Typography>
                         <Typography color="text.secondary" variant="body2">
