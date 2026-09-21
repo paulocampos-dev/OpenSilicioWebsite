@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenSilício · propostas mobile</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --black: #000;
+      --field: #16222e;
+      --surface: #1d2d3d;
+      --surface-2: #1d1f20;
+      --steel: #5980a6;
+      --steel-light: #b5d9fd;
+      --paper: #f5f5f8;
+      --muted: #b7b7ba;
+      --line: rgba(245, 245, 248, .2);
+      --line-strong: rgba(245, 245, 248, .42);
+      --danger: #e3a4a4;
+      --heading: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+      --body: "Barlow", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--black); color: var(--paper); font-family: var(--body); }
+    body { margin: 0; background: var(--black); }
+    button, input { font: inherit; }
+    button { color: inherit; }
+
+    .document {
+      width: min(1500px, 100%);
+      margin: 0 auto;
+      padding: 32px 24px 72px;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 520px);
+      gap: 32px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1, h2, h3, h4 { font-family: var(--heading); font-weight: 600; text-transform: uppercase; }
+    h1 { max-width: 740px; margin-bottom: 12px; font-size: clamp(36px, 5vw, 64px); line-height: .98; }
+    h2 { margin-bottom: 10px; font-size: 30px; line-height: 1; }
+    h3 { margin-bottom: 8px; font-size: 21px; line-height: 1.1; }
+    p { color: var(--muted); line-height: 1.55; }
+
+    .summary { max-width: 68ch; margin: 0; font-size: 17px; }
+    .criteria { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+    .criteria li { display: grid; grid-template-columns: 90px 1fr; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .criteria strong { color: var(--steel-light); font-size: 13px; letter-spacing: .04em; }
+    .criteria span { color: var(--muted); font-size: 14px; line-height: 1.45; }
+
+    .variants {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      padding-top: 28px;
+    }
+
+    .variant {
+      min-width: 0;
+      border-top: 3px solid var(--steel);
+      padding-top: 18px;
+    }
+
+    .variant-head {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+      min-height: 122px;
+      margin-bottom: 20px;
+    }
+
+    .letter {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      border: 1px solid var(--steel);
+      color: var(--steel-light);
+      font-family: var(--heading);
+      font-size: 32px;
+    }
+
+    .recommendation { margin: 0 0 6px; color: var(--steel-light); font-size: 13px; }
+    .variant-copy { max-width: 64ch; margin: 0; font-size: 14px; }
+
+    .phones {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 360px));
+      gap: 18px;
+      align-items: start;
+      justify-content: center;
+    }
+
+    .phone-wrap > h3 { margin: 0 0 10px; color: var(--muted); font-size: 16px; }
+    .phone {
+      position: relative;
+      width: 100%;
+      min-height: 700px;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      background: var(--field);
+    }
+
+    .appbar {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) 48px;
+      align-items: center;
+      min-height: 58px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .appbar button,
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 0;
+      background: transparent;
+      font-size: 21px;
+    }
+
+    .app-title { min-width: 0; }
+    .app-title strong { display: block; overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
+    .app-title small { display: block; color: var(--muted); font-size: 12px; }
+
+    .screen { padding: 20px 16px 84px; }
+    .screen h2 { margin-bottom: 6px; font-size: 30px; }
+    .screen .lead { margin-bottom: 20px; font-size: 14px; }
+    .meta { color: var(--muted); font-size: 13px; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 48px;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .primary, .secondary, .filter-button, .search, .category {
+      min-height: 48px;
+      border: 1px solid var(--line-strong);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .primary { padding: 0 16px; border-color: var(--steel); background: var(--steel); color: #fff; font-weight: 600; }
+    .secondary { padding: 0 16px; }
+    .search { width: 100%; padding: 0 14px; color: var(--paper); outline: none; }
+    .search::placeholder { color: var(--muted); }
+
+    .module {
+      margin-top: 18px;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .module-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 48px;
+      gap: 8px;
+      align-items: center;
+      min-height: 72px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .module-head strong { display: block; font-size: 16px; }
+    .module-head small { color: var(--muted); font-size: 12px; }
+
+    .activity {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) 48px;
+      gap: 10px;
+      align-items: center;
+      min-height: 66px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .index { color: var(--steel-light); font-family: var(--heading); font-size: 17px; }
+    .activity strong { display: block; font-size: 14px; line-height: 1.3; }
+    .status { display: inline-block; margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .status::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 6px; background: var(--steel); vertical-align: 1px; }
+
+    .sticky-actions {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      padding: 8px;
+      border-top: 1px solid var(--line-strong);
+      background: #000;
+    }
+
+    .sticky-actions button { min-height: 48px; }
+
+    .drawer-preview {
+      display: grid;
+      grid-template-columns: 1fr;
+      margin: 12px 0 18px;
+      border: 1px solid var(--line-strong);
+      background: #000;
+    }
+
+    .drawer-preview .drawer-title { padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+    .drawer-preview a { display: flex; align-items: center; min-height: 48px; padding: 0 16px; border-bottom: 1px solid var(--line); color: var(--paper); text-decoration: none; }
+    .drawer-preview a.active { border-left: 4px solid var(--steel); color: var(--steel-light); }
+
+    .filter-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 48px;
+      align-items: center;
+      min-height: 48px;
+      margin-top: 10px;
+      border: 1px solid var(--line-strong);
+    }
+
+    .filter-summary span { padding: 0 14px; font-size: 14px; }
+    .active-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 20px; }
+    .active-filters span { min-height: 32px; padding: 6px 9px; border: 1px solid var(--line); color: var(--steel-light); font-size: 12px; }
+
+    .resource {
+      margin-top: 18px;
+      border: 1px solid var(--line-strong);
+    }
+
+    .resource-visual {
+      display: grid;
+      place-items: center;
+      min-height: 160px;
+      border-bottom: 1px solid var(--line);
+      background:
+        repeating-linear-gradient(135deg, transparent 0 10px, rgba(181,217,253,.04) 10px 11px),
+        var(--surface-2);
+      color: var(--steel);
+      font-family: var(--heading);
+      font-size: 28px;
+    }
+
+    .resource-copy { padding: 16px; }
+    .resource-copy small { color: var(--steel-light); }
+    .resource-copy h3 { margin: 8px 0; font-size: 24px; }
+    .resource-copy p { margin-bottom: 0; font-size: 14px; }
+
+    .bottom-nav {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      min-height: 68px;
+      border-top: 1px solid var(--line-strong);
+      background: #000;
+    }
+
+    .bottom-nav a {
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 3px;
+      min-width: 0;
+      border-right: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      text-decoration: none;
+    }
+
+    .bottom-nav a.active { color: var(--steel-light); }
+    .nav-icon { font-size: 18px; }
+
+    .compact-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 18px; }
+    .compact-actions button { min-height: 48px; border: 1px solid var(--line-strong); background: transparent; font-size: 13px; }
+    .compact-actions .primary { background: var(--steel); }
+
+    .visible-filters { margin-top: 12px; border: 1px solid var(--line-strong); }
+    .filter-group { padding: 12px; border-bottom: 1px solid var(--line); }
+    .filter-group:last-child { border-bottom: 0; }
+    .filter-group > strong { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+    .filter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .filter-grid.categories { grid-template-columns: repeat(3, 1fr); }
+    .filter-grid button { min-height: 44px; border: 1px solid var(--line); background: transparent; font-size: 12px; }
+    .filter-grid button.selected { border-color: var(--steel); background: var(--steel); color: #fff; }
+
+    .tradeoffs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .tradeoff { padding-left: 14px; border-left: 3px solid var(--steel); }
+    .tradeoff p { margin-bottom: 0; font-size: 14px; }
+
+    @media (max-width: 1180px) {
+      .variants { grid-template-columns: 1fr; }
+      .variant-head { min-height: auto; }
+    }
+
+    @media (max-width: 760px) {
+      .document { padding: 24px 16px 56px; }
+      .intro { grid-template-columns: 1fr; }
+      .phones { grid-template-columns: 1fr; }
+      .phone { max-width: 390px; margin: 0 auto; }
+      .tradeoffs { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="document">
+    <header class="intro">
+      <div>
+        <h1>OpenSilício mobile</h1>
+        <p class="summary">Duas propostas para corrigir o admin em telas pequenas e melhorar os filtros públicos. Ambas mantêm a linguagem Industry, eliminam rolagem horizontal e reservam pelo menos 44 px para os controles principais.</p>
+      </div>
+      <ul class="criteria" aria-label="Critérios de decisão">
+        <li><strong>Prioridade</strong><span>Admin utilizável em 320 px sem reduzir a densidade das informações.</span></li>
+        <li><strong>Público</strong><span>Busca e filtros continuam fáceis de alcançar com uma mão.</span></li>
+        <li><strong>Escopo</strong><span>Navegação, listas, tabelas, editor, filtros, títulos e transições.</span></li>
+      </ul>
+    </header>
+
+    <div class="variants">
+      <section class="variant" aria-labelledby="option-a">
+        <div class="variant-head">
+          <div class="letter">A</div>
+          <div>
+            <p class="recommendation">Recomendada</p>
+            <h2 id="option-a">Espaço primeiro</h2>
+            <p class="variant-copy">O admin usa gaveta lateral temporária. Ações raras ficam no menu de cada item. No site público, busca aparece primeiro e os filtros abrem em uma folha dedicada.</p>
+          </div>
+        </div>
+
+        <div class="phones">
+          <div class="phone-wrap">
+            <h3>Admin · estrutura do curso</h3>
+            <div class="phone">
+              <div class="appbar">
+                <button aria-label="Abrir navegação">☰</button>
+                <div class="app-title"><strong>Projeto Digital</strong><small>6 módulos · 4 aulas publicadas</small></div>
+                <button aria-label="Mais ações">⋯</button>
+              </div>
+              <div class="screen">
+                <h2>Estrutura</h2>
+                <p class="lead">Organize módulos, aulas e quizzes.</p>
+                <div class="drawer-preview" aria-label="Prévia da gaveta">
+                  <div class="drawer-title">Navegação fechada durante a edição</div>
+                  <a href="#">Dashboard</a>
+                  <a href="#" class="active">Cursos</a>
+                  <a href="#">Wiki</a>
+                </div>
+                <div class="module">
+                  <div class="module-head">
+                    <div><strong>Módulo 2</strong><small>MOSFETs e células padrão</small></div>
+                    <button class="icon-button" aria-label="Ações do módulo">⋯</button>
+                  </div>
+                  <div class="activity">
+                    <span class="index">01</span>
+                    <div><strong>Simulando uma célula padrão</strong><span class="status">Rascunho</span></div>
+                    <button class="icon-button" aria-label="Ações da aula">⋯</button>
+                  </div>
+                  <div class="activity">
+                    <span class="index">?</span>
+                    <div><strong>Quiz: células padrão</strong><span class="status">4 questões</span></div>
+                    <button class="icon-button" aria-label="Ações do quiz">⋯</button>
+                  </div>
+                  <div class="activity">
+                    <span class="index">02</span>
+                    <div><strong>Desenhando componentes no SiliWiz</strong><span class="status">Rascunho</span></div>
+                    <button class="icon-button" aria-label="Ações da aula">⋯</button>
+                  </div>
+                </div>
+              </div>
+              <div class="sticky-actions">
+                <button class="primary">Nova aula</button>
+                <button class="secondary">Novo quiz</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="phone-wrap">
+            <h3>Público · Educação</h3>
+            <div class="phone">
+              <div class="appbar">
+                <button aria-label="Início">◈</button>
+                <div class="app-title"><strong>OpenSilício</strong><small>Educação aberta</small></div>
+                <button aria-label="Abrir menu">☰</button>
+              </div>
+              <div class="screen">
+                <h2>Educação</h2>
+                <p class="lead">Recursos para aprender projeto de circuitos integrados.</p>
+                <input class="search" type="search" placeholder="Buscar por título ou descrição" aria-label="Buscar recursos">
+                <div class="filter-summary">
+                  <span>Filtros · Cursos · Iniciante</span>
+                  <button class="icon-button" aria-label="Abrir filtros">☷</button>
+                </div>
+                <div class="active-filters"><span>Cursos ×</span><span>Iniciante ×</span></div>
+                <div class="resource">
+                  <div class="resource-visual">CURSOS</div>
+                  <div class="resource-copy">
+                    <small>Curso · iniciante</small>
+                    <h3>Projeto Digital: do zero ao silício</h3>
+                    <p>Do primeiro transistor a um chip pronto para fabricação.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="variant" aria-labelledby="option-b">
+        <div class="variant-head">
+          <div class="letter">B</div>
+          <div>
+            <p class="recommendation">Mais explícita</p>
+            <h2 id="option-b">Tudo à vista</h2>
+            <p class="variant-copy">O admin usa navegação inferior persistente. As ações da tela aparecem no topo e os filtros públicos permanecem visíveis, agora com altura confortável e uma grade previsível.</p>
+          </div>
+        </div>
+
+        <div class="phones">
+          <div class="phone-wrap">
+            <h3>Admin · estrutura do curso</h3>
+            <div class="phone">
+              <div class="appbar">
+                <button aria-label="Voltar">‹</button>
+                <div class="app-title"><strong>Estrutura do curso</strong><small>Projeto Digital</small></div>
+                <button aria-label="Ver site">↗</button>
+              </div>
+              <div class="screen">
+                <h2>Projeto Digital</h2>
+                <p class="lead">6 módulos · 4 aulas publicadas</p>
+                <div class="compact-actions">
+                  <button>Dados</button>
+                  <button>Publicar</button>
+                  <button class="primary">Adicionar</button>
+                </div>
+                <div class="module">
+                  <div class="module-head">
+                    <div><strong>Módulo 2</strong><small>MOSFETs e células padrão</small></div>
+                    <button class="icon-button" aria-label="Expandir módulo">⌄</button>
+                  </div>
+                  <div class="activity">
+                    <span class="index">01</span>
+                    <div><strong>Simulando uma célula padrão</strong><span class="status">Rascunho</span></div>
+                    <button class="icon-button" aria-label="Editar aula">›</button>
+                  </div>
+                  <div class="activity">
+                    <span class="index">?</span>
+                    <div><strong>Quiz: células padrão</strong><span class="status">4 questões</span></div>
+                    <button class="icon-button" aria-label="Editar quiz">›</button>
+                  </div>
+                  <div class="activity">
+                    <span class="index">02</span>
+                    <div><strong>Desenhando componentes no SiliWiz</strong><span class="status">Rascunho</span></div>
+                    <button class="icon-button" aria-label="Editar aula">›</button>
+                  </div>
+                </div>
+              </div>
+              <nav class="bottom-nav" aria-label="Admin">
+                <a href="#"><span class="nav-icon">⌂</span><span>Início</span></a>
+                <a href="#"><span class="nav-icon">▤</span><span>Conteúdo</span></a>
+                <a href="#" class="active"><span class="nav-icon">▶</span><span>Cursos</span></a>
+                <a href="#"><span class="nav-icon">W</span><span>Wiki</span></a>
+              </nav>
+            </div>
+          </div>
+
+          <div class="phone-wrap">
+            <h3>Público · Educação</h3>
+            <div class="phone">
+              <div class="appbar">
+                <button aria-label="Início">◈</button>
+                <div class="app-title"><strong>OpenSilício</strong><small>Educação aberta</small></div>
+                <button aria-label="Abrir menu">☰</button>
+              </div>
+              <div class="screen">
+                <h2>Educação</h2>
+                <p class="lead">Recursos para aprender projeto de circuitos integrados.</p>
+                <input class="search" type="search" placeholder="Buscar por título ou descrição" aria-label="Buscar recursos">
+                <div class="visible-filters">
+                  <div class="filter-group">
+                    <strong>Tipo</strong>
+                    <div class="filter-grid categories">
+                      <button>Todos 7</button><button class="selected">Cursos 1</button><button>Projetos 0</button>
+                      <button>Guias 0</button><button>Tutoriais 3</button><button>Teóricos 3</button>
+                    </div>
+                  </div>
+                  <div class="filter-group">
+                    <strong>Nível</strong>
+                    <div class="filter-grid">
+                      <button>Todos</button><button class="selected">Iniciante</button>
+                      <button>Intermediário</button><button>Avançado</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="resource">
+                  <div class="resource-visual">CURSOS</div>
+                  <div class="resource-copy">
+                    <small>Curso · iniciante</small>
+                    <h3>Projeto Digital: do zero ao silício</h3>
+                    <p>Do primeiro transistor a um chip pronto para fabricação.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="tradeoffs" aria-label="Comparação">
+      <div class="tradeoff">
+        <h3>Por que eu escolheria A</h3>
+        <p>Ela recupera quase toda a largura do admin e deixa o conteúdo da aula como protagonista. Também reduz a altura ocupada por filtros no site público.</p>
+      </div>
+      <div class="tradeoff">
+        <h3>Quando B é melhor</h3>
+        <p>Ela favorece quem alterna muito entre áreas do admin e quem prefere ver todos os filtros antes de escolher. O custo é menos espaço vertical para conteúdo.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
