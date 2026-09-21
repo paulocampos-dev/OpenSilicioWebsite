@@ -56,24 +56,24 @@ export default function Footer() {
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
             <Stack spacing={1.5}>
               <span className="kicker" style={{ color: 'var(--color-steel-300)' }}>Recursos</span>
-              <Link component={RouterLink} to="/educacao" sx={linkStyle}>Educação</Link>
-              <Link component={RouterLink} to="/cursos" sx={linkStyle}>Cursos</Link>
-              <Link component={RouterLink} to="/blog" sx={linkStyle}>Blog</Link>
-              <Link component={RouterLink} to="/wiki" sx={linkStyle}>Wiki</Link>
+              <Link component={RouterLink} to="/educacao" className="footer-nav-link" sx={linkStyle}>Educação</Link>
+              <Link component={RouterLink} to="/cursos" className="footer-nav-link" sx={linkStyle}>Cursos</Link>
+              <Link component={RouterLink} to="/blog" className="footer-nav-link" sx={linkStyle}>Blog</Link>
+              <Link component={RouterLink} to="/wiki" className="footer-nav-link" sx={linkStyle}>Wiki</Link>
             </Stack>
           </Grid>
 
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
             <Stack spacing={1.5}>
               <span className="kicker" style={{ color: 'var(--color-steel-300)' }}>Sobre</span>
-              <Link component={RouterLink} to="/sobre" sx={linkStyle}>Nossa História</Link>
+              <Link component={RouterLink} to="/sobre" className="footer-nav-link" sx={linkStyle}>Nossa História</Link>
             </Stack>
           </Grid>
 
           <Grid size={{ xs: 12, md: 4 }}>
             <Stack spacing={1.5}>
               <span className="kicker" style={{ color: 'var(--color-steel-300)' }}>Contato</span>
-              <Link href={`mailto:${email}`} sx={linkStyle}>{email}</Link>
+              <Link href={`mailto:${email}`} className="footer-nav-link" sx={linkStyle}>{email}</Link>
               <Typography sx={{ color: 'var(--color-on-field-muted)', fontSize: '15px', lineHeight: '22px', whiteSpace: 'pre-line' }}>
                 {address}
               </Typography>
@@ -95,7 +95,7 @@ export default function Footer() {
             <Typography sx={{ color: 'var(--color-on-field-muted)', fontSize: '13px' }}>
               © {new Date().getFullYear()} OpenSilício · Grupo de Pesquisa e Extensão — Poli USP
             </Typography>
-            <Link component="button" type="button" onClick={reopenCookieConsent} sx={{ ...linkStyle, fontSize: '13px', cursor: 'pointer' }}>
+            <Link component="button" type="button" className="footer-nav-link" onClick={reopenCookieConsent} sx={{ ...linkStyle, fontSize: '13px', cursor: 'pointer' }}>
               Cookies
             </Link>
           </Stack>

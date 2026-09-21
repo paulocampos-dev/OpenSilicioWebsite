@@ -257,7 +257,7 @@ export default function Aula() {
             <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
               <button
                 type="button"
-                className={estaFeita ? 'btn btn-primary' : 'btn btn-secondary'}
+                className={`aula-touch-control ${estaFeita ? 'btn btn-primary' : 'btn btn-secondary'}`}
                 aria-pressed={estaFeita}
                 onClick={() => alternar(cursoSlug, aulaSlug, !estaFeita)}
               >
@@ -292,7 +292,7 @@ export default function Aula() {
                 }}
               >
                 {anterior ? (
-                  <RouterLink to={hrefDaAtividade(cursoSlug, anterior)} style={{ textDecoration: 'none' }}>
+                  <RouterLink className="aula-touch-control" to={hrefDaAtividade(cursoSlug, anterior)} style={{ textDecoration: 'none' }}>
                     <BlueprintFrame sx={{ p: 2.5, height: '100%' }}>
                       <span className="kicker">{anterior.tipo === 'quiz' ? 'Quiz anterior' : 'Aula anterior'}</span>
                       <Typography sx={{ fontSize: '17px', lineHeight: '24px', color: 'var(--color-text)' }}>
@@ -304,7 +304,7 @@ export default function Aula() {
                   <Box />
                 )}
                 {proxima && (
-                  <RouterLink to={hrefDaAtividade(cursoSlug, proxima)} style={{ textDecoration: 'none' }}>
+                  <RouterLink className="aula-touch-control" to={hrefDaAtividade(cursoSlug, proxima)} style={{ textDecoration: 'none' }}>
                     <BlueprintFrame sx={{ p: 2.5, height: '100%', textAlign: 'right' }}>
                       <span className="kicker">{proxima.tipo === 'quiz' ? 'Próximo quiz' : 'Próxima aula'}</span>
                       <Typography sx={{ fontSize: '17px', lineHeight: '24px', color: 'var(--color-text)' }}>
