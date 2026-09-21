@@ -11,6 +11,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  MenuItem,
   Paper,
   Snackbar,
   Stack,
@@ -28,6 +29,7 @@ import AddIcon from '@mui/icons-material/Add';
 import PublishIcon from '@mui/icons-material/Publish';
 import { educationApi } from '../../services/api'
 import type { EducationResource } from '../../types';
+import AdminMobileItem from '../../components/admin/AdminMobileItem';
 
 export default function EducationList() {
   const [resources, setResources] = useState<EducationResource[]>([]);
@@ -95,7 +97,7 @@ export default function EducationList() {
 
   return (
     <Stack spacing={3}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' } }}>
         <Typography variant="h4" fontWeight={700}>
           Recursos Educacionais
         </Typography>
@@ -104,12 +106,13 @@ export default function EducationList() {
           to="/admin/educacao/new"
           variant="contained"
           startIcon={<AddIcon />}
+          sx={{ minHeight: { xs: 48, sm: 36 } }}
         >
           Novo Recurso
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ display: { xs: 'none', md: 'block' } }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -181,6 +184,26 @@ export default function EducationList() {
         </Table>
       </TableContainer>
 
+      <Stack spacing={1} sx={{ display: { xs: 'flex', md: 'none' } }}>
+        {loading ? <Typography sx={{ py: 3, textAlign: 'center' }}>Carregando...</Typography> : resources.length === 0 ? (
+          <Typography sx={{ py: 3, textAlign: 'center' }}>Nenhum recurso encontrado</Typography>
+        ) : resources.map((resource) => (
+          <AdminMobileItem
+            key={resource.id}
+            title={resource.title}
+            details={<>{resource.category} · {new Date(resource.created_at).toLocaleDateString('pt-BR')}</>}
+            status={<Chip label={resource.published ? 'Publicado' : 'Rascunho'} color={resource.published ? 'success' : 'default'} size="small" />}
+            actions={(
+              <>
+                {!resource.published && <MenuItem onClick={() => handlePublish(resource.id)}>Publicar</MenuItem>}
+                <MenuItem component={RouterLink} to={`/admin/educacao/edit/${resource.id}`}>Editar</MenuItem>
+                <MenuItem onClick={() => handleDeleteClick(resource.id)} sx={{ color: 'error.main' }}>Deletar</MenuItem>
+              </>
+            )}
+          />
+        ))}
+      </Stack>
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
@@ -211,4 +234,3 @@ export default function EducationList() {
     </Stack>
   );
 }
-

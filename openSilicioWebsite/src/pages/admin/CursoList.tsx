@@ -11,6 +11,7 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  MenuItem,
   Paper,
   Snackbar,
   Stack,
@@ -30,6 +31,7 @@ import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import { cursosApi } from '../../services/api';
 import type { CursoNaListagem } from '../../types';
 import { duracaoPorExtenso } from '../../utils/duracao';
+import AdminMobileItem from '../../components/admin/AdminMobileItem';
 
 export default function CursoList() {
   const [cursos, setCursos] = useState<CursoNaListagem[]>([]);
@@ -83,14 +85,14 @@ export default function CursoList() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} spacing={2} sx={{ mb: 3 }}>
         <Typography variant="h4">Cursos</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} component={RouterLink} to="/admin/cursos/novo">
+        <Button variant="contained" startIcon={<AddIcon />} component={RouterLink} to="/admin/cursos/novo" sx={{ minHeight: { xs: 48, sm: 36 } }}>
           Novo curso
         </Button>
       </Stack>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ display: { xs: 'none', md: 'block' } }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -157,6 +159,26 @@ export default function CursoList() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Stack spacing={1} sx={{ display: { xs: 'flex', md: 'none' } }}>
+        {cursos.length === 0 ? (
+          <Typography sx={{ py: 3, textAlign: 'center' }}>Nenhum curso ainda.</Typography>
+        ) : cursos.map((curso) => (
+          <AdminMobileItem
+            key={curso.id}
+            title={curso.titulo}
+            details={<>{curso.nivel ?? 'Nível não definido'} · {curso.modulos} {curso.modulos === 1 ? 'módulo' : 'módulos'} · {curso.aulas} {curso.aulas === 1 ? 'aula' : 'aulas'} · {duracaoPorExtenso(curso.duracao_seg)}</>}
+            status={<Chip size="small" label={curso.publicado ? 'Publicado' : 'Rascunho'} color={curso.publicado ? 'success' : 'default'} />}
+            actions={(
+              <>
+                <MenuItem component={RouterLink} to={`/admin/cursos/${curso.slug}/estrutura`}>Editar estrutura</MenuItem>
+                <MenuItem component={RouterLink} to={`/admin/cursos/editar/${curso.id}`}>Editar curso</MenuItem>
+                <MenuItem onClick={() => setParaApagar(curso)} sx={{ color: 'error.main' }}>Deletar</MenuItem>
+              </>
+            )}
+          />
+        ))}
+      </Stack>
 
       {/* Apagar um curso derruba módulos e aulas pelo cascade, então o corpo de
           toda aula vai junto. Digitar o título é o que separa isso de um clique

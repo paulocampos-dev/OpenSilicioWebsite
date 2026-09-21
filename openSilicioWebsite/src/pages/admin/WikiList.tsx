@@ -12,6 +12,7 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  MenuItem,
   Paper,
   Snackbar,
   Stack,
@@ -30,6 +31,7 @@ import BookmarkAddIcon from '@mui/icons-material/BookmarkAdd';
 import PublishIcon from '@mui/icons-material/Publish';
 import { wikiApi } from '../../services/api'
 import type { WikiEntry, PendingWikiLinkGrouped } from '../../types';
+import AdminMobileItem from '../../components/admin/AdminMobileItem';
 
 export default function WikiList() {
   const navigate = useNavigate();
@@ -117,7 +119,7 @@ export default function WikiList() {
 
   return (
     <Stack spacing={3}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' } }}>
         <Typography variant="h4" fontWeight={700}>
           Entradas da Wiki
         </Typography>
@@ -126,6 +128,7 @@ export default function WikiList() {
           to="/admin/wiki/new"
           variant="contained"
           startIcon={<AddIcon />}
+          sx={{ minHeight: { xs: 48, sm: 36 } }}
         >
           Nova Entrada
         </Button>
@@ -184,7 +187,7 @@ export default function WikiList() {
         </Paper>
       )}
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ display: { xs: 'none', md: 'block' } }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -260,6 +263,26 @@ export default function WikiList() {
         </Table>
       </TableContainer>
 
+      <Stack spacing={1} sx={{ display: { xs: 'flex', md: 'none' } }}>
+        {loading ? <Typography sx={{ py: 3, textAlign: 'center' }}>Carregando...</Typography> : entries.length === 0 ? (
+          <Typography sx={{ py: 3, textAlign: 'center' }}>Nenhuma entrada encontrada</Typography>
+        ) : entries.map((entry) => (
+          <AdminMobileItem
+            key={entry.id}
+            title={entry.term}
+            details={<>{entry.slug} · {entry.definition}</>}
+            status={<Chip label={entry.published ? 'Publicado' : 'Rascunho'} color={entry.published ? 'success' : 'default'} size="small" />}
+            actions={(
+              <>
+                {!entry.published && <MenuItem onClick={() => handlePublish(entry.id)}>Publicar</MenuItem>}
+                <MenuItem component={RouterLink} to={`/admin/wiki/edit/${entry.id}`}>Editar</MenuItem>
+                <MenuItem onClick={() => handleDeleteClick(entry.id)} sx={{ color: 'error.main' }}>Deletar</MenuItem>
+              </>
+            )}
+          />
+        ))}
+      </Stack>
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
@@ -290,4 +313,3 @@ export default function WikiList() {
     </Stack>
   );
 }
-
