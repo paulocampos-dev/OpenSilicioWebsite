@@ -90,6 +90,7 @@ const blockTypeToBlockName = {
 
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
+  const theme = useTheme();
   const toolbarRef = useRef(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -309,14 +310,31 @@ export default function ToolbarPlugin() {
   return (
     <Toolbar
       ref={toolbarRef}
+      role="toolbar"
+      aria-label="Formatação do conteúdo"
       sx={{
         display: 'flex',
         gap: 1,
         p: 1,
         borderBottom: 1,
         borderColor: 'divider',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
+        overflowX: 'auto',
+        overscrollBehaviorX: 'contain',
         minHeight: 'auto',
+        '& .MuiIconButton-root': {
+          minWidth: 44,
+          minHeight: 44,
+          flex: '0 0 auto',
+        },
+        [theme.breakpoints.up('md')]: {
+          flexWrap: 'wrap',
+          overflowX: 'visible',
+          '& .MuiIconButton-root': {
+            minWidth: 30,
+            minHeight: 30,
+          },
+        },
       }}
     >
       {/* Undo/Redo */}

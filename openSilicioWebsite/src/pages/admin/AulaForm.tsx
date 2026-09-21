@@ -133,19 +133,31 @@ export default function AulaForm() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', sm: 'center' }}
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
         <Box>
           <Typography variant="h4">{editando ? 'Editar aula' : 'Nova aula'}</Typography>
           <Typography variant="body2" color="text.secondary">
             <RouterLink to={`/admin/cursos/${curso.slug}/estrutura`}>{curso.titulo}</RouterLink>
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<SaveIcon />} onClick={salvar} disabled={salvando}>
+        <Button
+          variant="contained"
+          startIcon={<SaveIcon />}
+          onClick={salvar}
+          disabled={salvando}
+          sx={{ minHeight: { xs: 48, sm: 36 } }}
+        >
           {salvando ? 'Salvando...' : 'Salvar'}
         </Button>
       </Stack>
 
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: { xs: 2, md: 3 } }}>
         <Stack spacing={3}>
           <TextField
             select
@@ -202,7 +214,7 @@ export default function AulaForm() {
               onChange={(e) => setDuracao(e.target.value)}
               placeholder="14:20"
               helperText="mm:ss"
-              sx={{ minWidth: 160 }}
+              sx={{ minWidth: { xs: 0, sm: 160 } }}
             />
           </Stack>
 

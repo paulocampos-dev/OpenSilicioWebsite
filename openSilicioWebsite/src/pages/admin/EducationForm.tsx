@@ -223,7 +223,7 @@ export default function EducationForm() {
   return (
     <form onSubmit={handleSubmit}>
       <Stack spacing={3}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2 }}>
           <Box>
             <Typography variant="h4" fontWeight={700}>
               {id ? 'Editar Recurso' : 'Novo Recurso'}
@@ -234,7 +234,7 @@ export default function EducationForm() {
               </Typography>
             )}
           </Box>
-          <Stack direction="row" spacing={2}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ '& .MuiButton-root': { minHeight: { xs: 48, sm: 36 } } }}>
             <Button
               variant={showPreview ? 'outlined' : 'contained'}
               startIcon={showPreview ? <EditIcon /> : <VisibilityIcon />}
@@ -265,7 +265,7 @@ export default function EducationForm() {
         </Box>
 
         {!showPreview ? (
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: { xs: 2, md: 3 } }}>
             <Stack spacing={3}>
               <TextField
                 label="Título"
@@ -569,4 +569,3 @@ export default function EducationForm() {
     </form >
   );
 }
-

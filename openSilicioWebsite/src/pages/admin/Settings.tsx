@@ -389,7 +389,14 @@ export default function Settings() {
             Gerencie o conteúdo da página Sobre o OpenSilício
           </Typography>
 
-          <Tabs value={aboutTab} onChange={(_, v) => setAboutTab(v)} sx={{ mb: 3 }}>
+          <Tabs
+            value={aboutTab}
+            onChange={(_, v) => setAboutTab(v)}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            sx={{ mb: 3 }}
+          >
             <Tab value="main" label="Principal" />
             <Tab value="mission" label="Missão" />
             <Tab value="vision" label="Visão" />
@@ -457,7 +464,7 @@ export default function Settings() {
 
           {aboutTab === 'team' && (
             <Stack spacing={3}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: 1 }}>
                 <Typography variant="subtitle2" fontWeight={600}>
                   Membros da Equipe
                 </Typography>
@@ -656,6 +663,7 @@ export default function Settings() {
                 variant="contained"
                 onClick={handleChangePassword}
                 disabled={changingPassword}
+                sx={{ minHeight: 48, width: { xs: '100%', sm: 'auto' } }}
               >
                 {changingPassword ? 'Alterando...' : 'Alterar Senha'}
               </Button>
@@ -672,6 +680,7 @@ export default function Settings() {
           startIcon={<SaveIcon />}
           onClick={handleSave}
           disabled={saving}
+          sx={{ minHeight: 48, width: { xs: '100%', sm: 'auto' } }}
         >
           {saving ? 'Salvando...' : 'Salvar Configurações'}
         </Button>

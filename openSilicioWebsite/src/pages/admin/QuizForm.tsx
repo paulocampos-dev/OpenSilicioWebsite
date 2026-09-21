@@ -237,6 +237,7 @@ export default function QuizForm() {
           startIcon={<SaveIcon />}
           onClick={salvar}
           disabled={salvando}
+          sx={{ minHeight: { xs: 48, md: 36 } }}
         >
           {salvando ? 'Salvando...' : quiz.publicado ? 'Salvar e publicar' : 'Salvar rascunho'}
         </Button>

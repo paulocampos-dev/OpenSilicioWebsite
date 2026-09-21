@@ -137,9 +137,15 @@ export default function CursoForm() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', sm: 'center' }}
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
         <Typography variant="h4">{editando ? 'Editar curso' : 'Novo curso'}</Typography>
-        <Stack direction="row" spacing={1}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
           {editando && curso.slug && (
             <Button
               startIcon={<AccountTreeIcon />}
@@ -149,13 +155,19 @@ export default function CursoForm() {
               Estrutura
             </Button>
           )}
-          <Button variant="contained" startIcon={<SaveIcon />} onClick={salvar} disabled={salvando}>
+          <Button
+            variant="contained"
+            startIcon={<SaveIcon />}
+            onClick={salvar}
+            disabled={salvando}
+            sx={{ minHeight: { xs: 48, sm: 36 } }}
+          >
             {salvando ? 'Salvando...' : 'Salvar'}
           </Button>
         </Stack>
       </Stack>
 
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: { xs: 2, md: 3 } }}>
         <Stack spacing={3}>
           <TextField
             label="Título"
