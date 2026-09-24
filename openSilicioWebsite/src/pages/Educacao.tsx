@@ -16,9 +16,14 @@ const MotionGridItem = motion.create(Grid)
 
 type Level = 'Todos' | 'Iniciante' | 'Intermediário' | 'Avançado'
 type Kind = 'Todos' | 'Cursos' | 'Projetos' | 'Guias' | 'Tutoriais' | 'Teóricos'
+type Ordem = 'recentes' | 'antigos'
 
 const kinds: Kind[] = ['Todos', 'Cursos', 'Projetos', 'Guias', 'Tutoriais', 'Teóricos']
 const levels: Level[] = ['Todos', 'Iniciante', 'Intermediário', 'Avançado']
+const ordens: { id: Ordem; rotulo: string }[] = [
+  { id: 'recentes', rotulo: 'Mais recentes' },
+  { id: 'antigos', rotulo: 'Mais antigos' },
+]
 
 /**
  * A forma única que a grade sabe desenhar.
@@ -59,9 +64,9 @@ export const cartaoDeRecurso = (recurso: EducationResource): CartaoEducacao => (
   imagem: recurso.image_url ?? null,
   categoria: categoriaDeRecurso(recurso.category),
   nivel: recurso.difficulty ?? null,
-  meta: `Atualizado ${new Date(recurso.created_at).toLocaleDateString('pt-BR')}`,
+  meta: `Atualizado ${new Date(recurso.updated_at).toLocaleDateString('pt-BR')}`,
   buscavel: `${recurso.title} ${recurso.description}`.toLowerCase(),
-  data: recurso.created_at,
+  data: recurso.updated_at,
 })
 
 /**
@@ -86,13 +91,14 @@ export const cartaoDeCurso = (curso: CursoNaListagem): CartaoEducacao => ({
     .filter(Boolean)
     .join(' · '),
   buscavel: `${curso.titulo} ${curso.descricao} ${curso.aulas_publicadas.map((a) => a.titulo).join(' ')}`.toLowerCase(),
-  data: curso.created_at,
+  data: curso.updated_at,
 })
 
 export default function Educacao() {
   const reduce = useReducedMotion()
   const [tab, setTab] = useState<Kind>('Todos')
   const [level, setLevel] = useState<Level>('Todos')
+  const [ordem, setOrdem] = useState<Ordem>('recentes')
   const [query, setQuery] = useState<string>('')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [cartoes, setCartoes] = useState<CartaoEducacao[]>([])
@@ -118,12 +124,10 @@ export default function Educacao() {
       // o que mostrar.
       setErro(recursos === null && cursos === null)
 
-      const lista = [
+      setCartoes([
         ...(cursos?.data ?? []).map(cartaoDeCurso),
         ...(recursos?.data ?? []).map(cartaoDeRecurso),
-      ].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
-
-      setCartoes(lista)
+      ])
     } catch (error) {
       setErro(true)
       if (import.meta.env.DEV) {
@@ -149,7 +153,16 @@ export default function Educacao() {
     return c
   }, [cartoes])
 
-  const { pageItems, filteredCount, page, totalPages, setPage } = usePagedFilter(cartoes, {
+  const ordenados = useMemo(() => {
+    const lista = [...cartoes]
+    lista.sort((a, b) => {
+      const diff = new Date(a.data).getTime() - new Date(b.data).getTime()
+      return ordem === 'recentes' ? -diff : diff
+    })
+    return lista
+  }, [cartoes, ordem])
+
+  const { pageItems, filteredCount, page, totalPages, setPage } = usePagedFilter(ordenados, {
     pageSize,
     filterFn: (cartao) => {
       const matchesTab = tab === 'Todos' || cartao.categoria === tab
@@ -158,7 +171,7 @@ export default function Educacao() {
       const matchesQuery = !q || cartao.buscavel.includes(q)
       return matchesTab && matchesLevel && matchesQuery
     },
-    deps: [tab, level, query],
+    deps: [tab, level, query, ordem],
   })
 
   return (
@@ -193,7 +206,7 @@ export default function Educacao() {
           Filtros
         </Button>
 
-        {(tab !== 'Todos' || level !== 'Todos') && (
+        {(tab !== 'Todos' || level !== 'Todos' || ordem !== 'recentes') && (
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap aria-label="Filtros ativos">
             {tab !== 'Todos' && (
               <button
@@ -213,6 +226,16 @@ export default function Educacao() {
                 onClick={() => setLevel('Todos')}
               >
                 {level} ×
+              </button>
+            )}
+            {ordem !== 'recentes' && (
+              <button
+                type="button"
+                aria-label="Voltar para mais recentes"
+                className="tag tag-outline filter-pill"
+                onClick={() => setOrdem('recentes')}
+              >
+                Mais antigos ×
               </button>
             )}
           </Stack>
@@ -261,6 +284,22 @@ export default function Educacao() {
                 style={level === lvl ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
               >
                 {lvl}
+              </button>
+            ))}
+          </Stack>
+
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+            <span style={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>Ordenar</span>
+            {ordens.map(({ id, rotulo }) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={ordem === id}
+                onClick={() => setOrdem(id)}
+                className={ordem === id ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
+                style={ordem === id ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
+              >
+                {rotulo}
               </button>
             ))}
           </Stack>
@@ -329,12 +368,34 @@ export default function Educacao() {
             </Stack>
           </Stack>
 
+          <Stack spacing={1}>
+            <Typography sx={{ fontSize: 13, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--color-text-muted)' }}>
+              Ordenar
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {ordens.map(({ id, rotulo }) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-label={rotulo}
+                  aria-pressed={ordem === id}
+                  onClick={() => setOrdem(id)}
+                  className={ordem === id ? 'tag filter-pill' : 'tag tag-outline filter-pill'}
+                  style={ordem === id ? { background: 'var(--color-accent)', color: 'var(--brand-paper)', border: '1px solid var(--color-accent)', cursor: 'pointer' } : { cursor: 'pointer' }}
+                >
+                  {rotulo}
+                </button>
+              ))}
+            </Stack>
+          </Stack>
+
           <Stack direction="row" spacing={1.5}>
             <Button
               variant="outlined"
               onClick={() => {
                 setTab('Todos')
                 setLevel('Todos')
+                setOrdem('recentes')
               }}
               sx={{ flex: 1, minHeight: 48, borderRadius: 0 }}
             >
