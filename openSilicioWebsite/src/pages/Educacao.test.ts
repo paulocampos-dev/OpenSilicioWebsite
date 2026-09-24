@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createElement } from 'react'
 import { MemoryRouter } from 'react-router-dom'
@@ -23,7 +23,19 @@ const recurso: EducationResource = {
   difficulty: 'Iniciante',
   published: true,
   created_at: '2026-06-01T12:00:00.000Z',
-  updated_at: '2026-06-01T12:00:00.000Z',
+  updated_at: '2026-06-10T12:00:00.000Z',
+}
+
+const recursoAntigo: EducationResource = {
+  id: 'r2',
+  title: 'Introdução ao CMOS',
+  description: 'Base teórica.',
+  content: '{}',
+  category: 'Teóricos',
+  difficulty: 'Iniciante',
+  published: true,
+  created_at: '2026-01-01T12:00:00.000Z',
+  updated_at: '2026-01-02T12:00:00.000Z',
 }
 
 const curso: CursoNaListagem = {
@@ -34,7 +46,7 @@ const curso: CursoNaListagem = {
   publicado: true,
   nivel: 'Iniciante',
   created_at: '2026-07-01T12:00:00.000Z',
-  updated_at: '2026-07-01T12:00:00.000Z',
+  updated_at: '2026-07-15T12:00:00.000Z',
   modulos: 2,
   aulas: 3,
   aulas_rascunho: 1,
@@ -65,7 +77,7 @@ const pagination = {
 const renderEducacao = () => render(createElement(MemoryRouter, null, createElement(Educacao)))
 
 beforeEach(() => {
-  vi.mocked(educationApi.getAll).mockResolvedValue({ data: [recurso], pagination })
+  vi.mocked(educationApi.getAll).mockResolvedValue({ data: [recurso, recursoAntigo], pagination })
   vi.mocked(cursosApi.getAll).mockResolvedValue({ data: [curso], pagination })
 })
 
@@ -99,6 +111,17 @@ describe('adaptadores de cartão', () => {
     const antigo = { ...recurso, category: 'Categoria Que Não Existe Mais' }
     expect(cartaoDeRecurso(antigo).categoria).toBe('Guias')
   })
+
+  it('ordena e rotula o recurso pela atualização, não pela publicação', () => {
+    const cartao = cartaoDeRecurso(recurso)
+    expect(cartao.data).toBe(recurso.updated_at)
+    expect(cartao.meta).toBe(`Atualizado ${new Date(recurso.updated_at).toLocaleDateString('pt-BR')}`)
+  })
+
+  it('o curso ordena pela atualização, sem trocar a linha de estrutura', () => {
+    expect(cartaoDeCurso(curso).data).toBe(curso.updated_at)
+    expect(cartaoDeCurso(curso).meta).toBe('2 módulos · 3 aulas · 22 min')
+  })
 })
 
 describe('filtros mobile', () => {
@@ -127,5 +150,27 @@ describe('filtros mobile', () => {
     await user.click(screen.getByRole('button', { name: 'Limpar filtros' }))
 
     expect(busca).toHaveValue('SiliWiz')
+  })
+
+  it('ordena do mais recente e permite inverter no drawer', async () => {
+    const user = userEvent.setup()
+    renderEducacao()
+
+    await screen.findByRole('link', { name: /Do RTL ao GDS/i })
+    const linksRecentes = screen.getAllByRole('link').map((el) => el.getAttribute('href'))
+    expect(linksRecentes.indexOf('/cursos/do-rtl-ao-gds')).toBeLessThan(
+      linksRecentes.indexOf('/educacao/r2'),
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Filtros' }))
+    const drawer = screen.getByRole('presentation')
+    await user.click(within(drawer).getByRole('button', { name: 'Mais antigos' }))
+    await user.click(within(drawer).getByRole('button', { name: 'Ver resultados' }))
+
+    const linksAntigos = screen.getAllByRole('link').map((el) => el.getAttribute('href'))
+    expect(linksAntigos.indexOf('/educacao/r2')).toBeLessThan(
+      linksAntigos.indexOf('/cursos/do-rtl-ao-gds'),
+    )
+    expect(screen.getByRole('button', { name: 'Voltar para mais recentes' })).toBeVisible()
   })
 })
