@@ -288,7 +288,9 @@ function LexicalEditorInner({
           <ToolbarPlugin />
           <div className="editor-inner">
             <RichTextPlugin
-              contentEditable={<ContentEditable className="editor-input" />}
+              contentEditable={
+                <ContentEditable className="editor-input" spellCheck={false} />
+              }
               placeholder={<div className="editor-placeholder">{placeholder}</div>}
               ErrorBoundary={LexicalErrorBoundary as any}
             />
