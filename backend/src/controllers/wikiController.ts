@@ -9,12 +9,12 @@ import { BadRequestError, NotFoundError } from '../errors/AppError';
 import { clearCache } from '../middleware/cache';
 import { filterUndefined } from '../utils/filterUndefined';
 import { parsePagination } from '../utils/parsePagination';
-import { parsePublishedFilter } from '../utils/parsePublishedFilter';
+import { exigirVisivel, filtroDePublicacao } from '../utils/rascunhos';
 
 export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response) => {
   console.log('✅ [WikiController.getAllEntries] CALLED - This is the WIKI controller');
   const { page: pageNum, limit: limitNum } = parsePagination(req.query, 20);
-  const publishedFilter = parsePublishedFilter(req.query);
+  const publishedFilter = filtroDePublicacao(req);
 
   const result = await wikiService.getAllEntries(publishedFilter, { page: pageNum, limit: limitNum });
   console.log('✅ [WikiController.getAllEntries] Returning', result.data.length, 'wiki entries');
@@ -26,13 +26,13 @@ export const getAllEntries = asyncHandler(async (req: AuthRequest, res: Response
 export const getEntryById = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const entry = await wikiService.getEntryById(id);
-  res.json(entry);
+  res.json(exigirVisivel(req, entry, 'Entrada'));
 });
 
 export const getEntryBySlug = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { slug } = req.params;
   const entry = await wikiService.getBySlug(slug);
-  res.json(entry);
+  res.json(exigirVisivel(req, entry, 'Entrada'));
 });
 
 export const createEntry = asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -239,7 +239,7 @@ export const searchByTerm = asyncHandler(async (req: AuthRequest, res: Response)
     throw new NotFoundError('Entrada da wiki');
   }
 
-  res.json(entry);
+  res.json(exigirVisivel(req, entry, 'Entrada da wiki'));
 });
 
 // Public: term + count only (no linking content ids/titles), used by the

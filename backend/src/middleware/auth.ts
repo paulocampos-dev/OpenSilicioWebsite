@@ -35,6 +35,25 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   }
 };
 
+/**
+ * Para as rotas públicas de leitura: reconhece o admin quando chega um token
+ * válido, sem exigir um. Sem token, ou com token inválido, o pedido segue como
+ * visitante, e visitante só enxerga conteúdo publicado (ver utils/rascunhos.ts).
+ */
+export const authOpcional = (req: AuthRequest, _res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(authHeader.substring(7), JWT_SECRET) as { userId: string; username: string };
+      req.userId = decoded.userId;
+      req.username = decoded.username;
+    } catch {
+      // token inválido ou expirado: visitante
+    }
+  }
+  next();
+};
+
 export const generateToken = (userId: string, username: string): string => {
   return jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: '7d' });
 };

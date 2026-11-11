@@ -7,7 +7,7 @@ import {
   updateResource,
   deleteResource,
 } from '../controllers/educationController';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, authOpcional } from '../middleware/auth';
 import { createLimiter } from '../middleware/rateLimit';
 import { validate, educationResourceSchema, educationResourceUpdateSchema } from '../middleware/validation';
 import { cacheMiddleware } from '../middleware/cache';
@@ -15,8 +15,8 @@ import { cacheMiddleware } from '../middleware/cache';
 const router = Router();
 
 // Rotas públicas (with caching - 2 minutes)
-router.get('/', cacheMiddleware({ ttl: 120 }), getAllResources);
-router.get('/:id', cacheMiddleware({ ttl: 120 }), getResourceById);
+router.get('/', authOpcional, cacheMiddleware({ ttl: 120 }), getAllResources);
+router.get('/:id', authOpcional, cacheMiddleware({ ttl: 120 }), getResourceById);
 router.get('/:id/navigation', cacheMiddleware({ ttl: 120 }), getSeriesNavigation);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)

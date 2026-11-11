@@ -127,8 +127,9 @@ export function cacheMiddleware(options: CacheOptions = {}) {
   const ttl = options.ttl || 60; // Default: 60 seconds
 
   return (req: Request, res: Response, next: NextFunction) => {
-    // Only cache GET requests
-    if (req.method !== 'GET') {
+    // Only cache GET requests. Um pedido com Authorization também passa direto:
+    // a resposta do admin pode conter rascunhos e não pode ser servida a visitantes.
+    if (req.method !== 'GET' || req.headers.authorization) {
       return next();
     }
 

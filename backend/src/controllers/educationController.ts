@@ -5,7 +5,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { clearCache } from '../middleware/cache';
 import { filterUndefined } from '../utils/filterUndefined';
 import { parsePagination } from '../utils/parsePagination';
-import { parsePublishedFilter } from '../utils/parsePublishedFilter';
+import { exigirVisivel, filtroDePublicacao } from '../utils/rascunhos';
 import { sincronizarLinksDeWiki } from '../services/wikiLinkSync';
 
 /**
@@ -34,7 +34,7 @@ const sincronizarSilencioso = (
 
 export const getAllResources = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { page: pageNum, limit: limitNum } = parsePagination(req.query, 10);
-  const publishedFilter = parsePublishedFilter(req.query);
+  const publishedFilter = filtroDePublicacao(req);
 
   const result = await educationService.getAllResources(publishedFilter, { page: pageNum, limit: limitNum });
 
@@ -44,7 +44,7 @@ export const getAllResources = asyncHandler(async (req: AuthRequest, res: Respon
 export const getResourceById = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const resource = await educationService.getResourceById(id);
-  res.json(resource);
+  res.json(exigirVisivel(req, resource, 'Recurso'));
 });
 
 export const getSeriesNavigation = asyncHandler(async (req: AuthRequest, res: Response) => {
