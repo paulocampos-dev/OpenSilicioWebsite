@@ -10,7 +10,7 @@ import TitleBlockBar from '../components/design/TitleBlockBar'
 const quickStart = [
   { n: '01', title: 'Trilha de aprendizado', desc: 'Siga um caminho guiado e comece pela base certa.', to: '/educacao', label: 'Educação' },
   { n: '02', title: 'Explorar wiki', desc: 'Busque termos e conceitos essenciais rapidamente.', to: '/wiki', label: 'Wiki' },
-  { n: '03', title: 'Ler o blog', desc: 'Tutoriais e novidades do ecossistema de microeletrônica.', to: '/blog', label: 'Blog' },
+  { n: '03', title: 'Fazer o curso', desc: 'Projeto Digital: do primeiro transistor ao chip, aula por aula.', to: '/cursos', label: 'Cursos' },
 ]
 
 const offerings = [

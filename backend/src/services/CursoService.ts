@@ -151,7 +151,7 @@ export interface AulaComVizinhas {
 
 type LinhaDeAula = Pick<
   CursoAula,
-  'id' | 'modulo_id' | 'ordem' | 'slug' | 'titulo' | 'duracao_seg' | 'publicado' | 'opcional'
+  'id' | 'modulo_id' | 'ordem' | 'slug' | 'titulo' | 'duracao_seg' | 'publicado' | 'opcional' | 'updated_at'
 > & { video_id: string | null };
 
 interface LinhaDeQuizNaArvore {
@@ -361,7 +361,7 @@ export class CursoService extends BaseService<Curso> {
       ),
       this.pool.query<LinhaDeAula>(
         `SELECT a.id, a.modulo_id, a.ordem, a.slug, a.titulo, a.duracao_seg, a.publicado,
-                a.opcional, a.video_id
+                a.opcional, a.video_id, a.updated_at
            FROM curso_aulas a
           WHERE a.curso_id = $1
           ORDER BY a.ordem, a.id`,
@@ -383,11 +383,15 @@ export class CursoService extends BaseService<Curso> {
     const porModulo = new Map<string, AulaNaArvore[]>();
     let totalPublicadas = 0;
     let duracao = 0;
+    // "Atualizado" na página do curso: publicar ou editar uma aula também conta,
+    // não só mexer nos dados do curso.
+    let atualizadoEm = curso.updated_at;
 
     for (const aula of aulas.rows) {
       const lista = porModulo.get(aula.modulo_id) ?? [];
       if (aula.publicado) {
         totalPublicadas++;
+        if (aula.updated_at > atualizadoEm) atualizadoEm = aula.updated_at;
         duracao += aula.duracao_seg ?? 0;
         lista.push({
           publicado: true,
@@ -440,6 +444,7 @@ export class CursoService extends BaseService<Curso> {
 
     return {
       ...curso,
+      updated_at: atualizadoEm,
       modulos: modulos.rows.map((m) => ({
         ...m,
         aulas: porModulo.get(m.id) ?? [],
