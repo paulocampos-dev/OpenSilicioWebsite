@@ -5,7 +5,7 @@ import { asyncHandler } from '../middleware/errorHandler';
 import { clearCache } from '../middleware/cache';
 import { filterUndefined } from '../utils/filterUndefined';
 import { parsePagination } from '../utils/parsePagination';
-import { parsePublishedFilter } from '../utils/parsePublishedFilter';
+import { exigirVisivel, filtroDePublicacao } from '../utils/rascunhos';
 import { sincronizarLinksDeWiki } from '../services/wikiLinkSync';
 
 /** Ver services/wikiLinkSync.ts. Falhar aqui não pode derrubar o salvamento. */
@@ -17,7 +17,7 @@ const sincronizarSilencioso = (contentId: string, content: string | null | undef
 export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) => {
   console.log('📝 [BlogController.getAllPosts] CALLED - This is the BLOG controller');
   const { page: pageNum, limit: limitNum } = parsePagination(req.query, 10);
-  const publishedFilter = parsePublishedFilter(req.query);
+  const publishedFilter = filtroDePublicacao(req);
 
   const result = await blogService.getAllPosts(publishedFilter, { page: pageNum, limit: limitNum });
   console.log('📝 [BlogController.getAllPosts] Returning', result.data.length, 'blog posts');
@@ -28,13 +28,13 @@ export const getAllPosts = asyncHandler(async (req: AuthRequest, res: Response) 
 export const getPostById = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const post = await blogService.getById(id);
-  res.json(post);
+  res.json(exigirVisivel(req, post, 'Post'));
 });
 
 export const getPostBySlug = asyncHandler(async (req: AuthRequest, res: Response) => {
   const { slug } = req.params;
   const post = await blogService.getBySlug(slug);
-  res.json(post);
+  res.json(exigirVisivel(req, post, 'Post'));
 });
 
 export const createPost = asyncHandler(async (req: AuthRequest, res: Response) => {

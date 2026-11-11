@@ -54,6 +54,35 @@ describe('Education API', () => {
     });
   });
 
+  describe('rascunhos', () => {
+    it('ficam fora do alcance de quem não está autenticado', async () => {
+      await createTestEducationResource({ title: 'Publicado', published: true });
+      const rascunho = await createTestEducationResource({ title: 'Rascunho', published: false });
+
+      const lista = await request(app).get('/api/education');
+      expect(lista.body.data.map((r: { title: string }) => r.title)).toEqual(['Publicado']);
+
+      const pedindoRascunhos = await request(app).get('/api/education').query({ published: false });
+      expect(pedindoRascunhos.body.data.map((r: { title: string }) => r.title)).toEqual(['Publicado']);
+
+      const direto = await request(app).get(`/api/education/${rascunho.id}`);
+      expect(direto.status).toBe(404);
+    });
+
+    it('continuam visíveis para o admin', async () => {
+      const rascunho = await createTestEducationResource({ title: 'Rascunho', published: false });
+      const token = await getAuthToken();
+
+      const lista = await request(app).get('/api/education').set('Authorization', `Bearer ${token}`);
+      expect(lista.body.data.map((r: { title: string }) => r.title)).toEqual(['Rascunho']);
+
+      const direto = await request(app)
+        .get(`/api/education/${rascunho.id}`)
+        .set('Authorization', `Bearer ${token}`);
+      expect(direto.status).toBe(200);
+    });
+  });
+
   describe('GET /api/education/:id', () => {
     it('should return education resource by ID', async () => {
       const testResource = await createTestEducationResource({ 

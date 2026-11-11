@@ -20,7 +20,7 @@ import {
   createPendingLink,
   deletePendingLink,
 } from '../controllers/wikiController';
-import { authMiddleware } from '../middleware/auth';
+import { authMiddleware, authOpcional } from '../middleware/auth';
 import { createLimiter } from '../middleware/rateLimit';
 import { validate, wikiEntrySchema, wikiEntryUpdateSchema, wikiLinkSchema } from '../middleware/validation';
 import { cacheMiddleware } from '../middleware/cache';
@@ -34,8 +34,8 @@ router.use((req, res, next) => {
 });
 
 // Rotas públicas (with caching - 2 minutes)
-router.get('/', cacheMiddleware({ ttl: 120 }), getAllEntries);
-router.get('/search/:term', cacheMiddleware({ ttl: 120 }), searchByTerm);
+router.get('/', authOpcional, cacheMiddleware({ ttl: 120 }), getAllEntries);
+router.get('/search/:term', authOpcional, cacheMiddleware({ ttl: 120 }), searchByTerm);
 router.get('/links/:contentType/:contentId', cacheMiddleware({ ttl: 120 }), getWikiLinksForContent);
 // Caminho inverso: onde este verbete é citado.
 router.get('/:slug/aparicoes', cacheMiddleware({ ttl: 120 }), getAparicoes);
@@ -51,10 +51,10 @@ router.post('/pending', authMiddleware, createPendingLink);
 router.delete('/pending/:id', authMiddleware, deletePendingLink);
 
 // Get entry by ID (for admin editing - must be before slug route)
-router.get('/id/:id', cacheMiddleware({ ttl: 120 }), getEntryById);
+router.get('/id/:id', authOpcional, cacheMiddleware({ ttl: 120 }), getEntryById);
 
 // Get entry by slug (must be after specific routes to avoid conflict)
-router.get('/:slug', cacheMiddleware({ ttl: 120 }), getEntryBySlug);
+router.get('/:slug', authOpcional, cacheMiddleware({ ttl: 120 }), getEntryBySlug);
 
 // Rotas protegidas (com autenticação, validação e rate limiting)
 router.post('/', authMiddleware, createLimiter, validate(wikiEntrySchema), createEntry);
