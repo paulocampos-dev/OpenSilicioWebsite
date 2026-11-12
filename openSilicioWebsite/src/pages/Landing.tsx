@@ -13,13 +13,12 @@ const quickStart = [
   { n: '03', title: 'Fazer o curso', desc: 'Projeto Digital: do primeiro transistor ao chip, aula por aula.', to: '/cursos', label: 'Cursos' },
 ]
 
+// Só o que já existe no site, cada cartão com um número e um link. Blog,
+// projetos e eventos voltam para cá quando tiverem conteúdo publicado.
 const offerings = [
-  { title: 'Educação estruturada', desc: 'Guias, tutoriais, teóricos e projetos organizados do iniciante ao avançado.' },
-  { title: 'Blog técnico', desc: 'Registros de bancada, decisões de projeto e novidades do ecossistema aberto.' },
-  { title: 'Wiki técnica', desc: 'Dicionário de termos em português, ligado de dentro dos textos do site.' },
-  { title: 'Projetos open source', desc: 'Cada projeto com visão geral, conteúdo e recursos.' },
-  { title: 'Comunidade ativa', desc: 'Estudantes, pesquisadores e engenheiros trabalhando no mesmo repositório.' },
-  { title: 'Eventos e workshops', desc: 'Calendário próprio: oficinas de layout, semanas temáticas e mutirões de tape-out.' },
+  { title: 'Curso Projeto Digital', desc: 'Do primeiro transistor a um chip pronto para fabricação. Dois módulos no ar, oito aulas, com quiz.', to: '/cursos', label: 'Cursos' },
+  { title: 'Trilha de educação', desc: 'Sete textos em sequência, do inversor ao fluxo RTL-GDS, para ler na ordem ou consultar.', to: '/educacao', label: 'Educação' },
+  { title: 'Wiki técnica', desc: '27 verbetes em português, ligados de dentro das aulas e dos textos.', to: '/wiki', label: 'Wiki' },
 ]
 
 const partners = [
@@ -147,7 +146,8 @@ export default function Landing() {
                 <Typography component="h3" sx={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: '22px', lineHeight: '24px', letterSpacing: '.02em', textTransform: 'uppercase' }}>
                   {item.title}
                 </Typography>
-                <Typography sx={{ fontSize: '15px', lineHeight: '24px', mt: 1.5, color: 'var(--color-text-muted)' }}>{item.desc}</Typography>
+                <Typography sx={{ fontSize: '15px', lineHeight: '24px', mt: 1.5, mb: 2, color: 'var(--color-text-muted)' }}>{item.desc}</Typography>
+                <RouterLink to={item.to} className="btn btn-ghost" style={{ fontSize: 14 }}>{item.label} →</RouterLink>
               </BlueprintFrame>
             </Grid>
           ))}
