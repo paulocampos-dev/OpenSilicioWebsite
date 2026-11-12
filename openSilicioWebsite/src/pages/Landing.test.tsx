@@ -29,6 +29,6 @@ describe('Landing partners', () => {
     expect(
       screen.getByRole('heading', { name: 'Microeletrônica aberta, na Poli', level: 2 }),
     ).toBeVisible()
-    expect(screen.getByRole('heading', { name: 'Educação estruturada', level: 3 })).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'Curso Projeto Digital', level: 3 })).toBeVisible()
   })
 })
